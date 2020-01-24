@@ -1,6 +1,6 @@
-from flask import Flask
+from flask_api import FlaskAPI
 
-app = Flask(__name__, instance_relative_config=True)
+app = FlaskAPI(__name__, instance_relative_config=True)
 
 from jamaica import views
 
