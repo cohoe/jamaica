@@ -1,6 +1,6 @@
 import json
 import barbados.config
-from jamaica import app
+from jamaica import app, cache
 from barbados.models import CocktailModel
 from barbados.factories import CocktailFactory
 from barbados.connectors import PostgresqlConnector, RedisConnector
@@ -38,6 +38,7 @@ def _list():
 
 
 @app.route('/library/cocktails/by-slug/<string:slug>')
+# @cache.cached(timeout=60)
 def by_slug(slug):
     try:
         result = sess.query(CocktailModel).get(slug)
