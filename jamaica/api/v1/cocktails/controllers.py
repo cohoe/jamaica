@@ -13,11 +13,11 @@ redis = RedisConnector()
 sess = PostgresqlConnector().Session()
 
 
-@app.route('/cocktails', methods=['GET', 'POST'])
+@app.route('/cocktails/searchindex')
 def _list():
     try:
         cocktail_name_list = redis.get(barbados.config.cache.cocktail_name_list_key)
-        return json.dumps(json.loads(cocktail_name_list))
+        return json.loads(cocktail_name_list)
 
     except KeyError:
         raise exceptions.APIException('Cache empty or other Redis error.')

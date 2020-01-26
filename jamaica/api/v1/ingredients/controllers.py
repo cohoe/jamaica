@@ -1,9 +1,11 @@
 import json
+import barbados.config
 from barbados.connectors import PostgresqlConnector, RedisConnector
 from barbados.models import IngredientModel
 from barbados.objects import Ingredient
 from barbados.objects.ingredient import IngredientTypeEnum
 from flask import Blueprint
+from flask_api import exceptions
 from jamaica.api.v1 import URL_PREFIX
 
 app = Blueprint('ingredients', __name__, url_prefix=URL_PREFIX)
@@ -11,7 +13,19 @@ redis = RedisConnector()
 sess = PostgresqlConnector().Session()
 
 
-@app.route('/ingredients')
+@app.route('/ingredients/searchindex')
+def _list():
+    try:
+        ingredient_name_list = redis.get(barbados.config.cache.ingredient_name_list_key)
+        return json.loads(ingredient_name_list)
+
+    except KeyError:
+        raise exceptions.APIException('Cache empty or other Redis error.')
+    except Exception as e:
+        raise exceptions.APIException(str(e))
+
+
+@app.route('/ingredients/tree')
 def get_ingredients():
     tree = {}
 
@@ -56,7 +70,7 @@ def get_ingredients():
         else:
             print("Unable to place %s" % ingredient.slug)
 
-    return json.dumps(tree)
+    return tree
 
 
 def _create_tree_entry(obj):
