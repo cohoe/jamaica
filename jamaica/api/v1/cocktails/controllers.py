@@ -38,7 +38,6 @@ def by_slug(slug):
         raise exceptions.APIException(str(e))
 
 
-@app.route('/cocktails/by-alpha/')
 @app.route('/cocktails/by-alpha/<string:alpha>')
 def by_alpha(alpha=None):
     if not alpha or len(alpha) != 1:
