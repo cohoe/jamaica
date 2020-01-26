@@ -2,7 +2,7 @@ import json
 import barbados.config
 from barbados.connectors import PostgresqlConnector, RedisConnector
 from barbados.models import CocktailModel, IngredientModel
-from barbados.objects.ingredient import IngredientTypeEnum
+from barbados.constants import IngredientTypeEnum
 from flask import Blueprint
 from flask_api import exceptions
 from jamaica.api.v1 import URL_PREFIX
