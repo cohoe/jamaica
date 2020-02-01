@@ -3,17 +3,13 @@ from barbados.models import CocktailModel, IngredientModel
 from barbados.constants import IngredientTypes
 from flask import Blueprint
 from flask_api import exceptions
+from jamaica.api import redis, sess, AppConfig
 from jamaica.api.v1 import URL_PREFIX
 from sqlalchemy import or_
 
 cache_url_prefix = "%s/cache" % URL_PREFIX
 
 app = Blueprint('cache', __name__, url_prefix=cache_url_prefix)
-from barbados.objects import AppConfig
-from barbados.connectors import PostgresqlConnector, RedisConnector
-
-redis = RedisConnector()
-sess = PostgresqlConnector(database='amari', username='postgres', password='s3krAt').Session()
 
 
 @app.route('/rebuild/<string:cache_key>')

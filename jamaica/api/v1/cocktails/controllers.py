@@ -3,15 +3,11 @@ from barbados.factories import CocktailFactory
 from barbados.models import CocktailModel
 from flask import Blueprint
 from flask_api import exceptions
+from jamaica.api import redis, sess, AppConfig
 from jamaica.api.v1 import URL_PREFIX
 # from jamaica import cache
 
 app = Blueprint('cocktails', __name__, url_prefix=URL_PREFIX)
-from barbados.objects import AppConfig
-from barbados.connectors import PostgresqlConnector, RedisConnector
-
-redis = RedisConnector()
-sess = PostgresqlConnector(database='amari', username='postgres', password='s3krAt').Session()
 
 
 @app.route('/cocktails/searchindex')
