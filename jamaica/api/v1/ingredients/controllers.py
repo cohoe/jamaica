@@ -1,22 +1,23 @@
 import json
-import barbados.config
-from barbados.connectors import PostgresqlConnector, RedisConnector
 from barbados.models import IngredientModel
 from barbados.objects import Ingredient
-from barbados.constants import IngredientTypeEnum
+from barbados.constants import IngredientTypes
 from flask import Blueprint
 from flask_api import exceptions
 from jamaica.api.v1 import URL_PREFIX
 
 app = Blueprint('ingredients', __name__, url_prefix=URL_PREFIX)
+from barbados.objects import AppConfig
+from barbados.connectors import PostgresqlConnector, RedisConnector
+
 redis = RedisConnector()
-sess = PostgresqlConnector().Session()
+sess = PostgresqlConnector(database='amari', username='postgres', password='s3krAt').Session()
 
 
 @app.route('/ingredients/searchindex')
 def _list():
     try:
-        ingredient_name_list = redis.get(barbados.config.cache.ingredient_name_list_key)
+        ingredient_name_list = redis.get(AppConfig.get('/jamaica/api/v1/ingredient_name_list_key'))
         return json.loads(ingredient_name_list)
 
     except KeyError:
@@ -30,7 +31,7 @@ def get_ingredients():
     tree = {}
 
     # Categories
-    categories = sess.query(IngredientModel).filter(IngredientModel.type == IngredientTypeEnum.CATEGORY.value)
+    categories = sess.query(IngredientModel).filter(IngredientModel.type == IngredientTypes.CATEGORY.value)
     for category in categories:
         c = Ingredient(category.slug, category.display_name, category.type, category.parent)
         if c.slug in tree.keys():
@@ -39,7 +40,7 @@ def get_ingredients():
 
     # Families
     family_cache = {} # key=family, value=parent(category)
-    families = sess.query(IngredientModel).filter(IngredientModel.type == IngredientTypeEnum.FAMILY.value)
+    families = sess.query(IngredientModel).filter(IngredientModel.type == IngredientTypes.FAMILY.value)
     for family in families:
         f = Ingredient(family.slug, family.display_name, family.type, family.parent)
         if f.slug in tree[f.parent]['children'].keys():
@@ -51,7 +52,7 @@ def get_ingredients():
     # There are no category-child ingredients. Need two passes to catch everyone
     sub_ingredients = []
     top_ingredient_cache = {} # key=top_ingredient, value=parent(family)
-    ingredients = sess.query(IngredientModel).filter(IngredientModel.type == IngredientTypeEnum.INGREDIENT.value)
+    ingredients = sess.query(IngredientModel).filter(IngredientModel.type == IngredientTypes.INGREDIENT.value)
     for ingredient in ingredients:
         # i = Ingredient(ingredient.slug, ingredient.display_name, ingredient.type, ingredient.parent)
         if ingredient.parent in family_cache.keys():

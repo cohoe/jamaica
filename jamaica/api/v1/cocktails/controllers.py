@@ -1,6 +1,4 @@
 import json
-import barbados.config
-from barbados.connectors import PostgresqlConnector, RedisConnector
 from barbados.factories import CocktailFactory
 from barbados.models import CocktailModel
 from flask import Blueprint
@@ -9,14 +7,17 @@ from jamaica.api.v1 import URL_PREFIX
 # from jamaica import cache
 
 app = Blueprint('cocktails', __name__, url_prefix=URL_PREFIX)
+from barbados.objects import AppConfig
+from barbados.connectors import PostgresqlConnector, RedisConnector
+
 redis = RedisConnector()
-sess = PostgresqlConnector().Session()
+sess = PostgresqlConnector(database='amari', username='postgres', password='s3krAt').Session()
 
 
 @app.route('/cocktails/searchindex')
 def _list():
     try:
-        cocktail_name_list = redis.get(barbados.config.cache.cocktail_name_list_key)
+        cocktail_name_list = redis.get(AppConfig.get('/jamaica/api/v1/cocktail_name_list_key'))
         return json.loads(cocktail_name_list)
 
     except KeyError:
@@ -44,7 +45,7 @@ def by_alpha(alpha=None):
         raise exceptions.ParseError('Must give a single character.')
 
     try:
-        search_index = json.loads(redis.get(barbados.config.cache.cocktail_name_list_key))
+        search_index = json.loads(redis.get(AppConfig.get('/jamaica/api/v1/cocktail_name_list_key')))
         return _get_alpha_from_cache(search_index, alpha)
     except KeyError:
         raise exceptions.APIException('Cache empty or other Redis error.')
