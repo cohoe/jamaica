@@ -32,7 +32,7 @@ def invalidate(cache_key):
 
 def _build_cocktail_cache(cache_key, database_session, redis_connection):
     # This is still returning all values, just not populating them
-    scan_results = database_session.query(CocktailModel).add_columns(CocktailModel.slug, CocktailModel.display_name).all()
+    scan_results = CocktailModel.get_all(session=database_session)
 
     index = {}
     for result in scan_results:
