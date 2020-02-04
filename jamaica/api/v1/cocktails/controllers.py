@@ -1,11 +1,9 @@
 import json
 from barbados.factories import CocktailFactory
-from barbados.models import CocktailModel
 from flask import Blueprint
 from flask_api import exceptions
-from jamaica.api import redis, sess, AppConfig
+from jamaica.api import redis, cocktail_model, AppConfig
 from jamaica.api.v1 import URL_PREFIX
-# from jamaica import cache
 
 app = Blueprint('cocktails', __name__, url_prefix=URL_PREFIX)
 
@@ -26,7 +24,7 @@ def _list():
 # @cache.cached(timeout=60)
 def by_slug(slug):
     try:
-        result = sess.query(CocktailModel).get(slug)
+        result = cocktail_model.get_by_slug(slug)
         c = CocktailFactory.model_to_obj(result)
         return c.serialize()
     except KeyError:

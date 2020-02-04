@@ -1,11 +1,8 @@
 import json
-from barbados.models import CocktailModel, IngredientModel
-from barbados.constants import IngredientTypes
 from flask import Blueprint
 from flask_api import exceptions
-from jamaica.api import redis, sess, AppConfig
+from jamaica.api import redis, cocktail_model, ingredient_model, AppConfig
 from jamaica.api.v1 import URL_PREFIX
-from sqlalchemy import or_
 
 cache_url_prefix = "%s/cache" % URL_PREFIX
 
@@ -15,9 +12,9 @@ app = Blueprint('cache', __name__, url_prefix=cache_url_prefix)
 @app.route('/rebuild/<string:cache_key>')
 def rebuild(cache_key):
     if cache_key == AppConfig.get('/jamaica/api/v1/cocktail_name_list_key'):
-        _build_cocktail_cache(AppConfig.get('/jamaica/api/v1/cocktail_name_list_key'), sess, redis)
+        _build_cocktail_cache(AppConfig.get('/jamaica/api/v1/cocktail_name_list_key'), redis)
     elif cache_key == AppConfig.get('/jamaica/api/v1/ingredient_name_list_key'):
-        _build_ingredient_cache(AppConfig.get('/jamaica/api/v1/ingredient_name_list_key'), sess, redis)
+        _build_ingredient_cache(AppConfig.get('/jamaica/api/v1/ingredient_name_list_key'), redis)
     else:
         raise exceptions.ParseError("Unsupported cache key '%s'" % cache_key)
 
@@ -30,9 +27,9 @@ def invalidate(cache_key):
     return {}
 
 
-def _build_cocktail_cache(cache_key, database_session, redis_connection):
+def _build_cocktail_cache(cache_key, redis_connection):
     # This is still returning all values, just not populating them
-    scan_results = CocktailModel.get_all(session=database_session)
+    scan_results = cocktail_model.get_all()
 
     index = {}
     for result in scan_results:
@@ -49,10 +46,9 @@ def _build_cocktail_cache(cache_key, database_session, redis_connection):
     redis_connection.set(cache_key, json.dumps(index))
 
 
-def _build_ingredient_cache(cache_key, database_session, redis_connection):
+def _build_ingredient_cache(cache_key, redis_connection):
     # This is still returning all values, just not populating them
-    scan_results = database_session.query(IngredientModel).add_columns(IngredientModel.slug, IngredientModel.display_name).filter(
-        or_(IngredientModel.type == IngredientTypes.INGREDIENT.value, IngredientModel.type == IngredientTypes.FAMILY.value))
+    scan_results = ingredient_model.get_usable_ingredients()
 
     index = []
     for result in scan_results:
