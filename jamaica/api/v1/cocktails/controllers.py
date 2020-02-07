@@ -2,7 +2,7 @@ import json
 from barbados.factories import CocktailFactory
 from flask import Blueprint
 from flask_api import exceptions
-from jamaica.api import cocktail_model, AppConfig, Cache
+from jamaica.api import cocktail_model, AppConfig, Cache, sess
 from jamaica.api.v1 import URL_PREFIX
 
 app = Blueprint('cocktails', __name__, url_prefix=URL_PREFIX)

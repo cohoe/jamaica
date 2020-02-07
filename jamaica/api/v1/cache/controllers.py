@@ -1,8 +1,9 @@
 import json
 from flask import Blueprint
 from flask_api import exceptions
-from jamaica.api import cocktail_model, ingredient_model, AppConfig, Cache
+from jamaica.api import cocktail_model, AppConfig, Cache, sess
 from jamaica.api.v1 import URL_PREFIX
+from barbados.models import IngredientModel
 
 cache_url_prefix = "%s/cache" % URL_PREFIX
 
@@ -48,7 +49,7 @@ def _build_cocktail_cache(cache_key):
 
 def _build_ingredient_cache(cache_key):
     # This is still returning all values, just not populating them
-    scan_results = ingredient_model.get_usable_ingredients()
+    scan_results = IngredientModel.get_usable_ingredients(sess)
 
     index = []
     for result in scan_results:
