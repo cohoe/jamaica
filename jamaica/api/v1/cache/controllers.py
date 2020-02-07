@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint
 from flask_api import exceptions
-from jamaica.api import redis, cocktail_model, ingredient_model, AppConfig
+from jamaica.api import cocktail_model, ingredient_model, AppConfig, Cache
 from jamaica.api.v1 import URL_PREFIX
 
 cache_url_prefix = "%s/cache" % URL_PREFIX
@@ -12,9 +12,9 @@ app = Blueprint('cache', __name__, url_prefix=cache_url_prefix)
 @app.route('/rebuild/<string:cache_key>')
 def rebuild(cache_key):
     if cache_key == AppConfig.get('/jamaica/api/v1/cocktail_name_list_key'):
-        _build_cocktail_cache(AppConfig.get('/jamaica/api/v1/cocktail_name_list_key'), redis)
+        _build_cocktail_cache(AppConfig.get('/jamaica/api/v1/cocktail_name_list_key'))
     elif cache_key == AppConfig.get('/jamaica/api/v1/ingredient_name_list_key'):
-        _build_ingredient_cache(AppConfig.get('/jamaica/api/v1/ingredient_name_list_key'), redis)
+        _build_ingredient_cache(AppConfig.get('/jamaica/api/v1/ingredient_name_list_key'))
     else:
         raise exceptions.ParseError("Unsupported cache key '%s'" % cache_key)
 
@@ -23,11 +23,11 @@ def rebuild(cache_key):
 
 @app.route('/invalidate/<string:cache_key>')
 def invalidate(cache_key):
-    redis.delete(cache_key)
+    Cache.delete(cache_key)
     return {}
 
 
-def _build_cocktail_cache(cache_key, redis_connection):
+def _build_cocktail_cache(cache_key):
     # This is still returning all values, just not populating them
     scan_results = cocktail_model.get_all()
 
@@ -43,10 +43,10 @@ def _build_cocktail_cache(cache_key, redis_connection):
         else:
             index[key_alpha].append(key_entry)
 
-    redis_connection.set(cache_key, json.dumps(index))
+    Cache.set(cache_key, json.dumps(index))
 
 
-def _build_ingredient_cache(cache_key, redis_connection):
+def _build_ingredient_cache(cache_key):
     # This is still returning all values, just not populating them
     scan_results = ingredient_model.get_usable_ingredients()
 
@@ -57,4 +57,4 @@ def _build_ingredient_cache(cache_key, redis_connection):
             'display_name': result.display_name
         })
 
-    redis_connection.set(cache_key, json.dumps(index))
+    Cache.set(cache_key, json.dumps(index))

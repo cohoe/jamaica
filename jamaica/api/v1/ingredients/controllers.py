@@ -3,7 +3,7 @@ from barbados.objects import Ingredient
 from barbados.constants import IngredientTypes
 from flask import Blueprint
 from flask_api import exceptions
-from jamaica.api import redis, ingredient_model, AppConfig
+from jamaica.api import ingredient_model, AppConfig, Cache
 from jamaica.api.v1 import URL_PREFIX
 
 app = Blueprint('ingredients', __name__, url_prefix=URL_PREFIX)
@@ -12,7 +12,7 @@ app = Blueprint('ingredients', __name__, url_prefix=URL_PREFIX)
 @app.route('/ingredients/searchindex')
 def _list():
     try:
-        ingredient_name_list = redis.get(AppConfig.get('/jamaica/api/v1/ingredient_name_list_key'))
+        ingredient_name_list = Cache.get(AppConfig.get('/jamaica/api/v1/ingredient_name_list_key'))
         return json.loads(ingredient_name_list)
 
     except KeyError:
