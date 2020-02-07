@@ -4,7 +4,7 @@ from barbados.constants import IngredientTypes
 from barbados.models import IngredientModel
 from flask import Blueprint
 from flask_api import exceptions
-from jamaica.api import AppConfig, Cache, sess
+from barbados.services import AppConfig, Cache
 from jamaica.api.v1 import URL_PREFIX
 
 app = Blueprint('ingredients', __name__, url_prefix=URL_PREFIX)
@@ -27,7 +27,7 @@ def get_ingredients():
     tree = {}
 
     # Categories
-    categories = IngredientModel.get_by_type(sess, IngredientTypes.CATEGORY)
+    categories = IngredientModel.get_by_type(IngredientTypes.CATEGORY)
     for category in categories:
         c = Ingredient(category.slug, category.display_name, category.type, category.parent)
         if c.slug in tree.keys():
@@ -36,7 +36,7 @@ def get_ingredients():
 
     # Families
     family_cache = {} # key=family, value=parent(category)
-    families = IngredientModel.get_by_type(sess, IngredientTypes.FAMILY)
+    families = IngredientModel.get_by_type(IngredientTypes.FAMILY)
     for family in families:
         f = Ingredient(family.slug, family.display_name, family.type, family.parent)
         if f.slug in tree[f.parent]['children'].keys():
@@ -48,7 +48,7 @@ def get_ingredients():
     # There are no category-child ingredients. Need two passes to catch everyone
     sub_ingredients = []
     top_ingredient_cache = {} # key=top_ingredient, value=parent(family)
-    ingredients = IngredientModel.get_by_type(sess, IngredientTypes.INGREDIENT)
+    ingredients = IngredientModel.get_by_type(IngredientTypes.INGREDIENT)
     for ingredient in ingredients:
         # i = Ingredient(ingredient.slug, ingredient.display_name, ingredient.type, ingredient.parent)
         if ingredient.parent in family_cache.keys():

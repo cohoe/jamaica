@@ -6,6 +6,10 @@ from jamaica.api.v1.ingredients.controllers import app as ingredients
 from jamaica.api.v1.cocktails.controllers import app as cocktails
 from jamaica.api.v1.cache.controllers import app as cache
 
+from barbados.connectors import PostgresqlConnector
+
+pgconn = PostgresqlConnector(database='amari', username='postgres', password='s3krAt')
+
 
 app = FlaskAPI(__name__, instance_relative_config=True)
 # flask_cache = Cache(app, config={'CACHE_TYPE': 'redis',
