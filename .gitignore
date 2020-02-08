@@ -1,0 +1,6 @@
+*.pdf
+images
+test.*
+output
+*.egg-info
+*.iml
