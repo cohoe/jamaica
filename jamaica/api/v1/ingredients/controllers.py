@@ -1,6 +1,8 @@
 import json
 from barbados.objects import IngredientTree
 from barbados.factories import IngredientFactory
+from barbados.models import IngredientModel
+from barbados.constants import IngredientTypes
 from flask import Blueprint
 from flask_api import exceptions
 from barbados.services import AppConfig, Cache
@@ -26,6 +28,19 @@ def _list():
 def tree():
     ingredient_tree = IngredientTree()
     return ingredient_tree.tree.to_json(with_data=True)
+
+
+@app.route('/ingredients/categories')
+def categories():
+    categories = IngredientModel.get_by_type(IngredientTypes.CATEGORY)
+    return [cat.slug for cat in categories]
+
+
+@app.route('/ingredients/category/<string:category>/families')
+def families(category):
+    families = IngredientModel.get_by_type(IngredientTypes.FAMILY)
+    return [fam.slug for fam in families if fam.parent == category]
+
 
 
 @app.route('/ingredient/<string:node>/tree')
