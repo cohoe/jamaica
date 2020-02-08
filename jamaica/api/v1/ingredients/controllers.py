@@ -1,5 +1,6 @@
 import json
 from barbados.objects import IngredientTree
+from barbados.factories import IngredientFactory
 from flask import Blueprint
 from flask_api import exceptions
 from barbados.services import AppConfig, Cache
@@ -22,7 +23,31 @@ def _list():
 
 
 @app.route('/ingredients/tree')
-def build_tree():
+def tree():
     ingredient_tree = IngredientTree()
-
     return ingredient_tree.tree.to_json(with_data=True)
+
+
+@app.route('/ingredient/<string:node>/tree')
+def subtree(node):
+    ingredient_tree = IngredientTree()
+    return ingredient_tree.subtree(node).to_json(with_data=True)
+
+
+@app.route('/ingredient/<string:node>/parent')
+def parent(node):
+    ingredient_tree = IngredientTree()
+    node = ingredient_tree.parent(node)
+    i = IngredientFactory.node_to_obj(node)
+    return i.serialize()
+
+
+@app.route('/ingredient/<string:node>')
+def get_node(node):
+    ingredient_tree = IngredientTree()
+    try:
+        node = ingredient_tree.node(node)
+        i = IngredientFactory.node_to_obj(node)
+        return i.serialize()
+    except KeyError:
+        raise exceptions.NotFound()
