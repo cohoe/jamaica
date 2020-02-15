@@ -42,7 +42,6 @@ def families(category):
     return [fam.slug for fam in families if fam.parent == category]
 
 
-
 @app.route('/ingredient/<string:node>/tree')
 def subtree(node):
     ingredient_tree = IngredientTree()
@@ -55,6 +54,15 @@ def parent(node):
     node = ingredient_tree.parent(node)
     i = IngredientFactory.node_to_obj(node)
     return i.serialize()
+
+
+@app.route('/ingredient/<string:slug>/substitutions')
+def substitutions(slug):
+    ingredient_tree = IngredientTree()
+    try:
+        return ingredient_tree.substitutions(slug)
+    except KeyError:
+        raise exceptions.NotFound()
 
 
 @app.route('/ingredient/<string:node>')
