@@ -69,8 +69,9 @@ def substitutions(slug):
 def get_node(node):
     ingredient_tree = IngredientTree()
     try:
+        # @TODO do model -> object stuffs
         node = ingredient_tree.node(node)
-        i = IngredientFactory.node_to_obj(node)
-        return i.serialize()
+        ingredient = IngredientModel.query.get(node.identifier)
+        return ingredient.slug
     except KeyError:
         raise exceptions.NotFound()
