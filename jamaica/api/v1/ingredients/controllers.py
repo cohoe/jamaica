@@ -1,8 +1,8 @@
 import json
-from barbados.objects import IngredientTree
+from barbados.objects.ingredienttree import IngredientTree
+from barbados.objects.ingredientkinds import CategoryKind, FamilyKind
 from barbados.factories import IngredientFactory
 from barbados.models import IngredientModel
-from barbados.constants import CategoryKind, FamilyKind
 from flask import Blueprint
 from flask_api import exceptions
 from barbados.services import AppConfig, Cache
