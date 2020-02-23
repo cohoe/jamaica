@@ -1,6 +1,7 @@
 import json
 from barbados.objects.ingredienttree import IngredientTree
 from barbados.objects.ingredientkinds import CategoryKind, FamilyKind
+from barbados.serializers import ObjectSerializer
 from barbados.factories import IngredientFactory
 from barbados.models import IngredientModel
 from flask import Blueprint
@@ -45,15 +46,22 @@ def families(category):
 @app.route('/ingredient/<string:node>/tree')
 def subtree(node):
     ingredient_tree = IngredientTree()
-    return ingredient_tree.subtree(node).to_json(with_data=True)
+    try:
+        return ingredient_tree.subtree(node).to_json(with_data=True)
+    except KeyError:
+        raise exceptions.NotFound
 
 
-@app.route('/ingredient/<string:node>/parent')
-def parent(node):
-    ingredient_tree = IngredientTree()
-    node = ingredient_tree.parent(node)
-    i = IngredientFactory.node_to_obj(node)
-    return i.serialize()
+@app.route('/ingredient/<string:slug>/parent')
+def parent(slug):
+    try:
+        self_model = IngredientModel.get_by_slug(slug)
+        parent_model = IngredientModel.get_by_slug(self_model.parent)
+        i = IngredientFactory.to_obj(parent_model)
+
+        return ObjectSerializer.serialize(i, 'JSON')
+    except KeyError:
+        raise exceptions.NotFound
 
 
 @app.route('/ingredient/<string:slug>/substitutions')
@@ -62,16 +70,17 @@ def substitutions(slug):
     try:
         return ingredient_tree.substitutions(slug)
     except KeyError:
-        raise exceptions.NotFound()
+        raise exceptions.NotFound
 
 
-@app.route('/ingredient/<string:node>')
-def get_node(node):
-    ingredient_tree = IngredientTree()
+@app.route('/ingredient/<string:slug>')
+def get_ingredient(slug):
     try:
-        # @TODO do model -> object stuffs
-        node = ingredient_tree.node(node)
-        ingredient = IngredientModel.query.get(node.identifier)
-        return ingredient.slug
+        self_model = IngredientModel.get_by_slug(slug)
+        if self_model is None:
+            raise exceptions.NotFound
+        i = IngredientFactory.to_obj(self_model)
+
+        return ObjectSerializer.serialize(i, 'JSON')
     except KeyError:
-        raise exceptions.NotFound()
+        raise exceptions.NotFound
