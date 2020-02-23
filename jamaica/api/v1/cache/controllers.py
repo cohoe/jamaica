@@ -57,7 +57,8 @@ def _build_ingredient_cache(cache_key):
     for result in scan_results:
         index.append({
             'slug': result.slug,
-            'display_name': result.display_name
+            'display_name': result.display_name,
+            'aliases': result.aliases,
         })
 
     Cache.set(cache_key, json.dumps(index))
