@@ -6,7 +6,7 @@ from barbados.factories import IngredientFactory
 from barbados.models import IngredientModel
 from flask import Blueprint
 from flask_api import exceptions
-from barbados.services import AppConfig, Cache
+from barbados.objects.caches import UsableIngredientCache
 from jamaica.api.v1 import URL_PREFIX
 
 
@@ -16,7 +16,7 @@ app = Blueprint('ingredients', __name__, url_prefix=URL_PREFIX)
 @app.route('/ingredients/searchindex')
 def _list():
     try:
-        ingredient_name_list = Cache.get(AppConfig.get('/jamaica/api/v1/ingredient_name_list_key'))
+        ingredient_name_list = UsableIngredientCache.retrieve()
         return json.loads(ingredient_name_list)
 
     except KeyError:
