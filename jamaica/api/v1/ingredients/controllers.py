@@ -1,12 +1,11 @@
 import json
-from barbados.objects.ingredienttree import IngredientTree
 from barbados.objects.ingredientkinds import CategoryKind, FamilyKind
 from barbados.serializers import ObjectSerializer
 from barbados.factories import IngredientFactory
 from barbados.models import IngredientModel
 from flask import Blueprint
 from flask_api import exceptions
-from barbados.objects.caches import UsableIngredientCache
+from barbados.objects.caches import UsableIngredientCache, IngredientTreeCache
 from jamaica.api.v1 import URL_PREFIX
 
 
@@ -27,7 +26,7 @@ def _list():
 
 @app.route('/ingredients/tree')
 def tree():
-    ingredient_tree = IngredientTree()
+    ingredient_tree = IngredientTreeCache.retrieve()
     return ingredient_tree.tree.to_json(with_data=True)
 
 
@@ -45,7 +44,7 @@ def families(category):
 
 @app.route('/ingredient/<string:node>/tree')
 def subtree(node):
-    ingredient_tree = IngredientTree()
+    ingredient_tree = IngredientTreeCache.retrieve()
     try:
         return ingredient_tree.subtree(node).to_json(with_data=True)
     except KeyError:
@@ -66,7 +65,7 @@ def parent(slug):
 
 @app.route('/ingredient/<string:slug>/substitutions')
 def substitutions(slug):
-    ingredient_tree = IngredientTree()
+    ingredient_tree = IngredientTreeCache.retrieve()
     try:
         return ingredient_tree.substitutions(slug)
     except KeyError:
