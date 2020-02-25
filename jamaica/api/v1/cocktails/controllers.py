@@ -3,8 +3,9 @@ from barbados.factories import CocktailFactory
 from barbados.models import CocktailModel
 from flask import Blueprint
 from flask_api import exceptions
-from barbados.services import AppConfig, Cache
+from barbados.objects.caches import CocktailNameCache
 from jamaica.api.v1 import URL_PREFIX
+from barbados.serializers import ObjectSerializer
 
 app = Blueprint('cocktails', __name__, url_prefix=URL_PREFIX)
 
@@ -12,7 +13,7 @@ app = Blueprint('cocktails', __name__, url_prefix=URL_PREFIX)
 @app.route('/cocktails/searchindex')
 def _list():
     try:
-        cocktail_name_list = Cache.get(AppConfig.get('/jamaica/api/v1/cocktail_name_list_key'))
+        cocktail_name_list = CocktailNameCache.retrieve()
         return json.loads(cocktail_name_list)
 
     except KeyError:
@@ -27,7 +28,7 @@ def by_slug(slug):
     try:
         result = CocktailModel.get_by_slug(slug)
         c = CocktailFactory.model_to_obj(result)
-        return c.serialize()
+        return ObjectSerializer.serialize(c, 'JSON')
     except KeyError:
         raise exceptions.NotFound()
     except Exception as e:
@@ -40,7 +41,7 @@ def by_alpha(alpha=None):
         raise exceptions.ParseError('Must give a single character.')
 
     try:
-        search_index = json.loads(Cache.get(AppConfig.get('/jamaica/api/v1/cocktail_name_list_key')))
+        search_index = json.loads(CocktailNameCache.retrieve())
         return _get_alpha_from_cache(search_index, alpha)
     except KeyError:
         raise exceptions.APIException('Cache empty or other Redis error.')
@@ -49,6 +50,14 @@ def by_alpha(alpha=None):
 
 
 def _get_alpha_from_cache(cache_index, alpha):
+    """
+    '#' is '%23' in HTML, and really means both # and 0-9 in our
+    world. Since this operates on slugs we don't need to actually
+    search on literal '#' at this time.
+    :param cache_index: Name index dictionary.
+    :param alpha: First character of search term.
+    :return: List of results.
+    """
     if alpha == '#':
         search_results = []
         for i in range(0, 10):
