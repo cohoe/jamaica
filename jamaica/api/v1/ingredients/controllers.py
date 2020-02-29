@@ -63,6 +63,17 @@ def parent(slug):
         raise exceptions.NotFound
 
 
+@app.route('/ingredient/<string:slug>/parents')
+def parents(slug):
+    try:
+        ingredient_tree = IngredientTreeCache.retrieve()
+        parents = ingredient_tree.parents(slug)
+
+        return parents
+    except KeyError:
+        raise exceptions.NotFound
+
+
 @app.route('/ingredient/<string:slug>/substitutions')
 def substitutions(slug):
     ingredient_tree = IngredientTreeCache.retrieve()
