@@ -28,7 +28,8 @@ def by_slug(slug):
     try:
         result = CocktailModel.get_by_slug(slug)
         c = CocktailFactory.model_to_obj(result)
-        return ObjectSerializer.serialize(c, 'JSON')
+        print(ObjectSerializer.serialize(c, 'dict'))
+        return ObjectSerializer.serialize(c, 'dict')
     except KeyError:
         raise exceptions.NotFound()
     except Exception as e:
