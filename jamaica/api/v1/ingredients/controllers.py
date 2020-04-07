@@ -30,6 +30,12 @@ def tree():
     return ingredient_tree.tree.to_json(with_data=True)
 
 
+@app.route('/ingredients')
+def get_all():
+    ingredients = IngredientModel.query.all()
+    return [ObjectSerializer.serialize(IngredientFactory.to_obj(ingredient), 'dict') for ingredient in ingredients]
+
+
 @app.route('/ingredients/categories')
 def categories():
     categories = IngredientModel.get_by_kind(CategoryKind)
