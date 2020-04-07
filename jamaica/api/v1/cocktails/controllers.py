@@ -1,7 +1,7 @@
 import json
 from barbados.factories import CocktailFactory
 from barbados.models import CocktailModel
-from flask import Blueprint
+from flask import Blueprint, request
 from flask_api import exceptions
 from barbados.objects.caches import CocktailNameCache
 from jamaica.api.v1 import URL_PREFIX
@@ -47,6 +47,13 @@ def by_alpha(alpha=None):
         raise exceptions.APIException('Cache empty or other Redis error.')
     except Exception as e:
         raise exceptions.APIException(str(e))
+
+
+@app.route('/cocktails/search/')
+def search():
+    terms = request.args.getlist('term')
+    return terms
+
 
 
 def _get_alpha_from_cache(cache_index, alpha):
