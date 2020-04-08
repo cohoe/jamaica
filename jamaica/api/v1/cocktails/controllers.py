@@ -1,4 +1,5 @@
 import json
+import logging
 from barbados.factories import CocktailFactory
 from barbados.models import CocktailModel
 from flask import Blueprint, request
@@ -6,6 +7,7 @@ from flask_api import exceptions
 from barbados.objects.caches import CocktailNameCache
 from jamaica.api.v1 import URL_PREFIX
 from barbados.serializers import ObjectSerializer
+from barbados.indexes import RecipeIndex
 
 app = Blueprint('cocktails', __name__, url_prefix=URL_PREFIX)
 
@@ -49,11 +51,54 @@ def by_alpha(alpha=None):
         raise exceptions.APIException(str(e))
 
 
-@app.route('/cocktails/search/')
-def search():
-    terms = request.args.getlist('term')
-    return terms
+@app.route('/cocktails/')
+def get_cocktails():
+    raw_components = request.args.get(key='components', default='')
+    name = request.args.get(key='name')
+    components = raw_components.split(',')
+    return _search(components, name)
 
+
+def _search(components, name):
+    logging.info("Searching on name=%s,components=%s" % (name, components))
+    musts = []
+    for component in components:
+        # @TODO fix this
+        if component == '':
+            continue
+        musts.append({
+            'multi_match': {
+                'query': component,
+                'type': 'phrase_prefix',
+                'fields': ['specs.components.slug', 'specs.components.display_name', 'specs.components.parents'],
+            }
+        })
+
+    if name:
+        musts.append({
+            'multi_match': {
+                'query': name,
+                'type': 'phrase_prefix',
+                'fields': ['specs.name', 'display_name'],
+            }
+        })
+
+    print(musts)
+
+    query_params = {
+        'name_or_query': 'bool',
+        'must': musts
+    }
+
+    results = RecipeIndex.search()[0:1000].query(**query_params).sort('_score').execute()
+    logging.info("Got %s results." % results.hits.total.value)
+
+    slugs = []
+    for hit in results:
+        logging.info("%s :: %s" % (hit.slug, hit.meta.score))
+        slugs.append({'slug': hit.slug, 'score': hit.meta.score})
+
+    return slugs
 
 
 def _get_alpha_from_cache(cache_index, alpha):
