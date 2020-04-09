@@ -60,7 +60,7 @@ def get_cocktails():
     logging.info("Searching on name=%s,components=%s,alpha=%s" % (name, components, alpha))
     # params = {'name': name, 'components': components, 'alpha': alpha}
     # return CocktailQuery(input_parameters=params).execute()
-    return CocktailQuery(name=name, components=components)
+    return CocktailQuery(name=name, components=components, alpha=alpha)
 
 
 def _get_alpha_from_cache(cache_index, alpha):
