@@ -8,7 +8,7 @@ from barbados.objects.caches import CocktailNameCache
 from jamaica.api.v1 import URL_PREFIX
 from barbados.serializers import ObjectSerializer
 from barbados.indexes import RecipeIndex
-from barbados.search import QueryParameter, CocktailQuery
+from barbados.search import CocktailQueryResult, CocktailQuery
 
 app = Blueprint('cocktails', __name__, url_prefix=URL_PREFIX)
 
@@ -58,7 +58,8 @@ def get_cocktails():
     name = request.args.get(key='name')
     components = raw_components.split(',')
     logging.info("Searching on name=%s,components=%s" % (name, components))
-    return CocktailQuery(name=name, components=components).execute()
+    params = {'name': name, 'components': components}
+    return CocktailQuery(input_parameters=params).execute()
 
 
 def _get_alpha_from_cache(cache_index, alpha):
