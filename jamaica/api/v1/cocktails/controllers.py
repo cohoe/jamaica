@@ -53,10 +53,9 @@ def by_alpha(alpha=None):
 
 @app.route('/cocktails/')
 def get_cocktails():
-    raw_components = request.args.get(key='components', default='')
-    name = request.args.get(key='name')
-    alpha = request.args.get(key='alpha')
-    components = raw_components.split(',')
+    components = request.args.get(key='components', default='')
+    name = request.args.get(key='name', default='')
+    alpha = request.args.get(key='alpha', default='')
     logging.info("Searching on name=%s,components=%s,alpha=%s" % (name, components, alpha))
     # params = {'name': name, 'components': components, 'alpha': alpha}
     # return CocktailQuery(input_parameters=params).execute()
