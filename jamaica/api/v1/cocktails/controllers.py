@@ -70,7 +70,7 @@ def _search(components, name):
             'multi_match': {
                 'query': component,
                 'type': 'phrase_prefix',
-                'fields': ['specs.components.slug', 'specs.components.display_name', 'specs.components.parents'],
+                'fields': ['spec.components.slug', 'spec.components.display_name', 'spec.components.parents'],
             }
         })
 
@@ -79,11 +79,9 @@ def _search(components, name):
             'multi_match': {
                 'query': name,
                 'type': 'phrase_prefix',
-                'fields': ['specs.name', 'display_name'],
+                'fields': ['spec.display_name', 'spec.slug', 'display_name', 'slug'],
             }
         })
-
-    print(musts)
 
     query_params = {
         'name_or_query': 'bool',
@@ -96,7 +94,14 @@ def _search(components, name):
     slugs = []
     for hit in results:
         logging.info("%s :: %s" % (hit.slug, hit.meta.score))
-        slugs.append({'slug': hit.slug, 'score': hit.meta.score})
+        slugs.append({
+            'cocktail_slug': hit.slug,
+            'cocktail_display_name': hit.display_name,
+            'spec_slug': hit.spec.slug,
+            'spec_display_name': hit.spec.display_name,
+            'component_display_names': [component['display_name'] for component in hit.spec.components],
+            'score': hit.meta.score,
+        })
 
     return slugs
 
