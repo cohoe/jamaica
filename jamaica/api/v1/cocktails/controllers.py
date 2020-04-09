@@ -8,6 +8,7 @@ from barbados.objects.caches import CocktailNameCache
 from jamaica.api.v1 import URL_PREFIX
 from barbados.serializers import ObjectSerializer
 from barbados.indexes import RecipeIndex
+from barbados.search import QueryParameter, CocktailQuery
 
 app = Blueprint('cocktails', __name__, url_prefix=URL_PREFIX)
 
@@ -56,54 +57,8 @@ def get_cocktails():
     raw_components = request.args.get(key='components', default='')
     name = request.args.get(key='name')
     components = raw_components.split(',')
-    return _search(components, name)
-
-
-def _search(components, name):
     logging.info("Searching on name=%s,components=%s" % (name, components))
-    musts = []
-    for component in components:
-        # @TODO fix this
-        if component == '':
-            continue
-        musts.append({
-            'multi_match': {
-                'query': component,
-                'type': 'phrase_prefix',
-                'fields': ['spec.components.slug', 'spec.components.display_name', 'spec.components.parents'],
-            }
-        })
-
-    if name:
-        musts.append({
-            'multi_match': {
-                'query': name,
-                'type': 'phrase_prefix',
-                'fields': ['spec.display_name', 'spec.slug', 'display_name', 'slug'],
-            }
-        })
-
-    query_params = {
-        'name_or_query': 'bool',
-        'must': musts
-    }
-
-    results = RecipeIndex.search()[0:1000].query(**query_params).sort('_score').execute()
-    logging.info("Got %s results." % results.hits.total.value)
-
-    slugs = []
-    for hit in results:
-        logging.info("%s :: %s" % (hit.slug, hit.meta.score))
-        slugs.append({
-            'cocktail_slug': hit.slug,
-            'cocktail_display_name': hit.display_name,
-            'spec_slug': hit.spec.slug,
-            'spec_display_name': hit.spec.display_name,
-            'component_display_names': [component['display_name'] for component in hit.spec.components],
-            'score': hit.meta.score,
-        })
-
-    return slugs
+    return CocktailQuery(name=name, components=components).execute()
 
 
 def _get_alpha_from_cache(cache_index, alpha):
