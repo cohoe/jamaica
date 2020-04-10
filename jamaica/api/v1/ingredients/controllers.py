@@ -1,5 +1,4 @@
 import json
-from barbados.objects.ingredientkinds import CategoryKind, FamilyKind
 from barbados.serializers import ObjectSerializer
 from barbados.factories import IngredientFactory
 from barbados.models import IngredientModel
@@ -33,21 +32,20 @@ def tree():
 
 @app.route('/ingredients')
 def get_all():
-    # ingredients = IngredientModel.query.all()
-    # return [ObjectSerializer.serialize(IngredientFactory.to_obj(ingredient), 'dict') for ingredient in ingredients]
     return IngredientSearch(**request.args).execute()
 
 
-@app.route('/ingredients/categories')
-def categories():
-    categories = IngredientModel.get_by_kind(CategoryKind)
-    return [cat.slug for cat in categories]
+@app.route('/ingredient/<string:slug>')
+def get_ingredient(slug):
+    try:
+        self_model = IngredientModel.get_by_slug(slug)
+        if self_model is None:
+            raise exceptions.NotFound
+        i = IngredientFactory.to_obj(self_model)
 
-
-@app.route('/ingredients/category/<string:category>/families')
-def families(category):
-    families = IngredientModel.get_by_kind(FamilyKind)
-    return [fam.slug for fam in families if fam.parent == category]
+        return ObjectSerializer.serialize(i, 'JSON')
+    except KeyError:
+        raise exceptions.NotFound
 
 
 @app.route('/ingredient/<string:node>/tree')
@@ -59,18 +57,7 @@ def subtree(node):
         raise exceptions.NotFound
 
 
-@app.route('/ingredient/<string:slug>/parent')
-def parent(slug):
-    try:
-        self_model = IngredientModel.get_by_slug(slug)
-        parent_model = IngredientModel.get_by_slug(self_model.parent)
-        i = IngredientFactory.to_obj(parent_model)
-
-        return ObjectSerializer.serialize(i, 'JSON')
-    except KeyError:
-        raise exceptions.NotFound
-
-
+# @TODO roll this into /ingredient/<slug>
 @app.route('/ingredient/<string:slug>/parents')
 def parents(slug):
     try:
@@ -87,18 +74,5 @@ def substitutions(slug):
     ingredient_tree = IngredientTreeCache.retrieve()
     try:
         return ingredient_tree.substitutions(slug)
-    except KeyError:
-        raise exceptions.NotFound
-
-
-@app.route('/ingredient/<string:slug>')
-def get_ingredient(slug):
-    try:
-        self_model = IngredientModel.get_by_slug(slug)
-        if self_model is None:
-            raise exceptions.NotFound
-        i = IngredientFactory.to_obj(self_model)
-
-        return ObjectSerializer.serialize(i, 'JSON')
     except KeyError:
         raise exceptions.NotFound
