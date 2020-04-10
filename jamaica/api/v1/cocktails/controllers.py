@@ -56,7 +56,7 @@ def get_cocktails():
     components = request.args.get(key='components', default='')
     name = request.args.get(key='name', default='')
     alpha = request.args.get(key='alpha', default='')
-    logging.info("Searching on name=%s,components=%s,alpha=%s" % (name, components, alpha))
+    # logging.info("Searching on name=%s,components=%s,alpha=%s" % (name, components, alpha))
     # params = {'name': name, 'components': components, 'alpha': alpha}
     # return CocktailQuery(input_parameters=params).execute()
     return CocktailSearch(name=name, components=components, alpha=alpha).execute()
