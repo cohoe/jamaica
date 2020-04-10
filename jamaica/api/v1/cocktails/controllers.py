@@ -7,7 +7,7 @@ from flask_api import exceptions
 from barbados.objects.caches import CocktailNameCache
 from jamaica.api.v1 import URL_PREFIX
 from barbados.serializers import ObjectSerializer
-from barbados.searchv2 import CocktailSearch
+from barbados.search.cocktail import CocktailSearch
 
 app = Blueprint('cocktails', __name__, url_prefix=URL_PREFIX)
 
@@ -53,13 +53,7 @@ def by_alpha(alpha=None):
 
 @app.route('/cocktails/')
 def get_cocktails():
-    components = request.args.get(key='components', default='')
-    name = request.args.get(key='name', default='')
-    alpha = request.args.get(key='alpha', default='')
-    # logging.info("Searching on name=%s,components=%s,alpha=%s" % (name, components, alpha))
-    # params = {'name': name, 'components': components, 'alpha': alpha}
-    # return CocktailQuery(input_parameters=params).execute()
-    return CocktailSearch(name=name, components=components, alpha=alpha).execute()
+    return CocktailSearch(**request.args).execute()
 
 
 def _get_alpha_from_cache(cache_index, alpha):
