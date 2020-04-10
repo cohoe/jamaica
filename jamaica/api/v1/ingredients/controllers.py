@@ -3,10 +3,11 @@ from barbados.objects.ingredientkinds import CategoryKind, FamilyKind
 from barbados.serializers import ObjectSerializer
 from barbados.factories import IngredientFactory
 from barbados.models import IngredientModel
-from flask import Blueprint
+from flask import Blueprint, request
 from flask_api import exceptions
 from barbados.objects.caches import UsableIngredientCache, IngredientTreeCache
 from jamaica.api.v1 import URL_PREFIX
+from barbados.search.ingredient import IngredientSearch
 
 
 app = Blueprint('ingredients', __name__, url_prefix=URL_PREFIX)
@@ -32,8 +33,9 @@ def tree():
 
 @app.route('/ingredients')
 def get_all():
-    ingredients = IngredientModel.query.all()
-    return [ObjectSerializer.serialize(IngredientFactory.to_obj(ingredient), 'dict') for ingredient in ingredients]
+    # ingredients = IngredientModel.query.all()
+    # return [ObjectSerializer.serialize(IngredientFactory.to_obj(ingredient), 'dict') for ingredient in ingredients]
+    return IngredientSearch(**request.args).execute()
 
 
 @app.route('/ingredients/categories')
