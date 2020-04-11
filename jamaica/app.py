@@ -1,3 +1,4 @@
+import jamaica.database
 from flask import Flask, Blueprint
 from jamaica import settings
 from jamaica.v1.restx import api
