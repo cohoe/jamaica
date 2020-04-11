@@ -4,6 +4,7 @@ from jamaica import settings
 from jamaica.v1.restx import api
 
 from jamaica.v1.cocktails.endpoints import ns as cocktails_namespace
+from jamaica.v1.ingredients.endpoints import ns as ingredients_namespace
 
 app = Flask('jamaica')
 
@@ -23,6 +24,7 @@ def initialize_app(flask_app):
     blueprint = Blueprint('api', __name__, url_prefix='/api')
     api.init_app(blueprint)
     api.add_namespace(cocktails_namespace)
+    api.add_namespace(ingredients_namespace)
     flask_app.register_blueprint(blueprint)
 
 

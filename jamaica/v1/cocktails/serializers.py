@@ -11,6 +11,7 @@ cocktail_list_result = api.model('CocktailListResult', {
     'component_display_names': fields.List(fields.String(attribute='display_name'), attribute='hit.spec.components', description='Display names of components in this spec', example=['rum', 'sherry', 'vermouth']),
 })
 
+
 cocktail_search_index_result = api.model('CocktailSearchIndexResult', {
     'slug': fields.String(attribute='slug', description='Cocktail slug.', example='rum-and-coke'),
     'display_name': fields.String(attribute='display_name', description='Cocktail display name.', example='Rum & Coke'),

@@ -16,7 +16,7 @@ ns = api.namespace('v1/cocktails', description='Cocktail recipes.')
 
 
 @ns.route('/')
-class CocktailsCollection(Resource):
+class CocktailCollection(Resource):
 
     @api.expect(cocktail_list_parser, validate=True) # @TODO validate doesnt work.
     @api.marshal_list_with(cocktail_list_result)
@@ -26,7 +26,7 @@ class CocktailsCollection(Resource):
 
 @ns.route('/<string:slug>')
 @api.response(404, 'Cocktail slug not in database.')
-class CocktailCollection(Resource):
+class CocktailItem(Resource):
 
     def get(self, slug):
         try:
@@ -38,7 +38,7 @@ class CocktailCollection(Resource):
 
 
 @ns.route('/index')
-class CocktailIndex(Resource):
+class CocktailIndexItem(Resource):
 
     @api.marshal_with(cocktail_search_index)
     def get(self):
