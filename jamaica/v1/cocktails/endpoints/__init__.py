@@ -21,6 +21,10 @@ class CocktailCollection(Resource):
     @api.expect(cocktail_list_parser, validate=True) # @TODO validate doesnt work.
     @api.marshal_list_with(cocktail_list_result)
     def get(self):
+        """
+        Get a simplified view of cocktails from search.
+        :return: List of SearchResult Dicts
+        """
         return CocktailSearch(**request.args).execute()
 
 
@@ -29,6 +33,11 @@ class CocktailCollection(Resource):
 class CocktailItem(Resource):
 
     def get(self, slug):
+        """
+        Get a single cocktail from the database.
+        :param slug:
+        :return: Serialized Cocktail
+        """
         try:
             result = CocktailModel.get_by_slug(slug)
             c = CocktailFactory.model_to_obj(result)
@@ -42,4 +51,8 @@ class CocktailIndexItem(Resource):
 
     @api.marshal_with(cocktail_search_index)
     def get(self):
+        """
+        Get a simplified list of all cocktails from cache.
+        :return: List
+        """
         return json.loads(CocktailNameCache.retrieve())
