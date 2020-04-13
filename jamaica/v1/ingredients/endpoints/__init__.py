@@ -2,7 +2,7 @@ import json
 from flask import request
 from flask_restx import Resource
 from jamaica.v1.restx import api
-from jamaica.v1.ingredients.serializers import ingredient_list_result, ingredient_search_index, ingredient_substitution
+from jamaica.v1.ingredients.serializers import ingredient_list_result, ingredient_search_index, ingredient_substitution, ingredient_result
 from jamaica.v1.ingredients.parsers import ingredient_list_parser
 
 from barbados.search.ingredient import IngredientSearch
@@ -41,14 +41,15 @@ class IngredientIndexItem(Resource):
 @ns.route('/tree')
 class IngredientTreeItem(Resource):
 
-    # @api.marshal_with(Ingredient_search_index)
+    # @TODO Nothing here works. Recursion with models is really lacking...
+    # @api.marshal_with(ingredient_tree_model)
     def get(self):
         """
         Get the entire ingredient tree from cache.
         :return: Dict
         """
         ingredient_tree = IngredientTreeCache.retrieve()
-        return ingredient_tree.tree.to_json(with_data=True)
+        return json.loads(ingredient_tree.tree.to_json(with_data=True))
 
 
 @ns.route('/<string:slug>')
@@ -56,6 +57,7 @@ class IngredientTreeItem(Resource):
 @api.doc(params={'slug': 'An ingredient slug.'})
 class IngredientItem(Resource):
 
+    @api.marshal_with(ingredient_result)
     def get(self, slug):
         """
         Get a single ingredient from the database.
@@ -74,6 +76,7 @@ class IngredientItem(Resource):
 @api.response(404, 'Ingredient slug not in database.')
 class IngredientSubtreeItem(Resource):
 
+    # @TODO when you figure out recursive tree modeling, call here.
     def get(self, slug):
         """
         Return the subtree of this ingredient from the main tree.
