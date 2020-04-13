@@ -1,7 +1,7 @@
 from flask_restx import fields
 from jamaica.v1.restx import api
 
-cocktail_list_result = api.model('CocktailListResult', {
+CocktailSearchItem = api.model('CocktailSearchItem', {
     # 'id': fields.String(attribute='id', readOnly=True, description='ElasticSearch Document ID'),
     'score': fields.Float(attribute='score', readOnly=True, description='Search result score.'),
     'cocktail_slug': fields.String(attribute='hit.slug', description='Cocktail slug'),
@@ -12,13 +12,13 @@ cocktail_list_result = api.model('CocktailListResult', {
 })
 
 
-cocktail_search_index_result = api.model('CocktailSearchIndexResult', {
+CocktailIndexItem = api.model('CocktailIndexItem', {
     'slug': fields.String(attribute='slug', description='Cocktail slug.', example='rum-and-coke'),
     'display_name': fields.String(attribute='display_name', description='Cocktail display name.', example='Rum & Coke'),
 })
 
-cocktail_search_index = api.model('CocktailSearchIndex', {
+CocktailIndex = api.model('CocktailIndex', {
     # The API does will be wrong, but this works.
     # https://github.com/python-restx/flask-restx/issues/57
-    '*': fields.Wildcard(fields.List(fields.Nested(cocktail_search_index_result)), description='Starting character.', example=[{'slug': 'thing', 'display_name': 'Thing'}])
+    '*': fields.Wildcard(fields.List(fields.Nested(CocktailIndexItem)), description='Starting character.', example=[{'slug': 'thing', 'display_name': 'Thing'}])
 })

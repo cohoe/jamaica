@@ -2,7 +2,7 @@ import json
 from flask import request
 from flask_restx import Resource
 from jamaica.v1.restx import api
-from jamaica.v1.cocktails.serializers import cocktail_list_result, cocktail_search_index
+from jamaica.v1.cocktails.serializers import CocktailIndex, CocktailSearchItem
 from jamaica.v1.cocktails.parsers import cocktail_list_parser
 
 
@@ -16,10 +16,10 @@ ns = api.namespace('v1/cocktails', description='Cocktail recipes.')
 
 
 @ns.route('/')
-class CocktailCollection(Resource):
+class CocktailsEndpoint(Resource):
 
     @api.expect(cocktail_list_parser, validate=True) # @TODO validate doesnt work.
-    @api.marshal_list_with(cocktail_list_result)
+    @api.marshal_list_with(CocktailSearchItem)
     def get(self):
         """
         Get a simplified view of cocktails from search.
@@ -30,7 +30,7 @@ class CocktailCollection(Resource):
 
 @ns.route('/<string:slug>')
 @api.response(404, 'Cocktail slug not in database.')
-class CocktailItem(Resource):
+class CocktailEndpoint(Resource):
 
     def get(self, slug):
         """
@@ -47,9 +47,9 @@ class CocktailItem(Resource):
 
 
 @ns.route('/index')
-class CocktailIndexItem(Resource):
+class CocktailIndexEndpoint(Resource):
 
-    @api.marshal_with(cocktail_search_index)
+    @api.marshal_with(CocktailIndex)
     def get(self):
         """
         Get a simplified list of all cocktails from cache.

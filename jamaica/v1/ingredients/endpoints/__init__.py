@@ -2,7 +2,7 @@ import json
 from flask import request
 from flask_restx import Resource
 from jamaica.v1.restx import api
-from jamaica.v1.ingredients.serializers import ingredient_list_result, ingredient_search_index, ingredient_substitution, ingredient_result
+from jamaica.v1.ingredients.serializers import IngredientIndexItem, IngredientObject, IngredientSearchItem, IngredientSubstitution
 from jamaica.v1.ingredients.parsers import ingredient_list_parser
 
 from barbados.search.ingredient import IngredientSearch
@@ -15,10 +15,10 @@ ns = api.namespace('v1/ingredients', description='Ingredients.')
 
 
 @ns.route('/')
-class IngredientCollection(Resource):
+class IngredientsEndpoint(Resource):
 
     @api.expect(ingredient_list_parser, validate=True) # @TODO validate doesnt work.
-    @api.marshal_list_with(ingredient_list_result)
+    @api.marshal_list_with(IngredientSearchItem)
     def get(self):
         """
         Lookup ingredients in search.
@@ -28,9 +28,9 @@ class IngredientCollection(Resource):
 
 
 @ns.route('/index')
-class IngredientIndexItem(Resource):
+class IngredientIndexEndpoint(Resource):
 
-    @api.marshal_list_with(ingredient_search_index)
+    @api.marshal_list_with(IngredientIndexItem)
     def get(self):
         """
         Simplified list of ingredients from cache rather than search.
@@ -39,7 +39,7 @@ class IngredientIndexItem(Resource):
 
 
 @ns.route('/tree')
-class IngredientTreeItem(Resource):
+class IngredientTreeEndpoint(Resource):
 
     # @TODO Nothing here works. Recursion with models is really lacking...
     # @api.marshal_with(ingredient_tree_model)
@@ -55,9 +55,9 @@ class IngredientTreeItem(Resource):
 @ns.route('/<string:slug>')
 @api.response(404, 'Ingredient slug not in database.')
 @api.doc(params={'slug': 'An ingredient slug.'})
-class IngredientItem(Resource):
+class IngredientEndpoint(Resource):
 
-    @api.marshal_with(ingredient_result)
+    @api.marshal_with(IngredientObject)
     def get(self, slug):
         """
         Get a single ingredient from the database.
@@ -74,7 +74,7 @@ class IngredientItem(Resource):
 
 @ns.route('/<string:slug>/subtree')
 @api.response(404, 'Ingredient slug not in database.')
-class IngredientSubtreeItem(Resource):
+class IngredientSubtreeEndpoint(Resource):
 
     # @TODO when you figure out recursive tree modeling, call here.
     def get(self, slug):
@@ -90,32 +90,11 @@ class IngredientSubtreeItem(Resource):
             ns.abort(404, 'Ingredient not found.', slug=slug)
 
 
-@ns.route('/<string:slug>/parents')
+@ns.route('/<string:slug>/substitution')
 @api.response(404, 'Ingredient slug not in database.')
-class IngredientParentItem(Resource):
+class IngredientSubstitutionEndpoint(Resource):
 
-    def get(self, slug):
-        """
-        @TODO DEPRECATE THIS SHIT
-        Get a list of the slugs of every parent of this ingredient. These go all the way
-        to the root of the tree.
-        :param slug:
-        :return: List of Strings
-        """
-        try:
-            ingredient_tree = IngredientTreeCache.retrieve()
-            parents = ingredient_tree.parents(slug)
-
-            return parents
-        except KeyError:
-            ns.abort(404, 'Ingredient not found.', slug=slug)
-
-
-@ns.route('/<string:slug>/substitutions')
-@api.response(404, 'Ingredient slug not in database.')
-class IngredientSubstitutionsItem(Resource):
-
-    @api.marshal_with(ingredient_substitution)
+    @api.marshal_with(IngredientSubstitution)
     def get(self, slug):
         """
         Return relevant information needed to substitute this ingredient.
