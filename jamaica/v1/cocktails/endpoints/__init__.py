@@ -17,6 +17,9 @@ ns = api.namespace('v1/cocktails', description='Cocktail recipes.')
 @ns.route('/')
 class CocktailsEndpoint(Resource):
 
+    # Amazingly it took finding this post to figure out how
+    # this is supposed to work.
+    # https://stackoverflow.com/questions/41227736/flask-something-more-strict-than-api-expect-for-input-data
     @api.expect(cocktail_list_parser, validate=True)
     @api.marshal_list_with(CocktailSearchItem)
     def get(self):
