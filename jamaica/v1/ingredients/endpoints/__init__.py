@@ -1,5 +1,4 @@
 import json
-from flask import request
 from flask_restx import Resource
 from jamaica.v1.restx import api
 from jamaica.v1.ingredients.serializers import IngredientIndexItem, IngredientObject, IngredientSearchItem, IngredientSubstitution
@@ -17,14 +16,15 @@ ns = api.namespace('v1/ingredients', description='Ingredients.')
 @ns.route('/')
 class IngredientsEndpoint(Resource):
 
-    @api.expect(ingredient_list_parser, validate=True) # @TODO validate doesnt work.
+    @api.expect(ingredient_list_parser, validate=True)
     @api.marshal_list_with(IngredientSearchItem)
     def get(self):
         """
         Lookup ingredients in search.
         :return: List of search result Dicts
         """
-        return IngredientSearch(**request.args).execute()
+        args = ingredient_list_parser.parse_args(strict=True)
+        return IngredientSearch(**args).execute()
 
 
 @ns.route('/index')

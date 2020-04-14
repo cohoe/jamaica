@@ -1,5 +1,4 @@
 import json
-from flask import request
 from flask_restx import Resource
 from jamaica.v1.restx import api
 from jamaica.v1.cocktails.serializers import CocktailIndex, CocktailSearchItem
@@ -18,14 +17,15 @@ ns = api.namespace('v1/cocktails', description='Cocktail recipes.')
 @ns.route('/')
 class CocktailsEndpoint(Resource):
 
-    @api.expect(cocktail_list_parser, validate=True) # @TODO validate doesnt work.
+    @api.expect(cocktail_list_parser, validate=True)
     @api.marshal_list_with(CocktailSearchItem)
     def get(self):
         """
         Get a simplified view of cocktails from search.
         :return: List of SearchResult Dicts
         """
-        return CocktailSearch(**request.args).execute()
+        args = cocktail_list_parser.parse_args(strict=True)
+        return CocktailSearch(**args).execute()
 
 
 @ns.route('/<string:slug>')
