@@ -1,6 +1,0 @@
-Flask
-# Flask-API
-# flask_caching
-sqlalchemy
-flask-restx
-# Werkzeug==0.16.1 # https://github.com/noirbizarre/flask-restplus/issues/777
