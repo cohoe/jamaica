@@ -1,4 +1,5 @@
 import json
+# from flask import request
 from flask_restx import Resource
 from jamaica.v1.restx import api
 from jamaica.v1.cocktails.serializers import CocktailIndex, CocktailSearchItem, CocktailItem
@@ -31,8 +32,11 @@ class CocktailsEndpoint(Resource):
         return CocktailSearch(**args).execute()
 
     @api.expect(CocktailItem, validate=True)
+    @api.marshal_list_with(CocktailItem)
     def post(self):
-        pass
+        # print(api.payload)
+        c = CocktailFactory.raw_to_obj(api.payload, api.payload.get('slug'))
+        return ObjectSerializer.serialize(c, 'dict')
 
 
 @ns.route('/<string:slug>')
