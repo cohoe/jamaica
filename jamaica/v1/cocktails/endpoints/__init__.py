@@ -1,7 +1,7 @@
 import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
-from jamaica.v1.cocktails.serializers import CocktailIndex, CocktailSearchItem
+from jamaica.v1.cocktails.serializers import CocktailIndex, CocktailSearchItem, CocktailItem
 from jamaica.v1.cocktails.parsers import cocktail_list_parser
 
 
@@ -30,11 +30,16 @@ class CocktailsEndpoint(Resource):
         args = cocktail_list_parser.parse_args(strict=True)
         return CocktailSearch(**args).execute()
 
+    @api.expect(CocktailItem)
+    def post(self):
+        pass
+
 
 @ns.route('/<string:slug>')
 @api.response(404, 'Cocktail slug not in database.')
 class CocktailEndpoint(Resource):
 
+    @api.marshal_with(CocktailItem)
     def get(self, slug):
         """
         Get a single cocktail from the database.
