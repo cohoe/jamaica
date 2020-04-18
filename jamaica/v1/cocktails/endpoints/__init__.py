@@ -30,7 +30,7 @@ class CocktailsEndpoint(Resource):
         args = cocktail_list_parser.parse_args(strict=True)
         return CocktailSearch(**args).execute()
 
-    @api.expect(CocktailItem)
+    @api.expect(CocktailItem, validate=True)
     def post(self):
         pass
 
