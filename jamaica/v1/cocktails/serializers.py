@@ -77,7 +77,7 @@ GarnishItem = api.model('GarnishItem', {
     'slug': fields.String(description='Slug of the garnish.', example='lime-wedge'),
     'display_name': fields.String(description='The stylized name of the garnish.', example='Lime Wedge'),
     'quantity': fields.Float(description='Quantity of the ingredient in the specified unit which is described in another field. Can be omitted in certain cases such as a rinse.', example=1.5),
-    'notes': fields.List(fields.String(), description='Deprecate this, and also use proper notes expression.')
+    'notes': fields.List(fields.Nested(TextItem), description='Notes on the garnish.')
 })
 
 GlasswareItem = api.model('GlasswareItem', {
