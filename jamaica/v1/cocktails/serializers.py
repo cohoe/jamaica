@@ -8,6 +8,7 @@ CocktailSearchItem = api.model('CocktailSearchItem', {
     'cocktail_display_name': fields.String(attribute='hit.display_name', description='Cocktail display name'),
     'spec_slug': fields.String(attribute='hit.spec.slug', description='Spec slug'),
     'spec_display_name': fields.String(attribute='hit.spec.display_name', description='Spec display name'),
+    'construction_slug': fields.String(attribute='hit.spec.construction.slug', description='Construction slug'),
     'component_display_names': fields.List(fields.String(attribute='display_name'), attribute='hit.spec.components', description='Display names of components in this spec', example=['rum', 'sherry', 'vermouth']),
 })
 
