@@ -91,11 +91,11 @@ ConstructionItem = api.model('ConstructionItem', {
     'display_name': fields.String(description='The stylized name of the construction.', example='Stir'),
 })
 
-ComponentCountsItem = api.model('ComponentCountsItem', {
-    'all': fields.Integer(description='All components.'),
-    'primary': fields.Integer(description='Primary (aka not bitters, etc).'),
-    'garnish': fields.Integer(description='Garnishes'),
-})
+# ComponentCountsItem = api.model('ComponentCountsItem', {
+#     'all': fields.Integer(description='All components.'),
+#     'primary': fields.Integer(description='Primary (aka not bitters, etc).'),
+#     'garnish': fields.Integer(description='Garnishes'),
+# })
 
 SpecItem = api.model('SpecItem', {
     'slug': fields.String(description='Identifier slug of this spec.', example='death-co'),
@@ -104,7 +104,7 @@ SpecItem = api.model('SpecItem', {
     'glassware': fields.List(fields.Nested(GlasswareItem), description='Type of glass that should be used.'),
     'construction': fields.Nested(ConstructionItem, description='Construction method of the spec.'),
     'components': fields.List(fields.Nested(SpecComponentItem), description='Components of the recipe.'),
-    'component_counts': fields.Nested(ComponentCountsItem, description='Count of various components'),
+    # 'component_counts': fields.Nested(ComponentCountsItem, description='Count of various components'),
     'garnish': fields.List(fields.Nested(GarnishItem), description='Garnish for the recipe.'),
     'straw': fields.Boolean(description='Should a straw be used with this spec.', example=False),
     'citations': fields.List(fields.Nested(CitationItem), description='Spec citations.'),
