@@ -117,7 +117,6 @@ SpecItem = api.model('SpecItem', {
 CocktailItem = api.model('CocktailItem', {
     'slug': fields.String(description='Identifier slug of this drink.', example='la-viaa'),
     'display_name': fields.String(description='The stylized name of a drink.', example='La Viáa'),
-    'status': fields.String(description='Deprecated', example='red'),
     'origin': fields.Nested(OriginItem, description='Origin of the drink (not necessarily the specific recipe).'),
     'specs': fields.List(fields.Nested(SpecItem), description='Recipes of this drink.'),
     'spec_count': fields.Integer(description='Convenience field of the number of specs associated with this drink.', example=1),
