@@ -53,32 +53,12 @@ CitationItem = api.model('CitationItem', {
     'issue': fields.String(description='Deprecated'),
 })
 
-# SpecComponentItem = api.model('SpecComponentItem', {
-#     'name': fields.String(description='Slugable name of the ingredient.', example='aged-rum'),
-#     'quantity': fields.Float(description='Quantity of the ingredient in the specified unit which is described in another field. Can be omitted in certain cases such as a rinse.', example=1.5),
-#     'unit': fields.String(description='Unit of measure for this component. Can be omitted in certain cases such as muddling while citrus.', example='oz'),
-# })
-
 SpecComponentItem = api.model('SpecComponentItem', {
     'slug': fields.String(description='Slug of the component.', example='aged-rum'),
     'display_name': fields.String(description='The stylized name of the component.', example='Aged Rum'),
     'quantity': fields.Float(description='Quantity of the ingredient in the specified unit which is described in another field. Can be omitted in certain cases such as a rinse.', example=1.5),
     'unit': fields.String(description='Unit of measure for this component. Can be omitted in certain cases such as muddling while citrus.', example='oz'),
-    # @TODO deprecate parents?
-    'parents': fields.List(fields.String(), description='List of parent slugs of this component.'),
-})
-
-# @TODO deprecate this
-# GarnishItem = api.model('GarnishItem', {
-#     'name': fields.String(description='Slugable name of the ingredient.', example='aged-rum'),
-#     'quantity': fields.Float(description='Quantity of the ingredient in the specified unit which is described in another field. Can be omitted in certain cases such as a rinse.', example=1.5),
-#     'notes': fields.List(fields.String(), description='Deprecate this, and also use proper notes expression.')
-# })
-GarnishItem = api.model('GarnishItem', {
-    'slug': fields.String(description='Slug of the garnish.', example='lime-wedge'),
-    'display_name': fields.String(description='The stylized name of the garnish.', example='Lime Wedge'),
-    'quantity': fields.Float(description='Quantity of the ingredient in the specified unit which is described in another field. Can be omitted in certain cases such as a rinse.', example=1.5),
-    'notes': fields.List(fields.Nested(TextItem), description='Notes on the garnish.')
+    'notes': fields.List(fields.Nested(TextItem), description='Notes on the component.')
 })
 
 GlasswareItem = api.model('GlasswareItem', {
@@ -105,7 +85,7 @@ SpecItem = api.model('SpecItem', {
     'construction': fields.Nested(ConstructionItem, description='Construction method of the spec.'),
     'components': fields.List(fields.Nested(SpecComponentItem), description='Components of the recipe.'),
     # 'component_counts': fields.Nested(ComponentCountsItem, description='Count of various components'),
-    'garnish': fields.List(fields.Nested(GarnishItem), description='Garnish for the recipe.'),
+    'garnish': fields.List(fields.Nested(SpecComponentItem), description='Garnish for the recipe.'),
     'straw': fields.Boolean(description='Should a straw be used with this spec.', example=False),
     'citations': fields.List(fields.Nested(CitationItem), description='Spec citations.'),
     'images': fields.List(fields.Nested(CocktailImageItem), description='Reference images of the spec.'),
