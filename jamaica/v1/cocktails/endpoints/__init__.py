@@ -4,6 +4,7 @@ from jamaica.v1.restx import api
 from jamaica.v1.cocktails.serializers import CocktailIndex, CocktailSearchItem, CocktailItem
 from jamaica.v1.cocktails.parsers import cocktail_list_parser
 from flask_sqlalchemy_session import current_session
+from sqlalchemy.exc import IntegrityError
 
 
 from barbados.search.cocktail import CocktailSearch
@@ -35,11 +36,15 @@ class CocktailsEndpoint(Resource):
     @api.marshal_list_with(CocktailItem)
     def post(self):
         # print(api.payload)
-        c = CocktailFactory.raw_to_obj(api.payload, api.payload.get('slug'))
-        db_obj = CocktailModel(**ObjectSerializer.serialize(c, 'dict'))
-        current_session.add(db_obj).commit()
-        current_session.commit()
-        return ObjectSerializer.serialize(c, 'dict')
+        try:
+            c = CocktailFactory.raw_to_obj(api.payload, api.payload.get('slug'))
+            db_obj = CocktailModel(**ObjectSerializer.serialize(c, 'dict'))
+            current_session.add(db_obj)
+            current_session.commit()
+            return ObjectSerializer.serialize(c, 'dict')
+        except IntegrityError as e:
+            print(e.detail)
+            ns.abort(400, e.orig.diag.message_detail, slug=api.payload.get('slug'))
 
 
 @ns.route('/<string:slug>')
