@@ -36,6 +36,8 @@ class CocktailsEndpoint(Resource):
     def post(self):
         # print(api.payload)
         c = CocktailFactory.raw_to_obj(api.payload, api.payload.get('slug'))
+        db_obj = CocktailModel(**ObjectSerializer.serialize(c, 'dict'))
+        db_obj.save()
         return ObjectSerializer.serialize(c, 'dict')
 
 
