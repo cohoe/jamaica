@@ -1,9 +1,9 @@
 import json
-# from flask import request
 from flask_restx import Resource
 from jamaica.v1.restx import api
 from jamaica.v1.cocktails.serializers import CocktailIndex, CocktailSearchItem, CocktailItem
 from jamaica.v1.cocktails.parsers import cocktail_list_parser
+from flask_sqlalchemy_session import current_session
 
 
 from barbados.search.cocktail import CocktailSearch
@@ -37,7 +37,8 @@ class CocktailsEndpoint(Resource):
         # print(api.payload)
         c = CocktailFactory.raw_to_obj(api.payload, api.payload.get('slug'))
         db_obj = CocktailModel(**ObjectSerializer.serialize(c, 'dict'))
-        db_obj.save()
+        current_session.add(db_obj).commit()
+        current_session.commit()
         return ObjectSerializer.serialize(c, 'dict')
 
 
@@ -53,11 +54,25 @@ class CocktailEndpoint(Resource):
         :return: Serialized Cocktail
         """
         try:
-            result = CocktailModel.get_by_slug(slug)
+            result = current_session.query(CocktailModel).get(slug)
             c = CocktailFactory.model_to_obj(result)
             return ObjectSerializer.serialize(c, 'dict')
         except KeyError:
             ns.abort(404, 'Cocktail not found.', slug=slug)
+
+    def delete(self, slug):
+        """
+        Delete a single cocktail from the database.
+        :param slug:
+        :return:
+        """
+        result = current_session.query(CocktailModel).get(slug)
+
+        if not result:
+            ns.abort(404, 'Cocktail not found.', slug=slug)
+
+        current_session.delete(result)
+        current_session.commit()
 
 
 @ns.route('/index')

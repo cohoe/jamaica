@@ -3,6 +3,7 @@ from flask_restx import Resource
 from jamaica.v1.restx import api
 from jamaica.v1.ingredients.serializers import IngredientIndexItem, IngredientObject, IngredientSearchItem, IngredientSubstitution
 from jamaica.v1.ingredients.parsers import ingredient_list_parser
+from flask_sqlalchemy_session import current_session
 
 from barbados.search.ingredient import IngredientSearch
 from barbados.caches import IngredientTreeCache, UsableIngredientCache
@@ -65,7 +66,7 @@ class IngredientEndpoint(Resource):
         :return: Serialized Ingredient
         """
         try:
-            result = IngredientModel.get_by_slug(slug)
+            result = current_session.query(IngredientModel).get(slug)
             c = IngredientFactory.model_to_obj(result)
             return ObjectSerializer.serialize(c, 'dict')
         except KeyError:

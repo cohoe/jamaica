@@ -7,5 +7,5 @@ setup(
     url='https://github.com/cohoe/jamaica',
     author='Grant Cohoe',
     packages=find_packages(),
-    install_requires=['flask-restx'],
+    install_requires=['flask-restx', 'flask-cors', 'flask_sqlalchemy_session'],
 )
