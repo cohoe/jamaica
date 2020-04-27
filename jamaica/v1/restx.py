@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 api = Api(version='0.0.1', title='Jamaica API')
 
 ErrorModel = api.model('ErrorModel', {
-    'message': fields.String(),
+    'message': fields.String(example="It's the wrong trousers! They've gone wrong!"),
 })
 
 

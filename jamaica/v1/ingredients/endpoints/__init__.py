@@ -28,6 +28,22 @@ class IngredientsEndpoint(Resource):
         args = ingredient_list_parser.parse_args(strict=True)
         return IngredientSearch(**args).execute()
 
+    # @TODO go the frak to sleep
+    # @api.response(200, 'success')
+    # @api.expect(IngredientItem, validate=True)
+    # @api.marshal_list_with(IngredientItem)
+    # def post(self):
+    #     """
+    #     Create a new cocktail.
+    #     :return: Serialized Cocktail object.
+    #     :raises IntegrityError:
+    #     """
+    #     c = IngredientFactory.raw_to_obj(api.payload, api.payload.get('slug'))
+    #     db_obj = CocktailModel(**ObjectSerializer.serialize(c, 'dict'))
+    #     current_session.add(db_obj)
+    #     current_session.commit()
+    #     return ObjectSerializer.serialize(c, 'dict')
+
 
 @ns.route('/index')
 class IngredientIndexEndpoint(Resource):
@@ -72,6 +88,22 @@ class IngredientEndpoint(Resource):
         result = current_session.query(IngredientModel).get(slug)
         c = IngredientFactory.model_to_obj(result)
         return ObjectSerializer.serialize(c, 'dict')
+
+    @api.response(204, 'successful delete')
+    def delete(self, slug):
+        """
+        Delete a single ingredient from the database.
+        :param slug:
+        :return:
+        :raises KeyError:
+        """
+        result = current_session.query(IngredientModel).get(slug)
+
+        if not result:
+            raise KeyError('Not found')
+
+        current_session.delete(result)
+        current_session.commit()
 
 
 @ns.route('/<string:slug>/subtree')
