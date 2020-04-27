@@ -17,6 +17,7 @@ ns = api.namespace('v1/ingredients', description='Ingredients.')
 @ns.route('/')
 class IngredientsEndpoint(Resource):
 
+    @api.response(200, 'success')
     @api.expect(ingredient_list_parser, validate=True)
     @api.marshal_list_with(IngredientSearchItem)
     def get(self):
@@ -31,6 +32,7 @@ class IngredientsEndpoint(Resource):
 @ns.route('/index')
 class IngredientIndexEndpoint(Resource):
 
+    @api.response(200, 'success')
     @api.marshal_list_with(IngredientIndexItem)
     def get(self):
         """
@@ -42,6 +44,7 @@ class IngredientIndexEndpoint(Resource):
 @ns.route('/tree')
 class IngredientTreeEndpoint(Resource):
 
+    @api.response(200, 'success')
     # @TODO Nothing here works. Recursion with models is really lacking...
     # @api.marshal_with(ingredient_tree_model)
     def get(self):
@@ -54,56 +57,50 @@ class IngredientTreeEndpoint(Resource):
 
 
 @ns.route('/<string:slug>')
-@api.response(404, 'Ingredient slug not in database.')
 @api.doc(params={'slug': 'An ingredient slug.'})
 class IngredientEndpoint(Resource):
 
+    @api.response(200, 'success')
     @api.marshal_with(IngredientObject)
     def get(self, slug):
         """
         Get a single ingredient from the database.
         :param slug:
         :return: Serialized Ingredient
+        :raises KeyError: not found
         """
-        try:
-            result = current_session.query(IngredientModel).get(slug)
-            c = IngredientFactory.model_to_obj(result)
-            return ObjectSerializer.serialize(c, 'dict')
-        except KeyError:
-            ns.abort(404, 'Ingredient not found.', slug=slug)
+        result = current_session.query(IngredientModel).get(slug)
+        c = IngredientFactory.model_to_obj(result)
+        return ObjectSerializer.serialize(c, 'dict')
 
 
 @ns.route('/<string:slug>/subtree')
-@api.response(404, 'Ingredient slug not in database.')
 class IngredientSubtreeEndpoint(Resource):
 
     # @TODO when you figure out recursive tree modeling, call here.
+    @api.response(200, 'success')
     def get(self, slug):
         """
         Return the subtree of this ingredient from the main tree.
         :param slug:
         :return: Dict
+        :raises KeyError: not found
         """
-        try:
-            ingredient_tree = IngredientTreeCache.retrieve()
-            return json.loads(ingredient_tree.subtree(slug).to_json(with_data=True))
-        except KeyError:
-            ns.abort(404, 'Ingredient not found.', slug=slug)
+        ingredient_tree = IngredientTreeCache.retrieve()
+        return json.loads(ingredient_tree.subtree(slug).to_json(with_data=True))
 
 
 @ns.route('/<string:slug>/substitution')
-@api.response(404, 'Ingredient slug not in database.')
 class IngredientSubstitutionEndpoint(Resource):
 
+    @api.response(200, 'success')
     @api.marshal_with(IngredientSubstitution)
     def get(self, slug):
         """
         Return relevant information needed to substitute this ingredient.
         :param slug:
         :return: Dict
+        :raises KeyError: not found
         """
-        try:
-            ingredient_tree = IngredientTreeCache.retrieve()
-            return ingredient_tree.substitutions(slug)
-        except KeyError:
-            ns.abort(404, 'Ingredient not found.', slug=slug)
+        ingredient_tree = IngredientTreeCache.retrieve()
+        return ingredient_tree.substitutions(slug)

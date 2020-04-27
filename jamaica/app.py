@@ -19,6 +19,8 @@ def configure_app(flask_app):
     flask_app.config['RESTPLUS_MASK_SWAGGER'] = settings.RESTPLUS_MASK_SWAGGER
     flask_app.config['ERROR_404_HELP'] = settings.RESTPLUS_ERROR_404_HELP
     flask_app.config['RESTPLUS_MASK_HEADER'] = settings.RESTPLUS_MASK_HEADER
+    # https://github.com/python-restx/flask-restx/issues/27
+    flask_app.config["PROPAGATE_EXCEPTIONS"] = False
 
 
 def initialize_app(flask_app):
