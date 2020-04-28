@@ -6,7 +6,7 @@ from jamaica.v1.cocktails.parsers import cocktail_list_parser
 from flask_sqlalchemy_session import current_session
 
 from barbados.search.cocktail import CocktailSearch
-from barbados.caches import CocktailNameCache
+from barbados.caches import CocktailScanCache
 from barbados.models import CocktailModel
 from barbados.factories import CocktailFactory
 from barbados.serializers import ObjectSerializer
@@ -17,20 +17,11 @@ ns = api.namespace('v1/cocktails', description='Cocktail recipes.')
 @ns.route('/')
 class CocktailsEndpoint(Resource):
 
-    # Amazingly it took finding this post to figure out how
-    # this is supposed to work.
-    # https://stackoverflow.com/questions/41227736/flask-something-more-strict-than-api-expect-for-input-data
     @api.response(200, 'success')
-    @api.expect(cocktail_list_parser, validate=True)
-    @api.marshal_list_with(CocktailSearchItem)
+    @api.marshal_list_with(CocktailItem)
     def get(self):
-        """
-        Get a simplified view of cocktails from search.
-        :return: List of SearchResult Dicts
-        :raises KeyError:
-        """
-        args = cocktail_list_parser.parse_args(strict=True)
-        return CocktailSearch(**args).execute()
+        serialized_cocktails = json.loads(CocktailScanCache.retrieve())
+        return serialized_cocktails
 
     @api.response(200, 'success')
     @api.expect(CocktailItem, validate=True)
@@ -46,6 +37,31 @@ class CocktailsEndpoint(Resource):
         current_session.add(db_obj)
         current_session.commit()
         return ObjectSerializer.serialize(c, 'dict')
+
+
+@ns.route('/search')
+class CocktailSearchEndpoint(Resource):
+    # Amazingly it took finding this post to figure out how
+    # this is supposed to work.
+    # https://stackoverflow.com/questions/41227736/flask-something-more-strict-than-api-expect-for-input-data
+    @api.response(200, 'success')
+    @api.expect(cocktail_list_parser, validate=True)
+    @api.marshal_list_with(CocktailSearchItem)
+    def get(self):
+        """
+        Get a simplified view of cocktails from search. No search parameters means
+        empty list for you.
+        :return: List of SearchResult Dicts
+        :raises KeyError:
+        """
+        args = cocktail_list_parser.parse_args(strict=True)
+
+        # Don't return any results if all parameters are empty.
+        # https://stackoverflow.com/questions/35253971/how-to-check-if-all-values-of-a-dictionary-are-0
+        if all(value is None for value in args.values()):
+            return []
+
+        return CocktailSearch(**args).execute()
 
 
 @ns.route('/<string:slug>')
@@ -84,16 +100,3 @@ class CocktailEndpoint(Resource):
 
         current_session.delete(result)
         current_session.commit()
-
-
-@ns.route('/index')
-class CocktailIndexEndpoint(Resource):
-
-    @api.response(200, 'success')
-    @api.marshal_with(CocktailIndex)
-    def get(self):
-        """
-        Get a simplified list of all cocktails from cache.
-        :return: List
-        """
-        return json.loads(CocktailNameCache.retrieve())
