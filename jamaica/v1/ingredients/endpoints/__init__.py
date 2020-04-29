@@ -11,7 +11,7 @@ from barbados.models import IngredientModel
 from barbados.factories import IngredientFactory
 from barbados.serializers import ObjectSerializer
 
-ns = api.namespace('v1/ingredients', description='Ingredients.')
+ns = api.namespace('v1/ingredients', description='Ingredient database.')
 
 
 @ns.route('/')
@@ -27,7 +27,6 @@ class IngredientsEndpoint(Resource):
         serialized_ingredients = json.loads(IngredientScanCache.retrieve())
         return serialized_ingredients
 
-    # @TODO go the frak to sleep
     @api.response(200, 'success')
     @api.expect([IngredientObject], validate=True)
     @api.marshal_list_with(IngredientObject)
