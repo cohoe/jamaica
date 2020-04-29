@@ -1,7 +1,7 @@
 import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
-from jamaica.v1.cocktails.serializers import CocktailIndex, CocktailSearchItem, CocktailItem
+from jamaica.v1.cocktails.serializers import CocktailSearchItem, CocktailItem
 from jamaica.v1.cocktails.parsers import cocktail_list_parser
 from flask_sqlalchemy_session import current_session
 
@@ -20,6 +20,10 @@ class CocktailsEndpoint(Resource):
     @api.response(200, 'success')
     @api.marshal_list_with(CocktailItem)
     def get(self):
+        """
+        Return a list of all fully-detailed cocktail objects
+        :return: List[Dict]
+        """
         serialized_cocktails = json.loads(CocktailScanCache.retrieve())
         return serialized_cocktails
 
@@ -36,6 +40,7 @@ class CocktailsEndpoint(Resource):
         db_obj = CocktailModel(**ObjectSerializer.serialize(c, 'dict'))
         current_session.add(db_obj)
         current_session.commit()
+        CocktailScanCache.invalidate()
         return ObjectSerializer.serialize(c, 'dict')
 
 

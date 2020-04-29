@@ -12,18 +12,6 @@ CocktailSearchItem = api.model('CocktailSearchItem', {
     'component_display_names': fields.List(fields.String(attribute='display_name'), attribute='hit.spec.components', description='Display names of components in this spec', example=['rum', 'sherry', 'vermouth']),
 })
 
-
-CocktailIndexItem = api.model('CocktailIndexItem', {
-    'slug': fields.String(attribute='slug', description='Cocktail slug.', example='rum-and-coke'),
-    'display_name': fields.String(attribute='display_name', description='Cocktail display name.', example='Rum & Coke'),
-})
-
-CocktailIndex = api.model('CocktailIndex', {
-    # The API docs will be wrong, but this works.
-    # https://github.com/python-restx/flask-restx/issues/57
-    '*': fields.Wildcard(fields.List(fields.Nested(CocktailIndexItem)), description='Starting character.', example=[{'slug': 'thing', 'display_name': 'Thing'}])
-})
-
 OriginItem = api.model('OriginItem', {
     'creator': fields.String(description='Stylized name of the person who created this.', example='Sother Teague'),
     'venue': fields.String(description='Stylized name of the bar or other establishment where this object was created', example='Death & Co'),

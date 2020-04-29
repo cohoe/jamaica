@@ -1,12 +1,12 @@
 import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
-from jamaica.v1.ingredients.serializers import IngredientIndexItem, IngredientObject, IngredientSearchItem, IngredientSubstitution
+from jamaica.v1.ingredients.serializers import IngredientObject, IngredientSearchItem, IngredientSubstitution
 from jamaica.v1.ingredients.parsers import ingredient_list_parser
 from flask_sqlalchemy_session import current_session
 
 from barbados.search.ingredient import IngredientSearch
-from barbados.caches import IngredientTreeCache, UsableIngredientCache
+from barbados.caches import IngredientTreeCache, IngredientScanCache
 from barbados.models import IngredientModel
 from barbados.factories import IngredientFactory
 from barbados.serializers import ObjectSerializer
@@ -16,6 +16,41 @@ ns = api.namespace('v1/ingredients', description='Ingredients.')
 
 @ns.route('/')
 class IngredientsEndpoint(Resource):
+
+    @api.response(200, 'success')
+    @api.marshal_list_with(IngredientObject)
+    def get(self):
+        """
+        List all ingredients
+        :return: List of Ingredient dicts
+        """
+        serialized_ingredients = json.loads(IngredientScanCache.retrieve())
+        return serialized_ingredients
+
+    # @TODO go the frak to sleep
+    @api.response(200, 'success')
+    @api.expect([IngredientObject], validate=True)
+    @api.marshal_list_with(IngredientObject)
+    def post(self):
+        """
+        Create a new set of ingredients.
+        :return: List of the ingredients you created.
+        :raises IntegrityError:
+        """
+        serialized_objects = []
+        for raw_ingredient in api.payload:
+            i = IngredientFactory.raw_to_obj(raw_ingredient)
+            ser_i = ObjectSerializer.serialize(i, 'dict')
+            serialized_objects.append(ser_i)
+            current_session.add(IngredientModel(**ser_i))
+
+        current_session.commit()
+        IngredientScanCache.invalidate()
+        return serialized_objects
+
+
+@ns.route('/search')
+class IngredientSearchEndpoint(Resource):
 
     @api.response(200, 'success')
     @api.expect(ingredient_list_parser, validate=True)
@@ -28,44 +63,15 @@ class IngredientsEndpoint(Resource):
         args = ingredient_list_parser.parse_args(strict=True)
         return IngredientSearch(**args).execute()
 
-    # @TODO go the frak to sleep
-    # @api.response(200, 'success')
-    # @api.expect(IngredientItem, validate=True)
-    # @api.marshal_list_with(IngredientItem)
-    # def post(self):
-    #     """
-    #     Create a new cocktail.
-    #     :return: Serialized Cocktail object.
-    #     :raises IntegrityError:
-    #     """
-    #     c = IngredientFactory.raw_to_obj(api.payload, api.payload.get('slug'))
-    #     db_obj = CocktailModel(**ObjectSerializer.serialize(c, 'dict'))
-    #     current_session.add(db_obj)
-    #     current_session.commit()
-    #     return ObjectSerializer.serialize(c, 'dict')
-
-
-@ns.route('/index')
-class IngredientIndexEndpoint(Resource):
-
-    @api.response(200, 'success')
-    @api.marshal_list_with(IngredientIndexItem)
-    def get(self):
-        """
-        Simplified list of ingredients from cache rather than search.
-        """
-        return json.loads(UsableIngredientCache.retrieve())
-
 
 @ns.route('/tree')
 class IngredientTreeEndpoint(Resource):
 
     @api.response(200, 'success')
-    # @TODO Nothing here works. Recursion with models is really lacking...
-    # @api.marshal_with(ingredient_tree_model)
     def get(self):
         """
-        Get the entire ingredient tree from cache.
+        Get the entire ingredient tree from cache. No marshaling model
+        is documented due to recursion problems.
         :return: Dict
         """
         ingredient_tree = IngredientTreeCache.retrieve()
@@ -109,11 +115,11 @@ class IngredientEndpoint(Resource):
 @ns.route('/<string:slug>/subtree')
 class IngredientSubtreeEndpoint(Resource):
 
-    # @TODO when you figure out recursive tree modeling, call here.
     @api.response(200, 'success')
     def get(self, slug):
         """
         Return the subtree of this ingredient from the main tree.
+        No api.marshal_with() due to recursion.
         :param slug:
         :return: Dict
         :raises KeyError: not found

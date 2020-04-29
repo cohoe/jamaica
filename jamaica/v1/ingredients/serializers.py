@@ -13,12 +13,6 @@ IngredientSearchItem = api.model('IngredientSearchItem', {
     'elements': fields.List(fields.String(), attribute='hit.elements', description='Slug elements for this item (only if it is of kind IndexKind.'),
 })
 
-IngredientIndexItem = api.model('IngredientIndexItem', {
-    'slug': fields.String(attribute='slug', description='This items slug.'),
-    'display_name': fields.String(attribute='display_name', description='This items display name.'),
-    'aliases': fields.List(fields.String(), attribute='aliases', description='Display Name aliases for this item.'),
-})
-
 IngredientSubstitution = api.model('IngredientSubstitution', {
     'self': fields.String(attribute='self', description='The slug that you asked about.'),
     'parent': fields.String(attribute='parent', description='The parent slug of this ingredient.'),
