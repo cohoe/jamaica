@@ -1,9 +1,9 @@
 from flask_restx import fields
 from jamaica.v1.restx import api
+from jamaica.v1.serializers import DisplayItemBase, SearchResultBase, TextItem
 
-CocktailSearchItem = api.model('CocktailSearchItem', {
-    # 'id': fields.String(attribute='id', readOnly=True, description='ElasticSearch Document ID'),
-    'score': fields.Float(attribute='score', readOnly=True, description='Search result score.'),
+
+CocktailSearchItem = api.inherit('CocktailSearchItem', SearchResultBase, {
     'cocktail_slug': fields.String(attribute='hit.slug', description='Cocktail slug'),
     'cocktail_display_name': fields.String(attribute='hit.display_name', description='Cocktail display name'),
     'spec_slug': fields.String(attribute='hit.spec.slug', description='Spec slug'),
@@ -19,10 +19,6 @@ OriginItem = api.model('OriginItem', {
     'year': fields.Integer(description='The year that the drink was created. If a specific year is unknown, see "era".', example=2020),
     'era': fields.String(description='The era that the drink was created. Only to be used if year is not specific enough.', example='1840s'),
     'story': fields.String(description='A tale of the creation or evolution of this drink.', example='A long long time ago, in a galaxy far away, Naboo was under an attack.'),
-})
-
-TextItem = api.model('TextItem', {
-    'text': fields.String(description='String of text.', example='The quick brown cat jumped over the energetic raccoon.')
 })
 
 CocktailImageItem = api.model('CocktailImageItem', {
@@ -41,38 +37,21 @@ CitationItem = api.model('CitationItem', {
     'issue': fields.String(description='Deprecated'),
 })
 
-SpecComponentItem = api.model('SpecComponentItem', {
-    'slug': fields.String(description='Slug of the component.', example='aged-rum'),
-    'display_name': fields.String(description='The stylized name of the component.', example='Aged Rum'),
+SpecComponentItem = api.inherit('SpecComponentItem', DisplayItemBase, {
     'quantity': fields.Float(description='Quantity of the ingredient in the specified unit which is described in another field. Can be omitted in certain cases such as a rinse.', example=1.5),
     'unit': fields.String(description='Unit of measure for this component. Can be omitted in certain cases such as muddling while citrus.', example='oz'),
     'notes': fields.List(fields.Nested(TextItem), description='Notes on the component.')
 })
 
-GlasswareItem = api.model('GlasswareItem', {
-    'slug': fields.String(description='Slug of the glassware.', example='old-fashioned'),
-    'display_name': fields.String(description='The stylized name of the glassware.', example='Old Fashioned'),
-})
+GlasswareItem = api.inherit('GlasswareItem', DisplayItemBase, {})
 
-ConstructionItem = api.model('ConstructionItem', {
-    'slug': fields.String(description='Slug of the construction.', example='stir'),
-    'display_name': fields.String(description='The stylized name of the construction.', example='Stir'),
-})
+ConstructionItem = api.inherit('ConstructionItem', DisplayItemBase, {})
 
-# ComponentCountsItem = api.model('ComponentCountsItem', {
-#     'all': fields.Integer(description='All components.'),
-#     'primary': fields.Integer(description='Primary (aka not bitters, etc).'),
-#     'garnish': fields.Integer(description='Garnishes'),
-# })
-
-SpecItem = api.model('SpecItem', {
-    'slug': fields.String(description='Identifier slug of this spec.', example='death-co'),
-    'display_name': fields.String(description='The stylized name of this spec.', example='Death & Co'),
+SpecItem = api.inherit('SpecItem', DisplayItemBase, {
     'origin': fields.Nested(OriginItem, description='Origin of the spec.'),
     'glassware': fields.List(fields.Nested(GlasswareItem), description='Type of glass that should be used.'),
     'construction': fields.Nested(ConstructionItem, description='Construction method of the spec.'),
     'components': fields.List(fields.Nested(SpecComponentItem), description='Components of the recipe.'),
-    # 'component_counts': fields.Nested(ComponentCountsItem, description='Count of various components'),
     'garnish': fields.List(fields.Nested(SpecComponentItem), description='Garnish for the recipe.'),
     'straw': fields.Boolean(description='Should a straw be used with this spec.', example=False),
     'citations': fields.List(fields.Nested(CitationItem), description='Spec citations.'),
@@ -81,13 +60,10 @@ SpecItem = api.model('SpecItem', {
     'instructions': fields.List(fields.Nested(TextItem), description='Instructions.'),
 })
 
-# @TODO this only works on the way out, not the way in. Need to remove some fields for that.
-CocktailItem = api.model('CocktailItem', {
-    'slug': fields.String(description='Identifier slug of this drink.', example='la-viaa'),
-    'display_name': fields.String(description='The stylized name of a drink.', example='La Viáa'),
+# I'm dropping spec_count in the input/output. Lets see if this actually becomes needed.
+CocktailItem = api.inherit('CocktailItem', DisplayItemBase, {
     'origin': fields.Nested(OriginItem, description='Origin of the drink (not necessarily the specific recipe).'),
     'specs': fields.List(fields.Nested(SpecItem), description='Recipes of this drink.'),
-    'spec_count': fields.Integer(description='Convenience field of the number of specs associated with this drink.', example=1),
     'citations': fields.List(fields.Nested(CitationItem), description='Drink citations.'),
     'notes': fields.List(fields.Nested(TextItem), description='Global notes on the drink.'),
     'images': fields.List(fields.Nested(CocktailImageItem), description='Reference images of the drink.'),
