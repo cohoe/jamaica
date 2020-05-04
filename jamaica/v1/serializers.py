@@ -12,5 +12,7 @@ SearchResultBase = api.model('SearchResultBase', {
 })
 
 TextItem = api.model('TextItem', {
-    'text': fields.String(description='String of text.', example='The quick brown cat jumped over the energetic raccoon.')
+    'text': fields.String(description='String of text.', example='The quick brown cat jumped over the energetic raccoon.'),
+    'author': fields.String(description='Author of this text.', example='root'),
+    'datetime': fields.String(description='UTC timestamp (datetime.datetime.isoformat())', example='2020-05-04T02:36:11.368253')
 })
