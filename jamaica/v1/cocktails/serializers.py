@@ -22,13 +22,13 @@ OriginItem = api.model('OriginItem', {
 })
 
 CocktailImageItem = api.model('CocktailImageItem', {
-    'text': fields.String(description='Description of the image. Required for ADA.', example='Boy with apple.'),
-    'href': fields.String(description='URI of the image.', example='https://example.com/booze.png'),
-    'credit': fields.String(description='Photographer or other image credit.', example='Michelle Jay')
+    'text': fields.String(description='Description of the image.', example='Boy with apple.', required=True),
+    'href': fields.String(description='URI of the image.', example='https://example.com/booze.png', required=True),
+    'credit': fields.String(description='Photographer or other image credit.', example='Michelle Jay', required=True)
 })
 
 CitationItem = api.model('CitationItem', {
-    'title': fields.String(description='Title of the citation.', example='Death & Co: Modern Classic Cocktails'),
+    'title': fields.String(description='Title of the citation.', example='Death & Co: Modern Classic Cocktails', required=True),
     'author': fields.List(fields.String(), description='Author of the work being cited', example=['Jillian Vose', 'Ivy Mix']),
     'date': fields.String(description='Date that the citation was published. If the exact day cannot be determined but the month can, use the first day of the month. This affects mostly old works.', example='1812-05-01'),
     'publisher': fields.String(description='Publisher of the citation.', example='Ten Speed Press'),
@@ -51,7 +51,7 @@ SpecItem = api.inherit('SpecItem', DisplayItemBase, {
     'origin': fields.Nested(OriginItem, description='Origin of the spec.'),
     'glassware': fields.List(fields.Nested(GlasswareItem), description='Type of glass that should be used.'),
     'construction': fields.Nested(ConstructionItem, description='Construction method of the spec.'),
-    'components': fields.List(fields.Nested(SpecComponentItem), description='Components of the recipe.'),
+    'components': fields.List(fields.Nested(SpecComponentItem), description='Components of the recipe.', required=True),
     'garnish': fields.List(fields.Nested(SpecComponentItem), description='Garnish for the recipe.'),
     'straw': fields.Boolean(description='Should a straw be used with this spec.', example=False),
     'citations': fields.List(fields.Nested(CitationItem), description='Spec citations.'),
@@ -63,7 +63,7 @@ SpecItem = api.inherit('SpecItem', DisplayItemBase, {
 # I'm dropping spec_count in the input/output. Lets see if this actually becomes needed.
 CocktailItem = api.inherit('CocktailItem', DisplayItemBase, {
     'origin': fields.Nested(OriginItem, description='Origin of the drink (not necessarily the specific recipe).'),
-    'specs': fields.List(fields.Nested(SpecItem), description='Recipes of this drink.'),
+    'specs': fields.List(fields.Nested(SpecItem), description='Recipes of this drink.', required=True),
     'citations': fields.List(fields.Nested(CitationItem), description='Drink citations.'),
     'notes': fields.List(fields.Nested(TextItem), description='Global notes on the drink.'),
     'images': fields.List(fields.Nested(CocktailImageItem), description='Reference images of the drink.'),
