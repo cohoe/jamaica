@@ -10,6 +10,7 @@ from barbados.caches import IngredientTreeCache, IngredientScanCache
 from barbados.models import IngredientModel
 from barbados.factories import IngredientFactory
 from barbados.serializers import ObjectSerializer
+from barbados.indexers import indexer_factory
 
 ns = api.namespace('v1/ingredients', description='Ingredient database.')
 
@@ -36,16 +37,24 @@ class IngredientsEndpoint(Resource):
         :return: List of the ingredients you created.
         :raises IntegrityError:
         """
-        serialized_objects = []
+        objects = []
         for raw_ingredient in api.payload:
             i = IngredientFactory.raw_to_obj(raw_ingredient)
-            ser_i = ObjectSerializer.serialize(i, 'dict')
-            serialized_objects.append(ser_i)
-            current_session.add(IngredientModel(**ser_i))
+            objects.append(i)
 
+        # Add to database
+        for i in objects:
+            current_session.add(IngredientModel(**ObjectSerializer.serialize(i, 'dict')))
         current_session.commit()
+
+        # Add to index (if it worked)
+        for i in objects:
+            indexer_factory.get_indexer(i).index(i)
+
+        # Invalidate cache
         IngredientScanCache.invalidate()
-        return serialized_objects
+
+        return [ObjectSerializer.serialize(i, 'dict') for i in objects]
 
 
 @ns.route('/search')

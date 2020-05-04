@@ -24,5 +24,5 @@ IngredientObject = api.inherit('IngredientObject', DisplayItemBase, {
     'aliases': fields.List(fields.String(), attribute='aliases', description='Display Name aliases for this item.'),
     'elements': fields.List(fields.String(), attribute='elements', description='Slug elements for this item (only if it is of kind IndexKind.'),
     'kind': fields.String(attribute='kind', description='The kind of this item.', required=True),
-    'parent': fields.String(attribute='parent', description='The parent of this item.', required=True),
+    'parent': fields.String(attribute='parent', description='The parent of this item.'), # not required for categories
 })

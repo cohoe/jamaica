@@ -10,6 +10,7 @@ from barbados.caches import CocktailScanCache
 from barbados.models import CocktailModel
 from barbados.factories import CocktailFactory
 from barbados.serializers import ObjectSerializer
+from barbados.indexers import indexer_factory
 
 ns = api.namespace('v1/cocktails', description='Cocktail recipes.')
 
@@ -41,6 +42,7 @@ class CocktailsEndpoint(Resource):
         current_session.add(db_obj)
         current_session.commit()
         CocktailScanCache.invalidate()
+        indexer_factory.get_indexer(c).index(c)
         return ObjectSerializer.serialize(c, 'dict')
 
 
