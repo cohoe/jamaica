@@ -39,10 +39,13 @@ class CocktailsEndpoint(Resource):
         """
         c = CocktailFactory.raw_to_obj(api.payload, api.payload.get('slug'))
         db_obj = CocktailModel(**ObjectSerializer.serialize(c, 'dict'))
+        # Temporarily switching this
+        indexer_factory.get_indexer(c).index(c)
         current_session.add(db_obj)
+
         current_session.commit()
         CocktailScanCache.invalidate()
-        indexer_factory.get_indexer(c).index(c)
+
         return ObjectSerializer.serialize(c, 'dict')
 
 
