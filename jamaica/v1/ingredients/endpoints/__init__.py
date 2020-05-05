@@ -29,32 +29,23 @@ class IngredientsEndpoint(Resource):
         return serialized_ingredients
 
     @api.response(200, 'success')
-    @api.expect([IngredientObject], validate=True)
-    @api.marshal_list_with(IngredientObject)
+    @api.expect(IngredientObject, validate=True)
+    @api.marshal_with(IngredientObject)
     def post(self):
         """
-        Create a new set of ingredients.
-        :return: List of the ingredients you created.
+        Create a new ingredient.
+        :return: Ingredient you created.
         :raises IntegrityError:
         """
-        objects = []
-        for raw_ingredient in api.payload:
-            i = IngredientFactory.raw_to_obj(raw_ingredient)
-            objects.append(i)
-
-        # Add to database
-        for i in objects:
-            current_session.add(IngredientModel(**ObjectSerializer.serialize(i, 'dict')))
+        i = IngredientFactory.raw_to_obj(api.payload)
+        current_session.add(IngredientModel(**ObjectSerializer.serialize(i, 'dict')))
         current_session.commit()
-
-        # Add to index (if it worked)
-        for i in objects:
-            indexer_factory.get_indexer(i).index(i)
+        indexer_factory.get_indexer(i).index(i)
 
         # Invalidate cache
         IngredientScanCache.invalidate()
 
-        return [ObjectSerializer.serialize(i, 'dict') for i in objects]
+        return ObjectSerializer.serialize(i, 'dict')
 
 
 @ns.route('/search')
