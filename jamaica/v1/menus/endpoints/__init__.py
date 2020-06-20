@@ -1,7 +1,8 @@
 import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
-from jamaica.v1.menus.serializers import MenuObject
+from jamaica.v1.menus.serializers import MenuObject, MenuSearchItem
+from jamaica.v1.menus.parsers import menu_list_parser
 from flask_sqlalchemy_session import current_session
 
 from barbados.models import MenuModel
@@ -9,6 +10,7 @@ from barbados.factories import MenuFactory
 from barbados.serializers import ObjectSerializer
 from barbados.caches import MenuScanCache
 from barbados.indexers import indexer_factory
+from barbados.search.menu import MenuSearch
 
 ns = api.namespace('v1/menus', description='Drink lists.')
 
@@ -44,6 +46,21 @@ class MenusEndpoint(Resource):
         MenuScanCache.invalidate()
 
         return ObjectSerializer.serialize(i, 'dict')
+
+
+@ns.route('/search')
+class MenuSearchEndpoint(Resource):
+
+    @api.response(200, 'success')
+    @api.expect(menu_list_parser, validate=True)
+    @api.marshal_list_with(MenuSearchItem)
+    def get(self):
+        """
+        Lookup ingredients in search.
+        :return: List of search result Dicts
+        """
+        args = menu_list_parser.parse_args(strict=True)
+        return MenuSearch(**args).execute()
 
 
 @ns.route('/<string:slug>')
