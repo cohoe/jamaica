@@ -11,6 +11,7 @@ from barbados.models import IngredientModel
 from barbados.factories import IngredientFactory
 from barbados.serializers import ObjectSerializer
 from barbados.indexers import indexer_factory
+from barbados.validators import ObjectValidator
 
 ns = api.namespace('v1/ingredients', description='Ingredient database.')
 
@@ -38,7 +39,10 @@ class IngredientsEndpoint(Resource):
         :raises IntegrityError:
         """
         i = IngredientFactory.raw_to_obj(api.payload)
-        current_session.add(IngredientModel(**ObjectSerializer.serialize(i, 'dict')))
+        model = IngredientModel(**ObjectSerializer.serialize(i, 'dict'))
+        ObjectValidator.validate(model, session=current_session)
+
+        current_session.add(model)
         current_session.commit()
         indexer_factory.get_indexer(i).index(i)
 

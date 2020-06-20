@@ -2,6 +2,7 @@ from flask_restx import Api, fields
 from jamaica import settings
 # from jamaica import serializers
 from sqlalchemy.exc import IntegrityError
+from barbados.exceptions import ValidationException
 
 api = Api(version='0.0.1', title='Jamaica API')
 
@@ -41,3 +42,13 @@ def integrity_error_handler(error):
     """
     message = error.orig.diag.message_detail
     return {'message': message}, 400
+
+@api.marshal_with(ErrorModel, code=400)
+@api.errorhandler(ValidationException)
+def validation_error_handler(error):
+    """
+    ObjectValidator failed.
+    :param error: 
+    :return:
+    """
+    return {'message': str(error)}, 400

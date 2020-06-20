@@ -11,6 +11,7 @@ from barbados.models import CocktailModel
 from barbados.factories import CocktailFactory
 from barbados.serializers import ObjectSerializer
 from barbados.indexers import indexer_factory
+from barbados.validators import ObjectValidator
 
 ns = api.namespace('v1/cocktails', description='Cocktail recipes.')
 
@@ -37,15 +38,20 @@ class CocktailsEndpoint(Resource):
         :return: Serialized Cocktail object.
         :raises IntegrityError:
         """
+        # Build
         c = CocktailFactory.raw_to_obj(api.payload, api.payload.get('slug'))
-        db_obj = CocktailModel(**ObjectSerializer.serialize(c, 'dict'))
-        # Temporarily switching this
-        indexer_factory.get_indexer(c).index(c)
-        current_session.add(db_obj)
+        model = CocktailModel(**ObjectSerializer.serialize(c, 'dict'))
+        ObjectValidator.validate(model, session=current_session)
 
+        # Write
+        current_session.add(model)
         current_session.commit()
+        indexer_factory.get_indexer(c).index(c)
+
+        # Invalidate Cache
         CocktailScanCache.invalidate()
 
+        # Return
         return ObjectSerializer.serialize(c, 'dict')
 
 

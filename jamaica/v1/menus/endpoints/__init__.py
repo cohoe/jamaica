@@ -11,6 +11,7 @@ from barbados.serializers import ObjectSerializer
 from barbados.caches import MenuScanCache
 from barbados.indexers import indexer_factory
 from barbados.search.menu import MenuSearch
+from barbados.validators import ObjectValidator
 
 ns = api.namespace('v1/menus', description='Drink lists.')
 
@@ -38,14 +39,17 @@ class MenusEndpoint(Resource):
         :raises IntegrityError:
         """
         m = MenuFactory.raw_to_obj(api.payload)
-        current_session.add(MenuModel(**ObjectSerializer.serialize(m, 'dict')))
+        model = MenuModel(**ObjectSerializer.serialize(m, 'dict'))
+        ObjectValidator.validate(model, session=current_session)
+
+        current_session.add(model)
         current_session.commit()
         indexer_factory.get_indexer(m).index(m)
 
         # Invalidate Cache
         MenuScanCache.invalidate()
 
-        return ObjectSerializer.serialize(i, 'dict')
+        return ObjectSerializer.serialize(m, 'dict')
 
 
 @ns.route('/search')
