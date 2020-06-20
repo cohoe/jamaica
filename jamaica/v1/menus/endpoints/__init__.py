@@ -7,6 +7,8 @@ from flask_sqlalchemy_session import current_session
 from barbados.models import MenuModel
 from barbados.factories import MenuFactory
 from barbados.serializers import ObjectSerializer
+from barbados.caches import MenuScanCache
+from barbados.indexers import indexer_factory
 
 ns = api.namespace('v1/menus', description='Drink lists.')
 
@@ -21,14 +23,8 @@ class MenusEndpoint(Resource):
         List all Menus
         :return: List of Menu dicts
         """
-        # @TODO table scan bad. cache good.
-        results = current_session.query(MenuModel).all()
-
-        serialized = []
-        for result in results:
-            m = MenuFactory.model_to_obj(result)
-            serialized.append(ObjectSerializer.serialize(m, 'dict'))
-        return serialized
+        serialized_objects = json.loads(MenuScanCache.retrieve())
+        return serialized_objects
 
     @api.response(200, 'success')
     @api.expect(MenuObject, validate=True)
@@ -39,9 +35,13 @@ class MenusEndpoint(Resource):
         :return: Menu you created.
         :raises IntegrityError:
         """
-        i = MenuFactory.raw_to_obj(api.payload)
-        current_session.add(MenuModel(**ObjectSerializer.serialize(i, 'dict')))
+        m = MenuFactory.raw_to_obj(api.payload)
+        current_session.add(MenuModel(**ObjectSerializer.serialize(m, 'dict')))
         current_session.commit()
+        indexer_factory.get_indexer(m).index(m)
+
+        # Invalidate Cache
+        MenuScanCache.invalidate()
 
         return ObjectSerializer.serialize(i, 'dict')
 
@@ -72,9 +72,14 @@ class MenuEndpoint(Resource):
         :raises KeyError:
         """
         result = current_session.query(MenuModel).get(slug)
+        m = MenuFactory.model_to_obj(result)
 
         if not result:
             raise KeyError('Not found')
 
         current_session.delete(result)
         current_session.commit()
+
+        # Invalidate Cache
+        MenuScanCache.invalidate()
+        indexer_factory.get_indexer(m).delete(m)
