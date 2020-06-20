@@ -44,6 +44,7 @@ class IngredientsEndpoint(Resource):
 
         # Invalidate cache
         IngredientScanCache.invalidate()
+        IngredientTreeCache.invalidate()
 
         return ObjectSerializer.serialize(i, 'dict')
 
@@ -103,12 +104,17 @@ class IngredientEndpoint(Resource):
         :raises KeyError:
         """
         result = current_session.query(IngredientModel).get(slug)
+        i = IngredientFactory.model_to_obj(result)
 
         if not result:
             raise KeyError('Not found')
 
         current_session.delete(result)
         current_session.commit()
+
+        IngredientScanCache.invalidate()
+        IngredientTreeCache.invalidate()
+        indexer_factory.get_indexer(i).delete(i)
 
 
 @ns.route('/<string:slug>/subtree')

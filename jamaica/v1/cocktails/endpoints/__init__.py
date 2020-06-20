@@ -104,9 +104,13 @@ class CocktailEndpoint(Resource):
         :raises KeyError:
         """
         result = current_session.query(CocktailModel).get(slug)
+        c = CocktailFactory.model_to_obj(result)
 
         if not result:
             raise KeyError('Not found')
 
         current_session.delete(result)
         current_session.commit()
+
+        CocktailScanCache.invalidate()
+        indexer_factory.get_indexer(c).delete(c)
