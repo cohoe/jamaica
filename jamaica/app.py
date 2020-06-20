@@ -7,6 +7,7 @@ from flask_sqlalchemy_session import flask_scoped_session
 
 from jamaica.v1.cocktails.endpoints import ns as cocktails_namespace
 from jamaica.v1.ingredients.endpoints import ns as ingredients_namespace
+from jamaica.v1.menus.endpoints import ns as menus_namespace
 
 app = Flask('jamaica')
 CORS(app, origins=['0.0.0.0:5000', '0.0.0.0:3000']) # @TODO make this come from Registry, along with other app config?
@@ -30,6 +31,7 @@ def initialize_app(flask_app):
     api.init_app(blueprint)
     api.add_namespace(cocktails_namespace)
     api.add_namespace(ingredients_namespace)
+    api.add_namespace(menus_namespace)
     flask_app.register_blueprint(blueprint)
 
 
