@@ -2,7 +2,7 @@ from flask_restx import Api, fields
 from jamaica import settings
 # from jamaica import serializers
 from sqlalchemy.exc import IntegrityError
-from barbados.exceptions import ValidationException
+from barbados.exceptions import ValidationException, ServiceUnavailableException
 
 api = Api(version='0.0.1', title='Jamaica API')
 
@@ -43,6 +43,7 @@ def integrity_error_handler(error):
     message = error.orig.diag.message_detail
     return {'message': message}, 400
 
+
 @api.marshal_with(ErrorModel, code=400)
 @api.errorhandler(ValidationException)
 def validation_error_handler(error):
@@ -52,3 +53,14 @@ def validation_error_handler(error):
     :return:
     """
     return {'message': str(error)}, 400
+
+
+@api.marshal_with(ErrorModel, code=400)
+@api.errorhandler(ServiceUnavailableException)
+def service_error_handler(error):
+    """
+    Some internal service is not available
+    :param error:
+    :return:
+    """
+    return {'message': 'A necessary internal service is unavailable. ' + str(error)}, 500
