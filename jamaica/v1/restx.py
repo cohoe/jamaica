@@ -1,10 +1,25 @@
+import os
+from flask import url_for
 from flask_restx import Api, fields
 from jamaica import settings
 # from jamaica import serializers
 from sqlalchemy.exc import IntegrityError
 from barbados.exceptions import ValidationException, ServiceUnavailableException
 
-api = Api(version='0.0.1', title='Jamaica API')
+
+class CustomApi(Api):
+    @property
+    def specs_url(self):
+        """
+        Monkey patch for HTTPS.
+        https://github.com/noirbizarre/flask-restplus/issues/223
+        https://stackoverflow.com/questions/47508257/serving-flask-restplus-on-https-server
+        """
+        scheme = 'https' if os.environ.get('KUBERNETES_PORT') else 'http'
+        return url_for(self.endpoint('specs'), _external=True, _scheme=scheme)
+
+
+api = CustomApi(version='0.0.1', title='Jamaica API')
 
 ErrorModel = api.model('ErrorModel', {
     'message': fields.String(example="It's the wrong trousers! They've gone wrong!"),
