@@ -2,6 +2,13 @@ from flask_restx import fields
 from jamaica.v1.restx import api
 
 
+# Certain things should allow for null.
+# https://github.com/noirbizarre/flask-restplus/issues/179
+class NullableString(fields.String):
+    __schema_type__ = ['string', 'null']
+    __schema_example__ = 'nullable string'
+
+
 DisplayItemBase = api.model('DisplayItemBase', {
     'slug': fields.String(attribute='slug', description='This items slug (id).', required=True, example='la-viaa'),
     'display_name': fields.String(attribute='display_name', description='This items display name.', example='La Viaa'),
@@ -13,6 +20,6 @@ SearchResultBase = api.model('SearchResultBase', {
 
 TextItem = api.model('TextItem', {
     'text': fields.String(description='String of text.', example='The quick brown cat jumped over the energetic raccoon.', required=True),
-    'author': fields.String(description='Author of this text.', example='root'),
+    'author': NullableString(description='Author of this text.', example='root'),
     'datetime': fields.String(description='UTC timestamp (datetime.datetime.isoformat())', example='2020-05-04T02:36:11.368253', required=False)
 })

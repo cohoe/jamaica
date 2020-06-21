@@ -54,6 +54,23 @@ class CocktailsEndpoint(Resource):
         # Return
         return ObjectSerializer.serialize(c, 'dict')
 
+    @api.response(204, 'successful delete')
+    def delete(self):
+        """
+        Delete all cocktails from the database. There be dragons here.
+        :return: Number of items deleted.
+        """
+        results = current_session.query(CocktailModel).all()
+        for result in results:
+            c = CocktailFactory.model_to_obj(result)
+            current_session.delete(result)
+            indexer_factory.get_indexer(c).delete(c)
+
+        current_session.commit()
+        CocktailScanCache.invalidate()
+
+        return len(results)
+
 
 @ns.route('/search')
 class CocktailSearchEndpoint(Resource):

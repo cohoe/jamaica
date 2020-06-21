@@ -51,6 +51,23 @@ class MenusEndpoint(Resource):
 
         return ObjectSerializer.serialize(m, 'dict')
 
+    @api.response(204, 'successful delete')
+    def delete(self):
+        """
+        Delete all menus from the database. There be dragons here.
+        :return: Number of items deleted.
+        """
+        results = current_session.query(MenuModel).all()
+        for result in results:
+            m = MenuFactory.model_to_obj(result)
+            current_session.delete(result)
+            indexer_factory.get_indexer(m).delete(m)
+
+        current_session.commit()
+        MenuScanCache.invalidate()
+
+        return len(results)
+
 
 @ns.route('/search')
 class MenuSearchEndpoint(Resource):

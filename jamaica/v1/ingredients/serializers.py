@@ -1,13 +1,6 @@
 from flask_restx import fields
 from jamaica.v1.restx import api
-from jamaica.v1.serializers import DisplayItemBase, SearchResultBase
-
-
-# CategoryKind has no parent and that's OK.
-# https://github.com/noirbizarre/flask-restplus/issues/179
-class NullableString(fields.String):
-    __schema_type__ = ['string', 'null']
-    __schema_example__ = 'nullable string'
+from jamaica.v1.serializers import DisplayItemBase, SearchResultBase, NullableString
 
 
 IngredientSearchItem = api.inherit('IngredientSearchItem', SearchResultBase, {

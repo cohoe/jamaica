@@ -1,6 +1,6 @@
 from flask_restx import fields
 from jamaica.v1.restx import api
-from jamaica.v1.serializers import DisplayItemBase, SearchResultBase, TextItem
+from jamaica.v1.serializers import DisplayItemBase, SearchResultBase, TextItem, NullableString
 
 
 CocktailSearchItem = api.inherit('CocktailSearchItem', SearchResultBase, {
@@ -29,7 +29,7 @@ CocktailImageItem = api.model('CocktailImageItem', {
 
 CitationItem = api.model('CitationItem', {
     'title': fields.String(description='Title of the citation.', example='Death & Co: Modern Classic Cocktails', required=True),
-    'author': fields.List(fields.String(), description='Author of the work being cited', example=['Jillian Vose', 'Ivy Mix']),
+    'author': fields.List(NullableString(), description='Author of the work being cited', example=['Jillian Vose', 'Ivy Mix']),
     'date': fields.String(description='Date that the citation was published. If the exact day cannot be determined but the month can, use the first day of the month. This affects mostly old works.', example='1812-05-01'),
     'publisher': fields.String(description='Publisher of the citation.', example='Ten Speed Press'),
     'page': fields.Integer(description='If using a book or other printed medium, specify the page number.', example=69),

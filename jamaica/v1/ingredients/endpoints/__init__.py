@@ -52,6 +52,24 @@ class IngredientsEndpoint(Resource):
 
         return ObjectSerializer.serialize(i, 'dict')
 
+    @api.response(204, 'successful delete')
+    def delete(self):
+        """
+        Delete all ingredients from the database. There be dragons here.
+        :return: Number of items deleted.
+        """
+        results = current_session.query(IngredientModel).all()
+        for result in results:
+            i = IngredientFactory.model_to_obj(result)
+            current_session.delete(result)
+            indexer_factory.get_indexer(i).delete(i)
+
+        current_session.commit()
+        IngredientScanCache.invalidate()
+        IngredientTreeCache.invalidate()
+
+        return len(results)
+
 
 @ns.route('/search')
 class IngredientSearchEndpoint(Resource):
