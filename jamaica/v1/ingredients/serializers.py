@@ -3,6 +3,13 @@ from jamaica.v1.restx import api
 from jamaica.v1.serializers import DisplayItemBase, SearchResultBase
 
 
+# CategoryKind has no parent and that's OK.
+# https://github.com/noirbizarre/flask-restplus/issues/179
+class NullableString(fields.String):
+    __schema_type__ = ['string', 'null']
+    __schema_example__ = 'nullable string'
+
+
 IngredientSearchItem = api.inherit('IngredientSearchItem', SearchResultBase, {
     'slug': fields.String(attribute='hit.slug', description='This items slug.'),
     'display_name': fields.String(attribute='hit.display_name', description='This items display name.'),
@@ -24,5 +31,5 @@ IngredientObject = api.inherit('IngredientObject', DisplayItemBase, {
     'aliases': fields.List(fields.String(), attribute='aliases', description='Display Name aliases for this item.'),
     'elements': fields.List(fields.String(), attribute='elements', description='Slug elements for this item (only if it is of kind IndexKind.'),
     'kind': fields.String(attribute='kind', description='The kind of this item.', required=True),
-    'parent': fields.String(attribute='parent', description='The parent of this item.'), # not required for categories
+    'parent': NullableString(attribute='parent', description='The parent of this item.'),  # not required for categories
 })
