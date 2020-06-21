@@ -10,7 +10,7 @@ from jamaica.v1.ingredients.endpoints import ns as ingredients_namespace
 from jamaica.v1.menus.endpoints import ns as menus_namespace
 
 app = Flask('jamaica')
-CORS(app, origins=['0.0.0.0:5000', '0.0.0.0:3000']) # @TODO make this come from Registry, along with other app config?
+CORS(app, origins=['0.0.0.0:8080', '0.0.0.0:3000']) # @TODO make this come from Registry, along with other app config?
 session = flask_scoped_session(pgconn.Session, app) # this doesn't use get_session. https://flask-sqlalchemy-session.readthedocs.io/en/v1.1/
 
 # https://github.com/postrational/rest_api_demo/blob/master/rest_api_demo/app.py
@@ -37,7 +37,7 @@ def initialize_app(flask_app):
 
 def main():
     initialize_app(app)
-    app.run(debug=settings.FLASK_DEBUG, host='0.0.0.0')
+    app.run(debug=settings.FLASK_DEBUG, host='0.0.0.0', port=8080)
 
 
 if __name__ == "__main__":
