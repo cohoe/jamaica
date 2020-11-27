@@ -62,12 +62,20 @@ class CocktailsEndpoint(Resource):
         """
         results = current_session.query(CocktailModel).all()
         for result in results:
+            print(result)
             c = CocktailFactory.model_to_obj(result)
+            print("SUCCESS")
             current_session.delete(result)
+            print("NOW HERE")
+            # This is where its barfing
             indexer_factory.get_indexer(c).delete(c)
+            print("AND HERE")
 
         current_session.commit()
+        print("ALMOST")
         CocktailScanCache.invalidate()
+
+        print("DONE")
 
         return len(results)
 
