@@ -1,12 +1,12 @@
 import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
-from jamaica.v1.cocktails.serializers import CocktailSearchItem, CocktailItem
+from jamaica.v1.cocktails.serializers import CocktailSearchItem, CocktailItem, CitationItem
 from jamaica.v1.cocktails.parsers import cocktail_list_parser
 from flask_sqlalchemy_session import current_session
 
 from barbados.search.cocktail import CocktailSearch
-from barbados.caches import CocktailScanCache
+from barbados.caches import CocktailScanCache, RecipeBibliographyCache
 from barbados.models import CocktailModel
 from barbados.factories import CocktailFactory
 from barbados.serializers import ObjectSerializer
@@ -145,3 +145,18 @@ class CocktailEndpoint(Resource):
 
         CocktailScanCache.invalidate()
         indexer_factory.get_indexer(c).delete(c)
+
+
+@ns.route('/bibliography')
+class CocktailBibliographyEndpoint(Resource):
+
+    @api.response(200, 'success')
+    @api.marshal_list_with(CitationItem)
+    def get(self):
+        """
+        Return a list of all Citation objects associated with every
+        cocktail in the database. Citation needed? I think not!
+        :return: List[Citation]
+        """
+        serialized_citations = json.loads(RecipeBibliographyCache.retrieve())
+        return serialized_citations
