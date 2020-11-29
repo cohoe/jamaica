@@ -14,6 +14,7 @@ IngredientSearchItem = api.inherit('IngredientSearchItem', SearchResultBase, {
 
 IngredientSubstitution = api.model('IngredientSubstitution', {
     'self': fields.String(attribute='self', description='The slug that you asked about.'),
+    'kind': fields.String(attribute='kind', description='The kind of this ingredient.'),
     'parent': fields.String(attribute='parent', description='The parent slug of this ingredient.'),
     'parents': fields.List(fields.String, descriptiopn='List of parent slugs going to the root of the tree.'),
     'children': fields.List(fields.String(), attribute='children', description='Slugs of the children (all lower levels in the tree) of this ingredient.'),
