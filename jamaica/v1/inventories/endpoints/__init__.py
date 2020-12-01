@@ -8,7 +8,7 @@ from flask_sqlalchemy_session import current_session
 from barbados.models import InventoryModel
 from barbados.factories import InventoryFactory
 from barbados.serializers import ObjectSerializer
-from barbados.caches import InventoryScanCache
+from barbados.caches import InventoryScanCache, IngredientTreeCache
 from barbados.indexers import indexer_factory
 from barbados.search.menu import MenuSearch
 from barbados.validators import ObjectValidator
@@ -48,8 +48,7 @@ class InventoriesEndpoint(Resource):
         # indexer_factory.get_indexer(m).index(m)
 
         # Invalidate Cache
-        # @TODO inventory cache
-        MenuScanCache.invalidate()
+        InventoryScanCache.invalidate()
 
         return ObjectSerializer.serialize(f, 'dict')
 
@@ -59,17 +58,17 @@ class InventoriesEndpoint(Resource):
         Delete all objects from the database. There be dragons here.
         :return: Number of items deleted.
         """
-        # results = current_session.query(InventoryModel).all()
-        # for result in results:
-        #     m = MenuFactory.model_to_obj(result)
-        #     current_session.delete(result)
-        #     indexer_factory.get_indexer(m).delete(m)
-        #
-        # current_session.commit()
-        # MenuScanCache.invalidate()
-        #
-        # return len(results)
-        pass
+        results = current_session.query(InventoryModel).all()
+        for result in results:
+            i = InventoryFactory.model_to_obj(result)
+            current_session.delete(result)
+            # @TODO indexes
+            # indexer_factory.get_indexer(i).delete(i)
+
+        current_session.commit()
+        InventoryScanCache.invalidate()
+
+        return len(results)
 
 
 @ns.route('/<uuid:id>')
@@ -107,6 +106,32 @@ class InventoryEndpoint(Resource):
         current_session.commit()
 
         # Invalidate Cache
+        InventoryScanCache.invalidate()
         # @TODO this
-        # MenuScanCache.invalidate()
-        # indexer_factory.get_indexer(m).delete(m)
+        # indexer_factory.get_indexer(i).delete(i)
+
+
+@ns.route('/<uuid:id>/full')
+@api.doc(params={'id': 'An object ID.'})
+class InventoryFullEndpoint(Resource):
+
+    @api.response(200, 'success')
+    @api.marshal_with(InventoryObject)
+    def get(self, id):
+        """
+        Return a fully-expanded inventory including the implicitly
+        included items.
+        :param id: GUID of the object.
+        :return: Serialized Object
+        :raises KeyError: not found
+        """
+        result = current_session.query(InventoryModel).get(id)
+        c = InventoryFactory.model_to_obj(result)
+        # @TODO until dev is done
+        # tree = IngredientTreeCache.retrieve()
+        from barbados.objects.ingredienttree import IngredientTree
+        tree = IngredientTree()
+
+        c.full(tree=tree)
+
+        return ObjectSerializer.serialize(c, 'dict')
