@@ -1,17 +1,8 @@
-import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
-from jamaica.v1.menus.serializers import MenuObject, MenuSearchItem
-from jamaica.v1.menus.parsers import menu_list_parser
 from flask_sqlalchemy_session import current_session
 
-from barbados.models import MenuModel
-from barbados.factories import MenuFactory
-from barbados.serializers import ObjectSerializer
-from barbados.caches import MenuScanCache
 from barbados.indexers import indexer_factory
-from barbados.search.menu import MenuSearch
-from barbados.validators import ObjectValidator
 from barbados.indexes import index_factory
 
 ns = api.namespace('v1/indexes', description='Search indexes.')
@@ -61,22 +52,24 @@ class IndexEndpoint(Resource):
         except ValueError:
             raise KeyError("Index '%s' not found" % name)
 
-        print(index._index)
-        # @TODO this deletes the index, not the contents!
-        # index._index.delete()
+        counter = index.delete_all()
+        return counter
 
 
-# @ns.route('/<string:name>/reindex')
-# @api.doc(params={'slug': 'An index name.'})
-# class IndexReindexEndpoint:
-#
-#     @api.response(200, 'success')
-#     def get(self):
-#         """
-#         Re-index all cocktails.
-#         """
-#         results = current_session.query(CocktailModel).all()
-#
-#         for result in results:
-#             c = CocktailFactory.model_to_obj(result)
-#             indexer_factory.get_indexer(c).index(c)
+@ns.route('/<string:name>/reindex')
+@api.doc(params={'slug': 'An index name.'})
+class IndexReindexEndpoint(Resource):
+
+    @api.response(200, 'success')
+    def post(self, name):
+        """
+        Re-index all cocktails.
+        """
+        # @TODO make this generic
+        from barbados.models.cocktailmodel import CocktailModel
+        from barbados.factories.cocktailfactory import CocktailFactory
+        results = current_session.query(CocktailModel).all()
+
+        for result in results:
+            c = CocktailFactory.model_to_obj(result)
+            indexer_factory.get_indexer(c).index(c)
