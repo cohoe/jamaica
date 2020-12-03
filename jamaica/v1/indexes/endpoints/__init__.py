@@ -25,20 +25,6 @@ class IndexesEndpoint(Resource):
 @api.doc(params={'slug': 'An index name.'})
 class IndexEndpoint(Resource):
 
-    @api.response(200, 'success')
-    def get(self, name):
-        """
-        Get a single index
-        :param name: The name key of the index.
-        :return: Name of the index.
-        :raises KeyError: not found
-        """
-        try:
-            index = index_factory.get_index(name)
-            return str(type(index))
-        except ValueError:
-            raise KeyError("Index '%s' not found" % name)
-
     @api.response(204, 'successful delete')
     def delete(self, name):
         """
