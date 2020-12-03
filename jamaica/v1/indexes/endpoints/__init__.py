@@ -46,6 +46,7 @@ class IndexEndpoint(Resource):
 @api.doc(params={'slug': 'An index name.'})
 class IndexReindexEndpoint(Resource):
 
+    # @TODO move this to above. Also add POST for caches to rebuild the cache.
     @api.response(200, 'success')
     def post(self, name):
         """
