@@ -10,7 +10,8 @@ from jamaica.v1.cocktails.endpoints import ns as cocktails_namespace
 from jamaica.v1.ingredients.endpoints import ns as ingredients_namespace
 from jamaica.v1.menus.endpoints import ns as menus_namespace
 from jamaica.v1.caches.endpoints import ns as caches_namespace
-from jamaica.v1.inventories.endpoints import ns as inventories_namespaces
+from jamaica.v1.inventories.endpoints import ns as inventories_namespace
+from jamaica.v1.indexes.endpoints import ns as indexes_namespace
 
 app = Flask('jamaica')
 
@@ -35,12 +36,15 @@ def initialize_app(flask_app):
     configure_app(flask_app)
 
     blueprint = Blueprint('api', __name__, url_prefix='/api')
+
     api.init_app(blueprint)
     api.add_namespace(cocktails_namespace)
     api.add_namespace(ingredients_namespace)
     api.add_namespace(menus_namespace)
     api.add_namespace(caches_namespace)
-    api.add_namespace(inventories_namespaces)
+    api.add_namespace(inventories_namespace)
+    api.add_namespace(indexes_namespace)
+
     flask_app.register_blueprint(blueprint)
 
 

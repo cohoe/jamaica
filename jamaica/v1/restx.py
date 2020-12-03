@@ -44,7 +44,12 @@ def key_error_handler(error):
     :param error:
     :return:
     """
-    return {'message': str(error)}, 404
+    # For some reason something is adding quotes to the error
+    # message, thus doubling up on the output quotes.
+    # https://stackoverflow.com/questions/40950791/remove-quotes-from-string-in-python
+    # @TODO get this to the rest of the handlers.
+    message = str(error).strip('"')
+    return {'message': message}, 404
 
 
 @api.marshal_with(ErrorModel, code=400)
