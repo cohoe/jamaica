@@ -39,3 +39,19 @@ class CacheEndpoint(Resource):
 
         cache = cache_factory.get_cache(key)
         cache.invalidate()
+
+    @api.response(200, 'successful population')
+    def post(self, key):
+        """
+        Populate a cache at a particular key
+        :param key: The cache key to populate
+        :return: None
+        :raises KeyError:
+        """
+        keys = cache_factory.cache_keys()
+
+        if key not in keys:
+            raise KeyError("Cache '%s' not configured" % key)
+
+        cache = cache_factory.get_cache(key)
+        cache.populate()
