@@ -62,20 +62,12 @@ class CocktailsEndpoint(Resource):
         """
         results = current_session.query(CocktailModel).all()
         for result in results:
-            print(result)
             c = CocktailFactory.model_to_obj(result)
-            print("SUCCESS")
             current_session.delete(result)
-            print("NOW HERE")
-            # This is where its barfing
             indexer_factory.get_indexer(c).delete(c)
-            print("AND HERE")
 
         current_session.commit()
-        print("ALMOST")
         CocktailScanCache.invalidate()
-
-        print("DONE")
 
         return len(results)
 
@@ -118,12 +110,7 @@ class CocktailEndpoint(Resource):
         :raises IntegrityError: Duplicate
         :raises KeyError: Not found
         """
-        result = current_session.query(CocktailModel).get(slug)
-
-        if not result:
-            raise KeyError('Not found')
-
-        c = CocktailFactory.model_to_obj(result)
+        c = CocktailFactory.produce_obj(session=current_session, slug=slug)
         return ObjectSerializer.serialize(c, 'dict')
 
     @api.response(204, 'successful delete')

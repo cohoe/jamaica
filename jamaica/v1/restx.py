@@ -52,6 +52,22 @@ def key_error_handler(error):
     return {'message': message}, 404
 
 
+@api.marshal_with(ErrorModel, code=404)
+@api.errorhandler(ValueError)
+def key_error_handler(error):
+    """
+    ValueError generally means the object was not found.
+    :param error:
+    :return:
+    """
+    # For some reason something is adding quotes to the error
+    # message, thus doubling up on the output quotes.
+    # https://stackoverflow.com/questions/40950791/remove-quotes-from-string-in-python
+    # @TODO get this to the rest of the handlers.
+    message = str(error).strip('"')
+    return {'message': message}, 404
+
+
 @api.marshal_with(ErrorModel, code=400)
 @api.errorhandler(IntegrityError)
 def integrity_error_handler(error):

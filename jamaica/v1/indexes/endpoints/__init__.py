@@ -5,6 +5,7 @@ from flask_sqlalchemy_session import current_session
 from barbados.indexers import indexer_factory
 from barbados.indexes import index_factory
 
+
 ns = api.namespace('v1/indexes', description='Search indexes.')
 
 
@@ -17,13 +18,23 @@ class IndexesEndpoint(Resource):
         List all Indexes
         :return: List of Index keys
         """
-
         return list(index_factory.get_indexes().keys())
 
 
 @ns.route('/<string:name>')
-@api.doc(params={'slug': 'An index name.'})
+@api.doc(params={'name': 'An index name.'})
 class IndexEndpoint(Resource):
+
+    @api.response(200, 'success')
+    def post(self, name):
+        """
+        Re-index all objects that are supposed to be in an index.
+        """
+        index = index_factory.get_index(name=name)
+        indexer = indexer_factory.indexer_for(index)
+
+        counter = indexer.reindex(current_session)
+        return counter
 
     @api.response(204, 'successful delete')
     def delete(self, name):
@@ -33,30 +44,7 @@ class IndexEndpoint(Resource):
         :return: Number of documents deleted.
         :raises KeyError:
         """
-        try:
-            index = index_factory.get_index(name=name)
-        except ValueError:
-            raise KeyError("Index '%s' not found" % name)
-
+        index = index_factory.get_index(name=name)
         counter = index.delete_all()
+
         return counter
-
-
-@ns.route('/<string:name>/reindex')
-@api.doc(params={'slug': 'An index name.'})
-class IndexReindexEndpoint(Resource):
-
-    # @TODO move this to above. Also add POST for caches to rebuild the cache.
-    @api.response(200, 'success')
-    def post(self, name):
-        """
-        Re-index all cocktails.
-        """
-        # @TODO make this generic
-        from barbados.models.cocktailmodel import CocktailModel
-        from barbados.factories.cocktailfactory import CocktailFactory
-        results = current_session.query(CocktailModel).all()
-
-        for result in results:
-            c = CocktailFactory.model_to_obj(result)
-            indexer_factory.get_indexer(c).index(c)
