@@ -57,6 +57,8 @@ class InventoriesEndpoint(Resource):
         for i in objects:
             InventoryFactory.delete_obj(session=current_session, obj=i, commit=False)
 
+        current_session.commit()
+
         # @TODO indexes
         # InventoryIndexer.empty()
         InventoryScanCache.invalidate()
