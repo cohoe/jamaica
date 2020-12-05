@@ -34,7 +34,6 @@ class CocktailsEndpoint(Resource):
         """
         Create a new cocktail.
         :return: Serialized Cocktail object.
-        :raises IntegrityError:
         """
         c = CocktailFactory.raw_to_obj(api.payload, api.payload.get('slug'))
         CocktailFactory.store_obj(session=current_session, obj=c)
@@ -75,7 +74,6 @@ class CocktailSearchEndpoint(Resource):
         Get a simplified view of cocktails from search. No search parameters means
         empty list for you.
         :return: List of SearchResult Dicts
-        :raises KeyError:
         """
         args = cocktail_list_parser.parse_args(strict=True)
 
@@ -98,7 +96,6 @@ class CocktailEndpoint(Resource):
         :param slug:
         :return: Serialized Cocktail
         :raises IntegrityError: Duplicate
-        :raises KeyError: Not found
         """
         c = CocktailFactory.produce_obj(session=current_session, slug=slug)
         return ObjectSerializer.serialize(c, 'dict')
@@ -109,7 +106,6 @@ class CocktailEndpoint(Resource):
         Delete a single cocktail from the database.
         :param slug:
         :return:
-        :raises KeyError:
         """
         c = CocktailFactory.produce_obj(session=current_session, slug=slug)
         CocktailFactory.delete_obj(session=current_session, obj=c)

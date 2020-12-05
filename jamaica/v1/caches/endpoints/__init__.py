@@ -17,7 +17,7 @@ class CachesEndpoint(Resource):
         :return: List[Dict]
         """
         keys = cache_factory.cache_keys()
-        return list(keys)
+        return keys
 
 
 @ns.route('/<string:key>')
@@ -30,13 +30,7 @@ class CacheEndpoint(Resource):
         Invalidate a cache at a particular key
         :param key: The cache key to invalidate
         :return: None
-        :raises KeyError:
         """
-        keys = cache_factory.cache_keys()
-
-        if key not in keys:
-            raise KeyError("Cache '%s' not configured" % key)
-
         cache = cache_factory.get_cache(key)
         cache.invalidate()
 
@@ -46,12 +40,6 @@ class CacheEndpoint(Resource):
         Populate a cache at a particular key
         :param key: The cache key to populate
         :return: None
-        :raises KeyError:
         """
-        keys = cache_factory.cache_keys()
-
-        if key not in keys:
-            raise KeyError("Cache '%s' not configured" % key)
-
         cache = cache_factory.get_cache(key)
         cache.populate()

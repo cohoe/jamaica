@@ -34,7 +34,6 @@ class MenusEndpoint(Resource):
         """
         Create a new Menu.
         :return: Menu you created.
-        :raises IntegrityError:
         """
         m = MenuFactory.raw_to_obj(api.payload)
         MenuFactory.store_obj(session=current_session, obj=m)
@@ -88,7 +87,6 @@ class MenuEndpoint(Resource):
         Get a single menu from the database.
         :param slug:
         :return: Serialized Menu
-        :raises KeyError: not found
         """
         c = MenuFactory.produce_obj(session=current_session, slug=slug)
         return ObjectSerializer.serialize(c, 'dict')
@@ -99,7 +97,6 @@ class MenuEndpoint(Resource):
         Delete a single menu from the database.
         :param slug:
         :return:
-        :raises KeyError:
         """
         m = MenuFactory.produce_obj(session=current_session, slug=slug)
         MenuFactory.delete_obj(session=current_session, obj=m)

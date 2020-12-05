@@ -34,7 +34,6 @@ class IngredientsEndpoint(Resource):
         """
         Create a new ingredient.
         :return: Ingredient you created.
-        :raises IntegrityError:
         """
         i = IngredientFactory.raw_to_obj(api.payload)
         IngredientFactory.store_obj(session=current_session, obj=i)
@@ -105,7 +104,6 @@ class IngredientEndpoint(Resource):
         Get a single ingredient from the database.
         :param slug:
         :return: Serialized Ingredient
-        :raises KeyError: not found
         """
         c = IngredientFactory.produce_obj(session=current_session, slug=slug)
         return ObjectSerializer.serialize(c, 'dict')
@@ -116,7 +114,6 @@ class IngredientEndpoint(Resource):
         Delete a single ingredient from the database.
         :param slug:
         :return:
-        :raises KeyError:
         """
         i = IngredientFactory.produce_obj(session=current_session, slug=slug)
         IngredientFactory.delete_obj(session=current_session, obj=i)
@@ -137,7 +134,6 @@ class IngredientSubtreeEndpoint(Resource):
         No api.marshal_with() due to recursion.
         :param slug:
         :return: Dict
-        :raises KeyError: not found
         """
         ingredient_tree = IngredientTreeCache.retrieve()
         return json.loads(ingredient_tree.subtree(slug).to_json(with_data=True))
@@ -153,7 +149,6 @@ class IngredientSubstitutionEndpoint(Resource):
         Return relevant information needed to substitute this ingredient.
         :param slug:
         :return: Dict
-        :raises KeyError: not found
         """
         ingredient_tree = IngredientTreeCache.retrieve()
         return ingredient_tree.substitutions(slug)

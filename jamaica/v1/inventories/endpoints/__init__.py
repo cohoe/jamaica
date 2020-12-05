@@ -86,7 +86,7 @@ class InventoryEndpoint(Resource):
         Delete a single object from the database.
         :param id: GUID of the object.
         :return: None
-        :raises KeyError:
+        :raises KeyError: not found
         """
         i = InventoryFactory.produce_obj(session=current_session, id=id)
         InventoryFactory.delete_obj(session=current_session, obj=i)

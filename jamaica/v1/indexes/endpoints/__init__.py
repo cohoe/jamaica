@@ -42,7 +42,6 @@ class IndexEndpoint(Resource):
         Delete the contents of an index.
         :param name: The name key of the index.
         :return: Number of documents deleted.
-        :raises KeyError:
         """
         index = index_factory.get_index(name=name)
         counter = index.delete_all()
