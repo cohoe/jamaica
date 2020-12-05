@@ -7,11 +7,9 @@ from flask_sqlalchemy_session import current_session
 
 from barbados.search.cocktail import CocktailSearch
 from barbados.caches import CocktailScanCache, RecipeBibliographyCache
-from barbados.models import CocktailModel
 from barbados.factories import CocktailFactory
 from barbados.serializers import ObjectSerializer
-from barbados.indexers import indexer_factory
-from barbados.validators import ObjectValidator
+from barbados.indexers.recipeindexer import RecipeIndexer
 
 ns = api.namespace('v1/cocktails', description='Cocktail recipes.')
 
@@ -38,20 +36,13 @@ class CocktailsEndpoint(Resource):
         :return: Serialized Cocktail object.
         :raises IntegrityError:
         """
-        # Build
         c = CocktailFactory.raw_to_obj(api.payload, api.payload.get('slug'))
-        model = CocktailModel(**ObjectSerializer.serialize(c, 'dict'))
-        ObjectValidator.validate(model, session=current_session)
-
-        # Write
-        current_session.add(model)
-        current_session.commit()
-        indexer_factory.get_indexer(c).index(c)
+        CocktailFactory.store_obj(session=current_session, obj=c)
+        RecipeIndexer.index(c)
 
         # Invalidate Cache
         CocktailScanCache.invalidate()
 
-        # Return
         return ObjectSerializer.serialize(c, 'dict')
 
     @api.response(204, 'successful delete')
@@ -60,16 +51,15 @@ class CocktailsEndpoint(Resource):
         Delete all cocktails from the database. There be dragons here.
         :return: Number of items deleted.
         """
-        results = current_session.query(CocktailModel).all()
-        for result in results:
-            c = CocktailFactory.model_to_obj(result)
-            current_session.delete(result)
-            indexer_factory.get_indexer(c).delete(c)
+        objects = CocktailFactory.produce_all_objs(session=current_session)
+        for c in objects:
+            CocktailFactory.delete_obj(session=current_session, obj=c, commit=False)
 
+        RecipeIndexer.empty()
         current_session.commit()
         CocktailScanCache.invalidate()
 
-        return len(results)
+        return len(objects)
 
 
 @ns.route('/search')
@@ -121,17 +111,11 @@ class CocktailEndpoint(Resource):
         :return:
         :raises KeyError:
         """
-        result = current_session.query(CocktailModel).get(slug)
-        c = CocktailFactory.model_to_obj(result)
-
-        if not result:
-            raise KeyError('Not found')
-
-        current_session.delete(result)
-        current_session.commit()
+        c = CocktailFactory.produce_obj(session=current_session, slug=slug)
+        CocktailFactory.delete_obj(session=current_session, obj=c)
 
         CocktailScanCache.invalidate()
-        indexer_factory.get_indexer(c).delete(c)
+        RecipeIndexer.delete(c)
 
 
 @ns.route('/bibliography')

@@ -7,11 +7,9 @@ from flask_sqlalchemy_session import current_session
 
 from barbados.search.ingredient import IngredientSearch
 from barbados.caches import IngredientTreeCache, IngredientScanCache
-from barbados.models import IngredientModel
 from barbados.factories import IngredientFactory
 from barbados.serializers import ObjectSerializer
-from barbados.indexers import indexer_factory
-from barbados.validators import ObjectValidator
+from barbados.indexers.ingredientindexer import IngredientIndexer
 
 ns = api.namespace('v1/ingredients', description='Ingredient database.')
 
@@ -39,12 +37,8 @@ class IngredientsEndpoint(Resource):
         :raises IntegrityError:
         """
         i = IngredientFactory.raw_to_obj(api.payload)
-        model = IngredientModel(**ObjectSerializer.serialize(i, 'dict'))
-        ObjectValidator.validate(model, session=current_session)
-
-        current_session.add(model)
-        current_session.commit()
-        indexer_factory.get_indexer(i).index(i)
+        IngredientFactory.store_obj(session=current_session, obj=i)
+        IngredientIndexer.index(i)
 
         # Invalidate cache
         IngredientScanCache.invalidate()
@@ -58,17 +52,17 @@ class IngredientsEndpoint(Resource):
         Delete all ingredients from the database. There be dragons here.
         :return: Number of items deleted.
         """
-        results = current_session.query(IngredientModel).all()
-        for result in results:
-            i = IngredientFactory.model_to_obj(result)
-            current_session.delete(result)
-            indexer_factory.get_indexer(i).delete(i)
+        objects = IngredientFactory.produce_all_objs(session=current_session)
+        for i in objects:
+            IngredientFactory.delete_obj(session=current_session, obj=i, commit=False)
+
+        IngredientIndexer.empty()
 
         current_session.commit()
         IngredientScanCache.invalidate()
         IngredientTreeCache.invalidate()
 
-        return len(results)
+        return len(objects)
 
 
 @ns.route('/search')
@@ -113,8 +107,7 @@ class IngredientEndpoint(Resource):
         :return: Serialized Ingredient
         :raises KeyError: not found
         """
-        result = current_session.query(IngredientModel).get(slug)
-        c = IngredientFactory.model_to_obj(result)
+        c = IngredientFactory.produce_obj(session=current_session, slug=slug)
         return ObjectSerializer.serialize(c, 'dict')
 
     @api.response(204, 'successful delete')
@@ -125,18 +118,13 @@ class IngredientEndpoint(Resource):
         :return:
         :raises KeyError:
         """
-        result = current_session.query(IngredientModel).get(slug)
-        i = IngredientFactory.model_to_obj(result)
+        i = IngredientFactory.produce_obj(session=current_session, slug=slug)
+        IngredientFactory.delete_obj(session=current_session, obj=i)
 
-        if not result:
-            raise KeyError('Not found')
-
-        current_session.delete(result)
-        current_session.commit()
-
+        # Invalidate caches and de-index.
         IngredientScanCache.invalidate()
         IngredientTreeCache.invalidate()
-        indexer_factory.get_indexer(i).delete(i)
+        IngredientIndexer.delete(i)
 
 
 @ns.route('/<string:slug>/subtree')

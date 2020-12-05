@@ -5,13 +5,11 @@ from jamaica.v1.menus.serializers import MenuObject, MenuSearchItem
 from jamaica.v1.menus.parsers import menu_list_parser
 from flask_sqlalchemy_session import current_session
 
-from barbados.models import MenuModel
 from barbados.factories import MenuFactory
 from barbados.serializers import ObjectSerializer
 from barbados.caches import MenuScanCache
-from barbados.indexers import indexer_factory
+from barbados.indexers.menuindexer import MenuIndexer
 from barbados.search.menu import MenuSearch
-from barbados.validators import ObjectValidator
 
 ns = api.namespace('v1/menus', description='Drink lists.')
 
@@ -39,12 +37,8 @@ class MenusEndpoint(Resource):
         :raises IntegrityError:
         """
         m = MenuFactory.raw_to_obj(api.payload)
-        model = MenuModel(**ObjectSerializer.serialize(m, 'dict'))
-        ObjectValidator.validate(model, session=current_session)
-
-        current_session.add(model)
-        current_session.commit()
-        indexer_factory.get_indexer(m).index(m)
+        MenuFactory.store_obj(session=current_session, obj=m)
+        MenuIndexer.index(m)
 
         # Invalidate Cache
         MenuScanCache.invalidate()
@@ -57,16 +51,15 @@ class MenusEndpoint(Resource):
         Delete all menus from the database. There be dragons here.
         :return: Number of items deleted.
         """
-        results = current_session.query(MenuModel).all()
-        for result in results:
-            m = MenuFactory.model_to_obj(result)
-            current_session.delete(result)
-            indexer_factory.get_indexer(m).delete(m)
+        objects = MenuFactory.produce_all_objs(session=current_session)
+        for m in objects:
+            MenuFactory.delete_obj(session=current_session, obj=m, commit=False)
 
+        MenuIndexer.empty()
         current_session.commit()
         MenuScanCache.invalidate()
 
-        return len(results)
+        return len(objects)
 
 
 @ns.route('/search')
@@ -97,8 +90,7 @@ class MenuEndpoint(Resource):
         :return: Serialized Menu
         :raises KeyError: not found
         """
-        result = current_session.query(MenuModel).get(slug)
-        c = MenuFactory.model_to_obj(result)
+        c = MenuFactory.produce_obj(session=current_session, slug=slug)
         return ObjectSerializer.serialize(c, 'dict')
 
     @api.response(204, 'successful delete')
@@ -109,15 +101,9 @@ class MenuEndpoint(Resource):
         :return:
         :raises KeyError:
         """
-        result = current_session.query(MenuModel).get(slug)
-        m = MenuFactory.model_to_obj(result)
+        m = MenuFactory.produce_obj(session=current_session, slug=slug)
+        MenuFactory.delete_obj(session=current_session, obj=m)
 
-        if not result:
-            raise KeyError('Not found')
-
-        current_session.delete(result)
-        current_session.commit()
-
-        # Invalidate Cache
+        # Invalidate Cache and de-index.
         MenuScanCache.invalidate()
-        indexer_factory.get_indexer(m).delete(m)
+        MenuIndexer.delete(m)

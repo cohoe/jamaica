@@ -5,13 +5,10 @@ from jamaica.v1.inventories.serializers import InventoryObject
 # from jamaica.v1.inventories.parsers import menu_list_parser
 from flask_sqlalchemy_session import current_session
 
-from barbados.models import InventoryModel
 from barbados.factories import InventoryFactory
 from barbados.serializers import ObjectSerializer
 from barbados.caches import InventoryScanCache, IngredientTreeCache
-from barbados.indexers import indexer_factory
-from barbados.search.menu import MenuSearch
-from barbados.validators import ObjectValidator
+
 
 ns = api.namespace('v1/inventories', description='Inventories.')
 
@@ -38,19 +35,16 @@ class InventoriesEndpoint(Resource):
         :return: Object that you created.
         :raises IntegrityError:
         """
-        f = InventoryFactory.raw_to_obj(api.payload)
-        model = InventoryModel(**ObjectSerializer.serialize(f, 'dict'))
-        ObjectValidator.validate(model, session=current_session)
+        i = InventoryFactory.raw_to_obj(api.payload)
+        InventoryFactory.store_obj(session=current_session, obj=i)
 
-        current_session.add(model)
-        current_session.commit()
         # @TODO index inventories?
         # indexer_factory.get_indexer(m).index(m)
 
         # Invalidate Cache
         InventoryScanCache.invalidate()
 
-        return ObjectSerializer.serialize(f, 'dict')
+        return ObjectSerializer.serialize(i, 'dict')
 
     @api.response(204, 'successful delete')
     def delete(self):
@@ -58,17 +52,16 @@ class InventoriesEndpoint(Resource):
         Delete all objects from the database. There be dragons here.
         :return: Number of items deleted.
         """
-        results = current_session.query(InventoryModel).all()
-        for result in results:
-            i = InventoryFactory.model_to_obj(result)
-            current_session.delete(result)
-            # @TODO indexes
-            # indexer_factory.get_indexer(i).delete(i)
 
-        current_session.commit()
+        objects = InventoryFactory.produce_all_objs(session=current_session)
+        for i in objects:
+            InventoryFactory.delete_obj(session=current_session, obj=i, commit=False)
+
+        # @TODO indexes
+        # InventoryIndexer.empty()
         InventoryScanCache.invalidate()
 
-        return len(results)
+        return len(objects)
 
 
 @ns.route('/<uuid:id>')
@@ -84,8 +77,7 @@ class InventoryEndpoint(Resource):
         :return: Serialized Object
         :raises KeyError: not found
         """
-        result = current_session.query(InventoryModel).get(id)
-        c = InventoryFactory.model_to_obj(result)
+        c = InventoryFactory.produce_obj(session=current_session, id=id)
         return ObjectSerializer.serialize(c, 'dict')
 
     @api.response(204, 'successful delete')
@@ -96,14 +88,8 @@ class InventoryEndpoint(Resource):
         :return: None
         :raises KeyError:
         """
-        result = current_session.query(InventoryModel).get(id)
-        i = InventoryFactory.model_to_obj(result)
-
-        if not result:
-            raise KeyError('Not found')
-
-        current_session.delete(result)
-        current_session.commit()
+        i = InventoryFactory.produce_obj(session=current_session, id=id)
+        InventoryFactory.delete_obj(session=current_session, obj=i)
 
         # Invalidate Cache
         InventoryScanCache.invalidate()
@@ -125,13 +111,12 @@ class InventoryFullEndpoint(Resource):
         :return: Serialized Object
         :raises KeyError: not found
         """
-        result = current_session.query(InventoryModel).get(id)
-        c = InventoryFactory.model_to_obj(result)
+        i = InventoryFactory.produce_obj(session=current_session, id=id)
         # @TODO until dev is done
         # tree = IngredientTreeCache.retrieve()
         from barbados.objects.ingredienttree import IngredientTree
         tree = IngredientTree()
 
-        c.full(tree=tree)
+        i.full(tree=tree)
 
-        return ObjectSerializer.serialize(c, 'dict')
+        return ObjectSerializer.serialize(i, 'dict')
