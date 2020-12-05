@@ -88,7 +88,7 @@ class MenuEndpoint(Resource):
         :param slug:
         :return: Serialized Menu
         """
-        c = MenuFactory.produce_obj(session=current_session, slug=slug)
+        c = MenuFactory.produce_obj(session=current_session, id=slug)
         return ObjectSerializer.serialize(c, 'dict')
 
     @api.response(204, 'successful delete')
@@ -98,7 +98,7 @@ class MenuEndpoint(Resource):
         :param slug:
         :return:
         """
-        m = MenuFactory.produce_obj(session=current_session, slug=slug)
+        m = MenuFactory.produce_obj(session=current_session, id=slug)
         MenuFactory.delete_obj(session=current_session, obj=m)
 
         # Invalidate Cache and de-index.

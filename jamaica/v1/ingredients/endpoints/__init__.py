@@ -105,7 +105,7 @@ class IngredientEndpoint(Resource):
         :param slug:
         :return: Serialized Ingredient
         """
-        c = IngredientFactory.produce_obj(session=current_session, slug=slug)
+        c = IngredientFactory.produce_obj(session=current_session, id=slug)
         return ObjectSerializer.serialize(c, 'dict')
 
     @api.response(204, 'successful delete')
@@ -115,7 +115,7 @@ class IngredientEndpoint(Resource):
         :param slug:
         :return:
         """
-        i = IngredientFactory.produce_obj(session=current_session, slug=slug)
+        i = IngredientFactory.produce_obj(session=current_session, id=slug)
         IngredientFactory.delete_obj(session=current_session, obj=i)
 
         # Invalidate caches and de-index.

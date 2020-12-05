@@ -2,12 +2,15 @@ import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
 from jamaica.v1.inventories.serializers import InventoryObject
+from jamaica.v1.serializers import CocktailSearchItem
 # from jamaica.v1.inventories.parsers import menu_list_parser
 from flask_sqlalchemy_session import current_session
 
 from barbados.factories import InventoryFactory
 from barbados.serializers import ObjectSerializer
 from barbados.caches import InventoryScanCache, IngredientTreeCache
+from barbados.search.cocktail import CocktailSearch
+from barbados.services.logging import Log
 
 
 ns = api.namespace('v1/inventories', description='Inventories.')
@@ -115,10 +118,80 @@ class InventoryFullEndpoint(Resource):
         """
         i = InventoryFactory.produce_obj(session=current_session, id=id)
         # @TODO until dev is done
-        # tree = IngredientTreeCache.retrieve()
-        from barbados.objects.ingredienttree import IngredientTree
-        tree = IngredientTree()
+        tree = IngredientTreeCache.retrieve()
+        # from barbados.objects.ingredienttree import IngredientTree
+        # tree = IngredientTree()
 
         i.full(tree=tree)
 
         return ObjectSerializer.serialize(i, 'dict')
+
+
+@ns.route('/<uuid:id>/recipes')
+@api.doc(params={'id': 'An object ID.'})
+class InventoryRecipesEndpoint(Resource):
+
+    @api.response(200, 'success')
+    @api.marshal_list_with(CocktailSearchItem)
+    def get(self, id):
+        """
+        Return a list of all recipes that this inventory can make.
+        # @TODO parameter for tolerance to find things that are missing n.
+        :param id: GUID of the object.
+        """
+        recipes = []
+
+        i = InventoryFactory.produce_obj(session=current_session, id=id)
+        i.full(tree=IngredientTreeCache.retrieve())
+
+        inventory_item_slugs = []
+        for inventory_item in i.items:
+            inventory_item_slugs.append(inventory_item.slug)
+            # print(inventory_item.slug)
+            recipe_search_results = CocktailSearch(components=[inventory_item.slug]).execute()
+            recipes += recipe_search_results
+
+        Log.info("This inventory contains: %s" % inventory_item_slugs)
+
+        # CocktailSearch(**args).execute()
+        accepted_results = []
+        # print(len(recipe_search_results))
+        for result in recipe_search_results:
+            # print(list(result.keys()))
+
+            component_status = {}
+
+            for spec_component in result.get('hit').get('spec').get('components'):
+                #print(spec_component.get('slug'))
+                # Check if we have the specified ingredient
+                spec_component_slug = spec_component.get('slug')
+
+                # Establish baseline status of not-found.
+                component_status[spec_component_slug] = None
+
+                if spec_component_slug in inventory_item_slugs:
+                    # Log.info("Match on %s" % spec_component_slug)
+                    component_status[spec_component_slug] = 'DIRECT'
+                else:
+                    # Log.info("Failed on %s" % spec_component.get('slug'))
+                    for spec_component_parent in spec_component.get('parents'):
+                        if spec_component_parent in inventory_item_slugs:
+                            # Log.info("Match on %s" % spec_component_parent)
+                            component_status[spec_component_slug] = 'IMPLIED'
+
+            # print(component_status)
+            if None in component_status.values():
+                # Log.error("Failed inventory for %s" % result)
+                continue
+
+            accepted_results.append(result)
+
+
+        return accepted_results
+        """
+        Random Notes
+        
+        function to compare inventory to a recipe (recipe = spec of a cocktail)
+        simple yes/no
+        
+        """

@@ -1,7 +1,8 @@
 import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
-from jamaica.v1.cocktails.serializers import CocktailSearchItem, CocktailItem, CitationItem
+from jamaica.v1.serializers import CocktailSearchItem
+from jamaica.v1.cocktails.serializers import CocktailItem, CitationItem
 from jamaica.v1.cocktails.parsers import cocktail_list_parser
 from flask_sqlalchemy_session import current_session
 
@@ -97,7 +98,7 @@ class CocktailEndpoint(Resource):
         :return: Serialized Cocktail
         :raises IntegrityError: Duplicate
         """
-        c = CocktailFactory.produce_obj(session=current_session, slug=slug)
+        c = CocktailFactory.produce_obj(session=current_session, id=slug)
         return ObjectSerializer.serialize(c, 'dict')
 
     @api.response(204, 'successful delete')
@@ -107,7 +108,7 @@ class CocktailEndpoint(Resource):
         :param slug:
         :return:
         """
-        c = CocktailFactory.produce_obj(session=current_session, slug=slug)
+        c = CocktailFactory.produce_obj(session=current_session, id=slug)
         CocktailFactory.delete_obj(session=current_session, obj=c)
 
         CocktailScanCache.invalidate()

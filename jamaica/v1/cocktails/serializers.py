@@ -1,16 +1,7 @@
 from flask_restx import fields
 from jamaica.v1.restx import api
-from jamaica.v1.serializers import DisplayItemBase, SearchResultBase, TextItem, NullableString
+from jamaica.v1.serializers import DisplayItemBase, TextItem, NullableString
 
-
-CocktailSearchItem = api.inherit('CocktailSearchItem', SearchResultBase, {
-    'cocktail_slug': fields.String(attribute='hit.slug', description='Cocktail slug'),
-    'cocktail_display_name': fields.String(attribute='hit.display_name', description='Cocktail display name'),
-    'spec_slug': fields.String(attribute='hit.spec.slug', description='Spec slug'),
-    'spec_display_name': fields.String(attribute='hit.spec.display_name', description='Spec display name'),
-    'construction_slug': fields.String(attribute='hit.spec.construction.slug', description='Construction slug'),
-    'component_display_names': fields.List(fields.String(attribute='display_name'), attribute='hit.spec.components', description='Display names of components in this spec', example=['rum', 'sherry', 'vermouth']),
-})
 
 OriginItem = api.model('OriginItem', {
     'creator': fields.String(description='Stylized name of the person who created this.', example='Sother Teague'),

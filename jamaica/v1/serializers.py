@@ -23,3 +23,12 @@ TextItem = api.model('TextItem', {
     'author': NullableString(description='Author of this text.', example='root'),
     'datetime': fields.String(description='UTC timestamp (datetime.datetime.isoformat())', example='2020-05-04T02:36:11.368253', required=False)
 })
+
+CocktailSearchItem = api.inherit('CocktailSearchItem', SearchResultBase, {
+    'cocktail_slug': fields.String(attribute='hit.slug', description='Cocktail slug'),
+    'cocktail_display_name': fields.String(attribute='hit.display_name', description='Cocktail display name'),
+    'spec_slug': fields.String(attribute='hit.spec.slug', description='Spec slug'),
+    'spec_display_name': fields.String(attribute='hit.spec.display_name', description='Spec display name'),
+    'construction_slug': fields.String(attribute='hit.spec.construction.slug', description='Construction slug'),
+    'component_display_names': fields.List(fields.String(attribute='display_name'), attribute='hit.spec.components', description='Display names of components in this spec', example=['rum', 'sherry', 'vermouth']),
+})
