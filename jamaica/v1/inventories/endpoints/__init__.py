@@ -3,14 +3,15 @@ from flask_restx import Resource
 from jamaica.v1.restx import api
 from jamaica.v1.inventories.serializers import InventoryObject
 from jamaica.v1.serializers import CocktailSearchItem
-# from jamaica.v1.inventories.parsers import menu_list_parser
+from jamaica.v1.inventories.parsers import inventory_resolve_parser
 from flask_sqlalchemy_session import current_session
 
-from barbados.factories import InventoryFactory
+from barbados.factories import InventoryFactory, CocktailFactory
 from barbados.serializers import ObjectSerializer
 from barbados.caches import InventoryScanCache, IngredientTreeCache
 from barbados.search.cocktail import CocktailSearch
 from barbados.services.logging import Log
+from barbados.resolvers.reciperesolver import RecipeResolver
 
 
 ns = api.namespace('v1/inventories', description='Inventories.')
@@ -122,7 +123,7 @@ class InventoryFullEndpoint(Resource):
         # from barbados.objects.ingredienttree import IngredientTree
         # tree = IngredientTree()
 
-        i.full(tree=tree)
+        i.populate_implicit_items(tree=tree)
 
         return ObjectSerializer.serialize(i, 'dict')
 
@@ -186,12 +187,32 @@ class InventoryRecipesEndpoint(Resource):
 
             accepted_results.append(result)
 
-
         return accepted_results
+
+
+@ns.route('/<uuid:id>/resolve')
+@api.doc(params={'id': 'An object ID.'})
+class InventoryResolveEndpoint(Resource):
+
+    @api.response(200, 'success')
+    @api.expect(inventory_resolve_parser, validate=True)
+    # @api.marshal_list_with(CocktailSearchItem)
+    def get(self, id):
         """
-        Random Notes
-        
-        function to compare inventory to a recipe (recipe = spec of a cocktail)
-        simple yes/no
-        
+        :param id: GUID of the object.
         """
+        args = inventory_resolve_parser.parse_args(strict=True)
+
+        # Don't return any results if all parameters are empty.
+        # https://stackoverflow.com/questions/35253971/how-to-check-if-all-values-of-a-dictionary-are-0
+        if all(value is None for value in args.values()):
+            return []
+
+        i = InventoryFactory.produce_obj(session=current_session, id=id)
+
+        results = []
+        if args.recipe:
+            c = CocktailFactory.produce_obj(session=current_session, id=args.recipe)
+            results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=args.spec)
+
+        return [ObjectSerializer.serialize(rs, 'dict') for rs in results]

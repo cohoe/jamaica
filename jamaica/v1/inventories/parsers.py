@@ -1,0 +1,7 @@
+from flask_restx import reqparse
+
+inventory_resolve_parser = reqparse.RequestParser()
+inventory_resolve_parser.add_argument('recipe', type=str, help='cocktail slug')
+inventory_resolve_parser.add_argument('spec', type=str, help='spec slug from the cocktail')
+# @TODO inventory resolution
+# inventory_resolve_parser.add_argument('ingredient', type=str, help='cocktail slug')
