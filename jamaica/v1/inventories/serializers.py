@@ -2,7 +2,9 @@ from flask_restx import fields
 from jamaica.v1.restx import api
 from jamaica.v1.serializers import DisplayItemBase
 
-InventoryItemObject = api.inherit('InventoryItemObject', DisplayItemBase, {})
+InventoryItemObject = api.inherit('InventoryItemObject', DisplayItemBase, {
+    'implied_by': fields.String(attribute='implied_by', description='Slug of the ingredient that implies this one.')
+})
 
 InventoryObject = api.model('InventoryObject', {
     'id': fields.String(attribute='id', description='ID of this inventory.'),

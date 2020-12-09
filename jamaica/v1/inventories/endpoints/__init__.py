@@ -119,9 +119,9 @@ class InventoryFullEndpoint(Resource):
         """
         i = InventoryFactory.produce_obj(session=current_session, id=id)
         # @TODO until dev is done
-        tree = IngredientTreeCache.retrieve()
-        # from barbados.objects.ingredienttree import IngredientTree
-        # tree = IngredientTree()
+        # tree = IngredientTreeCache.retrieve()
+        from barbados.objects.ingredienttree import IngredientTree
+        tree = IngredientTree()
 
         i.populate_implicit_items(tree=tree)
 
