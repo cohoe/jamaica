@@ -31,7 +31,7 @@ class InventoriesEndpoint(Resource):
         return serialized_objects
 
     @api.response(200, 'success')
-    @api.expect(InventoryObject, validate=True)
+    # @api.expect(InventoryObject, validate=True)
     @api.marshal_with(InventoryObject)
     def post(self):
         """
