@@ -124,7 +124,7 @@ class InventoryFullEndpoint(Resource):
         from barbados.objects.ingredienttree import IngredientTree
         tree = IngredientTree()
 
-        i.populate_implicit_items(tree=tree)
+        i.expand(tree=tree)
 
         return ObjectSerializer.serialize(i, 'dict')
 

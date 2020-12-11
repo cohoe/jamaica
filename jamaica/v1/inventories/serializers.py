@@ -20,7 +20,7 @@ class InventoryItemObject(fields.Raw):
         """
         return {
             'slug': value.get('slug'),
-            'implied_by': value.get('implied_by'),
+            'substitutes': value.get('substitutes'),
         }
 
 
