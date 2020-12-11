@@ -34,7 +34,8 @@ InventoryObject = api.model('InventoryObject', {
 InventoryResolutionObject = api.model('InventoryResolutionObject', {
     'slug': fields.String(attribute='slug', description='component/ingredient slug'),
     'status': fields.String(attribute='status', description='status key'),
-    'substitutes': fields.List(fields.String, attribute='substitutes', description='list of substitute ingredient slugs')
+    'substitutes': fields.List(fields.String, attribute='substitutes', description='list of substitute ingredient slugs'),
+    'parent': fields.String(attribute='parent', description='Parent of this item.')
 })
 
 # https://flask-restx.readthedocs.io/en/latest/marshalling.html
