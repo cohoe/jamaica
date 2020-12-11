@@ -30,3 +30,22 @@ InventoryObject = api.model('InventoryObject', {
     'items': fields.Wildcard(InventoryItemObject, attribute='items'),
     'implicit_items': fields.Wildcard(InventoryItemObject, attribute='implicit_items'),
 })
+
+InventoryResolutionObject = api.model('InventoryResolutionObject', {
+    'slug': fields.String(attribute='slug', description='component/ingredient slug'),
+    'status': fields.String(attribute='status', description='status key'),
+    'substitutes': fields.List(fields.String, attribute='substitutes', description='list of substitute ingredient slugs')
+})
+
+# https://flask-restx.readthedocs.io/en/latest/marshalling.html
+# Even though it seems I can unify to a single line here, the guide
+# tells me I shouldn't. I'll take their word for it. /shrug
+count_value = fields.Wildcard(fields.Integer)
+InventoryResolutionStatusCount = {'*': count_value}
+
+InventoryResolutionSummaryObject = api.model('InventoryResolutionSummaryObject', {
+    'cocktail_slug': fields.String(attribute='cocktail_slug'),
+    'spec_slug': fields.String(attribute='spec_slug'),
+    'components': fields.List(fields.Nested(InventoryResolutionObject), attribute='components'),
+    'status_count': fields.Nested(InventoryResolutionStatusCount, attribute='status_count')
+})

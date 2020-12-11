@@ -4,6 +4,7 @@ from jamaica.v1.restx import api
 from jamaica.v1.inventories.serializers import InventoryObject
 from jamaica.v1.serializers import CocktailSearchItem
 from jamaica.v1.inventories.parsers import inventory_resolve_parser
+from jamaica.v1.inventories.serializers import InventoryResolutionSummaryObject
 from flask_sqlalchemy_session import current_session
 
 from barbados.factories import InventoryFactory, CocktailFactory
@@ -196,7 +197,7 @@ class InventoryResolveEndpoint(Resource):
 
     @api.response(200, 'success')
     @api.expect(inventory_resolve_parser, validate=True)
-    # @api.marshal_list_with(CocktailSearchItem)
+    @api.marshal_list_with(InventoryResolutionSummaryObject)
     def get(self, id):
         """
         :param id: GUID of the object.
