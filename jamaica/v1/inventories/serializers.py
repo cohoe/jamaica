@@ -1,34 +1,26 @@
 from flask_restx import fields
 from jamaica.v1.restx import api
 
+InventoryItemObject = api.model('InventoryItemObject', {
+    'slug': fields.String(description='Slug of this inventory item.', attribute='slug', example='regans-orange-bitters'),
+    'substitutions': fields.List(fields.String(description='Slug of the substitute ingredient.', example='fee-bros-orange'),
+                                 attribute='substitutes', example=['fee-bros-orange', '1821-orange'],
+                                 description='List of substitute ingredient slugs.')
+})
 
-class InventoryItemObject(fields.Raw):
-    """
-    https://flask-restx.readthedocs.io/en/latest/marshalling.html
-    https://stackoverflow.com/questions/58919366/flask-restplus-fields-nested-with-raw-dict-not-model
-    """
-    def format(self, value):
-        return {slug: self._get_formatted(obj) for slug, obj in value.items()}
-
-    @staticmethod
-    def _get_formatted(value):
-        """
-        Can't use Yield here because we're not a List.
-        https://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do
-        :param value:
-        :return:
-        """
-        return {
-            'slug': value.get('slug'),
-            'substitutes': value.get('substitutes'),
-        }
-
+# https://flask-restx.readthedocs.io/en/latest/marshalling.html
+# Even though it seems I can unify to a single line here, the guide
+# tells me I shouldn't. I'll take their word for it. /shrug
+InventoryItemsWildcard = fields.Wildcard(fields.Nested(InventoryItemObject), description='InventoryItemObjects')
+InventoryItems = api.model('InventoryItems', {
+    '*': InventoryItemsWildcard
+})
 
 InventoryObject = api.model('InventoryObject', {
     'id': fields.String(attribute='id', description='ID of this inventory.'),
     'display_name': fields.String(attribute='display_name', description='Display name of this inventory.'),
-    'items': fields.Wildcard(InventoryItemObject, attribute='items'),
-    'implicit_items': fields.Wildcard(InventoryItemObject, attribute='implicit_items'),
+    'items': fields.Nested(InventoryItems, attribute='items'),
+    'implicit_items': fields.Nested(InventoryItems, attribute='implicit_items')
 })
 
 InventoryResolutionObject = api.model('InventoryResolutionObject', {
