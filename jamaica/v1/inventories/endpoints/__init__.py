@@ -4,14 +4,13 @@ from jamaica.v1.restx import api
 from jamaica.v1.inventories.serializers import InventoryObject
 from jamaica.v1.serializers import CocktailSearchItem
 from jamaica.v1.inventories.parsers import inventory_resolve_parser
-from jamaica.v1.inventories.serializers import InventoryResolutionSummaryObject
+from jamaica.v1.inventories.serializers import InventoryResolutionSummaryObject, InventoryItemObject
 from flask_sqlalchemy_session import current_session
 
-from barbados.factories import InventoryFactory, CocktailFactory
+from barbados.factories.inventoryfactory import InventoryFactory
+from barbados.factories.cocktailfactory import CocktailFactory
 from barbados.serializers import ObjectSerializer
-from barbados.caches import InventoryScanCache, IngredientTreeCache
-from barbados.search.cocktail import CocktailSearch
-from barbados.services.logging import Log
+from barbados.caches.tablescan import InventoryScanCache
 from barbados.resolvers.reciperesolver import RecipeResolver
 
 
@@ -118,14 +117,7 @@ class InventoryFullEndpoint(Resource):
         :return: Serialized Object
         :raises KeyError: not found
         """
-        i = InventoryFactory.produce_obj(session=current_session, id=id)
-        # @TODO until dev is done
-        # tree = IngredientTreeCache.retrieve()
-        from barbados.objects.ingredienttree import IngredientTree
-        tree = IngredientTree()
-
-        i.expand(tree=tree)
-
+        i = InventoryFactory.produce_obj(session=current_session, id=id, expand=True)
         return ObjectSerializer.serialize(i, 'dict')
 
 
@@ -137,58 +129,11 @@ class InventoryRecipesEndpoint(Resource):
     @api.marshal_list_with(CocktailSearchItem)
     def get(self, id):
         """
-        Return a list of all recipes that this inventory can make.
-        # @TODO parameter for tolerance to find things that are missing n.
-        :param id: GUID of the object.
+        @TODO this
+        :param id:
+        :return:
         """
-        recipes = []
-
-        i = InventoryFactory.produce_obj(session=current_session, id=id)
-        i.full(tree=IngredientTreeCache.retrieve())
-
-        inventory_item_slugs = []
-        for inventory_item in i.items:
-            inventory_item_slugs.append(inventory_item.slug)
-            # print(inventory_item.slug)
-            recipe_search_results = CocktailSearch(components=[inventory_item.slug]).execute()
-            recipes += recipe_search_results
-
-        Log.info("This inventory contains: %s" % inventory_item_slugs)
-
-        # CocktailSearch(**args).execute()
-        accepted_results = []
-        # print(len(recipe_search_results))
-        for result in recipe_search_results:
-            # print(list(result.keys()))
-
-            component_status = {}
-
-            for spec_component in result.get('hit').get('spec').get('components'):
-                #print(spec_component.get('slug'))
-                # Check if we have the specified ingredient
-                spec_component_slug = spec_component.get('slug')
-
-                # Establish baseline status of not-found.
-                component_status[spec_component_slug] = None
-
-                if spec_component_slug in inventory_item_slugs:
-                    # Log.info("Match on %s" % spec_component_slug)
-                    component_status[spec_component_slug] = 'DIRECT'
-                else:
-                    # Log.info("Failed on %s" % spec_component.get('slug'))
-                    for spec_component_parent in spec_component.get('parents'):
-                        if spec_component_parent in inventory_item_slugs:
-                            # Log.info("Match on %s" % spec_component_parent)
-                            component_status[spec_component_slug] = 'IMPLIED'
-
-            # print(component_status)
-            if None in component_status.values():
-                # Log.error("Failed inventory for %s" % result)
-                continue
-
-            accepted_results.append(result)
-
-        return accepted_results
+        pass
 
 
 @ns.route('/<uuid:id>/resolve')
@@ -217,3 +162,28 @@ class InventoryResolveEndpoint(Resource):
             results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=args.spec)
 
         return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
+
+
+@ns.route('/<uuid:id>/item/<string:slug>')
+@api.doc(params={
+    'id': 'An inventory ID',
+    'slug': 'An item slug'
+})
+class InventoryItemEndpoint(Resource):
+
+    @api.response(200, 'success')
+    @api.marshal_with(InventoryItemObject)
+    def get(self, id, slug):
+        """
+        Return a single inventory item.
+        :param id: GUID of the inventory.
+        :param slug: Slug of the item.
+        :return: InventoryItem
+        """
+        i = InventoryFactory.produce_obj(session=current_session, id=id, expand=True)
+        ii = i.items.get(slug)
+
+        if not ii:
+            raise KeyError("Item %s not found in inventory %s." % (slug, id))
+
+        return ObjectSerializer.serialize(ii, 'dict')

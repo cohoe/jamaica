@@ -1,8 +1,7 @@
-import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
 
-from barbados.caches import cache_factory
+from barbados.caches import Caches
 
 ns = api.namespace('v1/caches', description='Caches.')
 
@@ -16,7 +15,7 @@ class CachesEndpoint(Resource):
         Return a list of all cache keys.
         :return: List[Dict]
         """
-        keys = cache_factory.cache_keys()
+        keys = Caches.cache_keys()
         return keys
 
 
@@ -31,7 +30,7 @@ class CacheEndpoint(Resource):
         :param key: The cache key to invalidate
         :return: None
         """
-        cache = cache_factory.get_cache(key)
+        cache = Caches.get_cache(key)
         cache.invalidate()
 
     @api.response(200, 'successful population')
@@ -41,5 +40,5 @@ class CacheEndpoint(Resource):
         :param key: The cache key to populate
         :return: None
         """
-        cache = cache_factory.get_cache(key)
+        cache = Caches.get_cache(key)
         cache.populate()

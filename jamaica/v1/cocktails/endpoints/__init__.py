@@ -7,7 +7,8 @@ from jamaica.v1.cocktails.parsers import cocktail_list_parser
 from flask_sqlalchemy_session import current_session
 
 from barbados.search.cocktail import CocktailSearch
-from barbados.caches import CocktailScanCache, RecipeBibliographyCache
+from barbados.caches.tablescan import CocktailScanCache
+from barbados.caches.recipebibliography import RecipeBibliographyCache
 from barbados.factories import CocktailFactory
 from barbados.serializers import ObjectSerializer
 from barbados.indexers.recipeindexer import RecipeIndexer

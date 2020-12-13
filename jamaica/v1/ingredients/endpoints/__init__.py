@@ -6,7 +6,8 @@ from jamaica.v1.ingredients.parsers import ingredient_list_parser
 from flask_sqlalchemy_session import current_session
 
 from barbados.search.ingredient import IngredientSearch
-from barbados.caches import IngredientTreeCache, IngredientScanCache
+from barbados.caches.ingredienttree import IngredientTreeCache
+from barbados.caches.tablescan import IngredientScanCache
 from barbados.factories import IngredientFactory
 from barbados.serializers import ObjectSerializer
 from barbados.indexers.ingredientindexer import IngredientIndexer

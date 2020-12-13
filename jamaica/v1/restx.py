@@ -47,8 +47,11 @@ def key_error_handler(error):
     # For some reason something is adding quotes to the error
     # message, thus doubling up on the output quotes.
     # https://stackoverflow.com/questions/40950791/remove-quotes-from-string-in-python
-    # @TODO get this to the rest of the handlers.
-    message = str(error).strip('"')
+    #
+    # Apparently its expected?
+    # https://stackoverflow.com/questions/24998968/why-does-strkeyerror-add-extra-quotes
+    # @TODO get this to the rest of the handlers. Though not sure it's needed?
+    message = str(error).strip('"').strip("'")
     return {'message': message}, 404
 
 
