@@ -37,6 +37,7 @@ count_value = fields.Wildcard(fields.Integer)
 InventoryResolutionStatusCount = {'*': count_value}
 
 InventoryResolutionSummaryObject = api.model('InventoryResolutionSummaryObject', {
+    'inventory_id': fields.String(attribute='inventory_id'),
     'cocktail_slug': fields.String(attribute='cocktail_slug'),
     'spec_slug': fields.String(attribute='spec_slug'),
     'components': fields.List(fields.Nested(InventoryResolutionObject), attribute='components'),

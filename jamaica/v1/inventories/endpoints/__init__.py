@@ -3,7 +3,7 @@ from flask_restx import Resource
 from jamaica.v1.restx import api
 from jamaica.v1.inventories.serializers import InventoryObject
 from jamaica.v1.serializers import CocktailSearchItem
-from jamaica.v1.inventories.parsers import inventory_resolve_parser
+from jamaica.v1.inventories.parsers import inventory_resolve_parser, inventory_recipes_parser
 from jamaica.v1.inventories.serializers import InventoryResolutionSummaryObject, InventoryItemObject
 from flask_sqlalchemy_session import current_session
 
@@ -12,6 +12,8 @@ from barbados.factories.cocktailfactory import CocktailFactory
 from barbados.serializers import ObjectSerializer
 from barbados.caches.tablescan import InventoryScanCache
 from barbados.resolvers.reciperesolver import RecipeResolver
+from barbados.caches.tablescan import CocktailScanCache
+from barbados.search.inventoryspecresolution import InventorySpecResolutionSearch
 
 
 ns = api.namespace('v1/inventories', description='Inventories.')
@@ -126,14 +128,38 @@ class InventoryFullEndpoint(Resource):
 class InventoryRecipesEndpoint(Resource):
 
     @api.response(200, 'success')
-    @api.marshal_list_with(CocktailSearchItem)
+    @api.marshal_list_with(InventoryResolutionSummaryObject)
     def get(self, id):
         """
         @TODO this
         :param id:
         :return:
         """
-        pass
+        i = InventoryFactory.produce_obj(session=current_session, id=id)
+        cocktails_cache = CocktailScanCache.retrieve()
+
+        results = []
+        for raw_c in json.loads(cocktails_cache):
+            c = CocktailFactory.produce_obj(session=current_session, id=raw_c.get('slug'))
+            c_results = RecipeResolver.resolve(inventory=i, cocktail=c)
+            results += c_results
+
+        return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
+
+
+@ns.route('/<uuid:id>/recipes/search')
+@api.doc(params={'id': 'An object ID.'})
+class InventoryRecipesEndpoint(Resource):
+
+    def get(self, id):
+        args = inventory_recipes_parser.parse_args(strict=True)
+
+        # Don't return any results if all parameters are empty.
+        # https://stackoverflow.com/questions/35253971/how-to-check-if-all-values-of-a-dictionary-are-0
+        if all(value is None for value in args.values()):
+            return []
+
+        return InventorySpecResolutionSearch(**args).execute()
 
 
 @ns.route('/<uuid:id>/resolve')
