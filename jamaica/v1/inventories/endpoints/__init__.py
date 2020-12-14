@@ -157,8 +157,8 @@ class InventoryResolveEndpoint(Resource):
         i = InventoryFactory.produce_obj(session=current_session, id=id)
 
         results = []
-        if args.recipe:
-            c = CocktailFactory.produce_obj(session=current_session, id=args.recipe)
+        if args.cocktail:
+            c = CocktailFactory.produce_obj(session=current_session, id=args.cocktail)
             results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=args.spec)
 
         return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
