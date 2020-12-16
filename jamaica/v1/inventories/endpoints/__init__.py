@@ -131,7 +131,7 @@ class InventoryRecipesEndpoint(Resource):
     @api.marshal_list_with(InventoryResolutionSummaryObject)
     def get(self, id):
         """
-        @TODO this
+        @TODO this, something?
         :param id:
         :return:
         """
@@ -152,6 +152,7 @@ class InventoryRecipesEndpoint(Resource):
 class InventoryRecipesEndpoint(Resource):
 
     def get(self, id):
+        # @TODO id
         args = inventory_recipes_parser.parse_args(strict=True)
 
         # Don't return any results if all parameters are empty.
