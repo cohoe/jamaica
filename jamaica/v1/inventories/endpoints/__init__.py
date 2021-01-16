@@ -11,7 +11,7 @@ from barbados.factories.inventoryfactory import InventoryFactory
 from barbados.factories.cocktailfactory import CocktailFactory
 from barbados.serializers import ObjectSerializer
 from barbados.caches.tablescan import InventoryScanCache
-from barbados.resolvers.reciperesolver import RecipeResolver
+from barbados.resolvers.recipe import RecipeResolver
 from barbados.caches.tablescan import CocktailScanCache
 from barbados.search.inventoryspecresolution import InventorySpecResolutionSearch
 

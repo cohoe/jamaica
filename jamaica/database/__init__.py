@@ -1,3 +1,3 @@
-from barbados.services.registry import Registry
+from barbados.services.registry import RegistryService
 
-pgconn = Registry.get_database_connection()
+pgconn = RegistryService.get_database_connection()
