@@ -8,7 +8,7 @@ from flask_sqlalchemy_session import current_session
 from barbados.factories import MenuFactory
 from barbados.serializers import ObjectSerializer
 from barbados.caches.tablescan import MenuScanCache
-from barbados.indexers.menuindexer import MenuIndexer
+from barbados.indexers.menu import MenuIndexer
 from barbados.search.menu import MenuSearch
 
 ns = api.namespace('v1/menus', description='Drink lists.')

@@ -10,7 +10,7 @@ from barbados.caches.ingredienttree import IngredientTreeCache
 from barbados.caches.tablescan import IngredientScanCache
 from barbados.factories import IngredientFactory
 from barbados.serializers import ObjectSerializer
-from barbados.indexers.ingredientindexer import IngredientIndexer
+from barbados.indexers.ingredient import IngredientIndexer
 
 ns = api.namespace('v1/ingredients', description='Ingredient database.')
 

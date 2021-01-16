@@ -11,7 +11,7 @@ from barbados.caches.tablescan import CocktailScanCache
 from barbados.caches.recipebibliography import RecipeBibliographyCache
 from barbados.factories import CocktailFactory
 from barbados.serializers import ObjectSerializer
-from barbados.indexers.recipeindexer import RecipeIndexer
+from barbados.indexers.recipe import RecipeIndexer
 
 ns = api.namespace('v1/cocktails', description='Cocktail recipes.')
 
