@@ -23,17 +23,21 @@ api = CustomApi(version='0.0.1', title='Jamaica API')
 
 ErrorModel = api.model('ErrorModel', {
     'message': fields.String(example="It's the wrong trousers! They've gone wrong!"),
+    'details': fields.String(example="The evil chicken stole the trousers.")
 })
 
 
 # https://github.com/postrational/rest_api_demo/blob/master/rest_api_demo/api/restplus.py
 # https://flask-restx.readthedocs.io/en/latest/errors.html
+@api.marshal_with(ErrorModel, code=500)
 @api.errorhandler
 def default_error_handler(e):
     message = 'An unhandled exception occurred.'
+    details = str(e)
 
-    if not settings.FLASK_DEBUG:
-        return {'message': message}, 500
+    # if settings.FLASK_DEBUG:
+    # @TODO this probably isn't cool in production.
+    return {'message': message, 'details': details}, 500
 
 
 @api.marshal_with(ErrorModel, code=404)
