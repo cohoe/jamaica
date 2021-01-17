@@ -20,7 +20,7 @@ app = Flask('jamaica')
 FlaskUUID(app)
 
 CORS(app, origins=['0.0.0.0:8080', '0.0.0.0:3000']) # @TODO make this come from Registry, along with other app config?
-session = flask_scoped_session(DatabaseService.database_connector.Session, app) # this doesn't use get_session. https://flask-sqlalchemy-session.readthedocs.io/en/v1.1/
+session = flask_scoped_session(DatabaseService.connector.Session, app) # this doesn't use get_session. https://flask-sqlalchemy-session.readthedocs.io/en/v1.1/
 
 # https://github.com/postrational/rest_api_demo/blob/master/rest_api_demo/app.py
 def configure_app(flask_app):
