@@ -39,8 +39,11 @@ InventoryResolutionStatusCount = {'*': count_value}
 
 InventoryResolutionSummaryObject = api.model('InventoryResolutionSummaryObject', {
     'inventory_id': fields.String(attribute='inventory_id'),
+    'alpha': fields.String(attribute='alpha'),
     'cocktail_slug': fields.String(attribute='cocktail_slug'),
     'spec_slug': fields.String(attribute='spec_slug'),
+    'component_count': fields.Integer(attribute='component_count'),
     'components': fields.List(fields.Nested(InventoryResolutionObject), attribute='components'),
+    'construction_slug': fields.String(attribute='construction_slug'),
     'status_count': fields.Nested(InventoryResolutionStatusCount, attribute='status_count')
 })
