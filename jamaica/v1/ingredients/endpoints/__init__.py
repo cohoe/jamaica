@@ -11,7 +11,6 @@ from barbados.caches.tablescan import IngredientScanCache
 from barbados.factories import IngredientFactory
 from barbados.serializers import ObjectSerializer
 from barbados.indexers.ingredient import IngredientIndexer
-from barbados.indexers import ObjectIndexer
 
 ns = api.namespace('v1/ingredients', description='Ingredient database.')
 
@@ -39,7 +38,7 @@ class IngredientsEndpoint(Resource):
         """
         i = IngredientFactory.raw_to_obj(api.payload)
         IngredientFactory.store_obj(session=current_session, obj=i)
-        ObjectIndexer.index(i)
+        IngredientIndexer.index(i)
 
         # Invalidate cache
         IngredientScanCache.invalidate()
