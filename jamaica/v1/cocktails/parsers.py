@@ -9,3 +9,5 @@ cocktail_list_parser.add_argument('construction', type=str, help='Drink construc
 cocktail_list_parser.add_argument('component_count', type=int, help='Count of components.')
 # https://github.com/noirbizarre/flask-restplus/issues/199
 cocktail_list_parser.add_argument('garnish', type=inputs.boolean, help='Boolean of if results should have garnish.')
+cocktail_list_parser.add_argument('citation_name', type=str, help='Citation name keyword')
+cocktail_list_parser.add_argument('citation_author', type=str, help='Citation author keyword')
