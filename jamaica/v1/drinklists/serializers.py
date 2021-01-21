@@ -5,6 +5,7 @@ from jamaica.v1.serializers import DisplayItemBase, SearchResultBase, NullableSt
 DrinkListItemObject = api.model('DrinkListItemObject', {
     'cocktail_slug': fields.String(attribute='cocktail_slug', description='Slug of the cocktail.'),
     'spec_slug': NullableString(attribute='spec_slug', description='Slug of the specific spec.'),
+    'highlight': fields.Boolean(attribute='highlight', description='Boolean of whether this is highlighted or not.')
 })
 
 DrinkListObject = api.model('DrinkListObject', {
@@ -13,6 +14,7 @@ DrinkListObject = api.model('DrinkListObject', {
     'items': fields.List(fields.Nested(DrinkListItemObject), attribute='items'),
 })
 
+# @TODO notes?
 DrinkListSearchItem = api.inherit('DrinkListSearchItem', SearchResultBase, {
     'slug': fields.String(attribute='hit.slug', description='This items slug.'),
     'display_name': fields.String(attribute='hit.display_name', description='This items display name.'),
