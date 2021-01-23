@@ -153,3 +153,17 @@ class IngredientSubstitutionEndpoint(Resource):
         """
         ingredient_tree = IngredientTreeCache.retrieve()
         return ingredient_tree.substitutions(slug)
+
+
+@ns.route('/<string:slug>/refresh')
+class IngredientRefreshEndpoint(Resource):
+
+    @api.response(200, 'success')
+    def post(self, slug):
+        """
+        Refresh an ingredient that supports refreshing.
+        :param slug:
+        :return: None
+        """
+        c = IngredientFactory.produce_obj(session=current_session, id=slug)
+        c.refresh(session=current_session)
