@@ -167,3 +167,4 @@ class IngredientRefreshEndpoint(Resource):
         """
         c = IngredientFactory.produce_obj(session=current_session, id=slug)
         c.refresh(session=current_session)
+        IngredientFactory.update_obj(session=current_session, obj=c)
