@@ -34,5 +34,8 @@ IngredientObject = api.inherit('IngredientObject', DisplayItemBase, {
     'elements': fields.List(fields.String(), attribute='elements', description='Slug elements for this item (only if it is of kind IndexKind.'),
     'kind': fields.String(attribute='kind', description='The kind of this item.', required=True),
     'parent': NullableString(attribute='parent', description='The parent of this item.'),  # not required for categories
-    'conditions': fields.List(fields.Nested(IngredientConditionItem), attribute='conditions'),
+    'conditions': fields.List(fields.Nested(IngredientConditionItem), attribute='conditions', description='Liast of query conditions that fill this index.', required=False),
+    'last_refresh': NullableString(attribute='last_refresh', description='datetime of the last refresh of this object.', required=False),
+    'elements_include': fields.List(fields.String(), attribute='elements_include', required=False),
+    'elements_exclude': fields.List(fields.String(), attribute='elements_exclude', required=False),
 })
