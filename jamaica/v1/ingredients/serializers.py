@@ -22,9 +22,17 @@ IngredientSubstitution = api.model('IngredientSubstitution', {
     'implies': fields.List(fields.String(), attribute='implies', description='List of slugs that this implies')
 })
 
+IngredientConditionItem = api.model('IngredientConditionItem', {
+    'bin_op': fields.String(attribute='bin_op'),
+    'field': fields.String(attribute='field'),
+    'operator': fields.String(attribute='operator'),
+    'value': fields.String(attribute='value'),
+})
+
 IngredientObject = api.inherit('IngredientObject', DisplayItemBase, {
     'aliases': fields.List(fields.String(), attribute='aliases', description='Display Name aliases for this item.'),
     'elements': fields.List(fields.String(), attribute='elements', description='Slug elements for this item (only if it is of kind IndexKind.'),
     'kind': fields.String(attribute='kind', description='The kind of this item.', required=True),
     'parent': NullableString(attribute='parent', description='The parent of this item.'),  # not required for categories
+    'conditions': fields.List(fields.Nested(IngredientConditionItem), attribute='conditions'),
 })
