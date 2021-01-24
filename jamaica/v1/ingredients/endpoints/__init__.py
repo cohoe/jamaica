@@ -165,6 +165,10 @@ class IngredientRefreshEndpoint(Resource):
         :param slug:
         :return: None
         """
-        c = IngredientFactory.produce_obj(session=current_session, id=slug)
-        c.refresh(session=current_session)
-        IngredientFactory.update_obj(session=current_session, obj=c)
+        i = IngredientFactory.produce_obj(session=current_session, id=slug)
+        i.refresh(session=current_session)
+        IngredientFactory.update_obj(session=current_session, obj=i)
+        IngredientIndexer.index(i)
+
+        # Invalidate cache
+        IngredientScanCache.invalidate()
