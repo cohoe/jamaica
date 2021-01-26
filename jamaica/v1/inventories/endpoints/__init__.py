@@ -42,7 +42,7 @@ class InventoriesEndpoint(Resource):
         :raises IntegrityError:
         """
         i = InventoryFactory.raw_to_obj(api.payload)
-        InventoryFactory.store_obj(session=current_session, obj=i)
+        InventoryFactory.store_obj(obj=i)
 
         # @TODO index inventories?
         # indexer_factory.get_indexer(m).index(m)
@@ -59,9 +59,9 @@ class InventoriesEndpoint(Resource):
         :return: Number of items deleted.
         """
 
-        objects = InventoryFactory.produce_all_objs(session=current_session)
+        objects = InventoryFactory.produce_all_objs()
         for i in objects:
-            InventoryFactory.delete_obj(session=current_session, obj=i, commit=False)
+            InventoryFactory.delete_obj(obj=i, commit=False)
 
         current_session.commit()
 
@@ -85,7 +85,7 @@ class InventoryEndpoint(Resource):
         :return: Serialized Object
         :raises KeyError: not found
         """
-        c = InventoryFactory.produce_obj(session=current_session, id=id)
+        c = InventoryFactory.produce_obj(id=id)
         return ObjectSerializer.serialize(c, 'dict')
 
     @api.response(204, 'successful delete')
@@ -96,8 +96,8 @@ class InventoryEndpoint(Resource):
         :return: None
         :raises KeyError: not found
         """
-        i = InventoryFactory.produce_obj(session=current_session, id=id)
-        InventoryFactory.delete_obj(session=current_session, obj=i)
+        i = InventoryFactory.produce_obj(id=id)
+        InventoryFactory.delete_obj(obj=i)
 
         # Invalidate Cache
         InventoryScanCache.invalidate()
@@ -119,7 +119,7 @@ class InventoryFullEndpoint(Resource):
         :return: Serialized Object
         :raises KeyError: not found
         """
-        i = InventoryFactory.produce_obj(session=current_session, id=id, expand=True)
+        i = InventoryFactory.produce_obj(id=id, expand=True)
         return ObjectSerializer.serialize(i, 'dict')
 
 
@@ -135,12 +135,12 @@ class InventoryRecipesEndpoint(Resource):
         :param id:
         :return:
         """
-        i = InventoryFactory.produce_obj(session=current_session, id=id)
+        i = InventoryFactory.produce_obj(id=id)
         cocktails_cache = CocktailScanCache.retrieve()
 
         results = []
         for raw_c in json.loads(cocktails_cache):
-            c = CocktailFactory.produce_obj(session=current_session, id=raw_c.get('slug'))
+            c = CocktailFactory.produce_obj(id=raw_c.get('slug'))
             c_results = RecipeResolver.resolve(inventory=i, cocktail=c)
             results += c_results
 
@@ -183,11 +183,11 @@ class InventoryResolveEndpoint(Resource):
         if all(value is None for value in args.values()):
             return []
 
-        i = InventoryFactory.produce_obj(session=current_session, id=id)
+        i = InventoryFactory.produce_obj(id=id)
 
         results = []
         if args.cocktail:
-            c = CocktailFactory.produce_obj(session=current_session, id=args.cocktail)
+            c = CocktailFactory.produce_obj(id=args.cocktail)
             results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=args.spec)
 
         return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
@@ -209,7 +209,7 @@ class InventoryItemEndpoint(Resource):
         :param slug: Slug of the item.
         :return: InventoryItem
         """
-        i = InventoryFactory.produce_obj(session=current_session, id=id, expand=True)
+        i = InventoryFactory.produce_obj(id=id, expand=True)
         ii = i.items.get(slug)
 
         if not ii:

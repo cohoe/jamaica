@@ -36,7 +36,7 @@ class DrinkListsEndpoint(Resource):
         :return: DrinkList you created.
         """
         m = DrinkListFactory.raw_to_obj(api.payload)
-        DrinkListFactory.store_obj(session=current_session, obj=m)
+        DrinkListFactory.store_obj(obj=m)
         DrinkListIndexer.index(m)
 
         # Invalidate Cache
@@ -50,9 +50,9 @@ class DrinkListsEndpoint(Resource):
         Delete all drinklists from the database. There be dragons here.
         :return: Number of items deleted.
         """
-        objects = DrinkListFactory.produce_all_objs(session=current_session)
+        objects = DrinkListFactory.produce_all_objs()
         for m in objects:
-            DrinkListFactory.delete_obj(session=current_session, obj=m, commit=False)
+            DrinkListFactory.delete_obj(obj=m, commit=False)
 
         DrinkListIndexer.empty()
         current_session.commit()
@@ -88,7 +88,7 @@ class DrinkListEndpoint(Resource):
         :param id:
         :return: Serialized DrinkList
         """
-        c = DrinkListFactory.produce_obj(session=current_session, id=id)
+        c = DrinkListFactory.produce_obj(id=id)
         return ObjectSerializer.serialize(c, 'dict')
 
     @api.response(204, 'successful delete')
@@ -98,8 +98,8 @@ class DrinkListEndpoint(Resource):
         :param id:
         :return:
         """
-        m = DrinkListFactory.produce_obj(session=current_session, id=id)
-        DrinkListFactory.delete_obj(session=current_session, obj=m)
+        m = DrinkListFactory.produce_obj(id=id)
+        DrinkListFactory.delete_obj(obj=m)
 
         # Invalidate Cache and de-index.
         DrinkListScanCache.invalidate()

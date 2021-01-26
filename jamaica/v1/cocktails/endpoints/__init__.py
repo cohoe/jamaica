@@ -38,7 +38,7 @@ class CocktailsEndpoint(Resource):
         :return: Serialized Cocktail object.
         """
         c = CocktailFactory.raw_to_obj(api.payload, api.payload.get('slug'))
-        CocktailFactory.store_obj(session=current_session, obj=c)
+        CocktailFactory.store_obj(obj=c)
         RecipeIndexer.index(c)
 
         # Invalidate Cache
@@ -52,9 +52,9 @@ class CocktailsEndpoint(Resource):
         Delete all cocktails from the database. There be dragons here.
         :return: Number of items deleted.
         """
-        objects = CocktailFactory.produce_all_objs(session=current_session)
+        objects = CocktailFactory.produce_all_objs()
         for c in objects:
-            CocktailFactory.delete_obj(session=current_session, obj=c, commit=False)
+            CocktailFactory.delete_obj(obj=c, commit=False)
 
         RecipeIndexer.empty()
         current_session.commit()
@@ -99,7 +99,7 @@ class CocktailEndpoint(Resource):
         :return: Serialized Cocktail
         :raises IntegrityError: Duplicate
         """
-        c = CocktailFactory.produce_obj(session=current_session, id=slug)
+        c = CocktailFactory.produce_obj(id=slug)
         return ObjectSerializer.serialize(c, 'dict')
 
     @api.response(204, 'successful delete')
@@ -109,8 +109,8 @@ class CocktailEndpoint(Resource):
         :param slug:
         :return:
         """
-        c = CocktailFactory.produce_obj(session=current_session, id=slug)
-        CocktailFactory.delete_obj(session=current_session, obj=c)
+        c = CocktailFactory.produce_obj(id=slug)
+        CocktailFactory.delete_obj(obj=c)
 
         CocktailScanCache.invalidate()
         RecipeIndexer.delete(c)

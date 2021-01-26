@@ -37,7 +37,7 @@ class IngredientsEndpoint(Resource):
         :return: Ingredient you created.
         """
         i = IngredientFactory.raw_to_obj(api.payload)
-        IngredientFactory.store_obj(session=current_session, obj=i)
+        IngredientFactory.store_obj(obj=i)
         IngredientIndexer.index(i)
 
         # Invalidate cache
@@ -52,9 +52,9 @@ class IngredientsEndpoint(Resource):
         Delete all ingredients from the database. There be dragons here.
         :return: Number of items deleted.
         """
-        objects = IngredientFactory.produce_all_objs(session=current_session)
+        objects = IngredientFactory.produce_all_objs()
         for i in objects:
-            IngredientFactory.delete_obj(session=current_session, obj=i, commit=False)
+            IngredientFactory.delete_obj(obj=i, commit=False)
 
         IngredientIndexer.empty()
 
@@ -106,7 +106,7 @@ class IngredientEndpoint(Resource):
         :param slug:
         :return: Serialized Ingredient
         """
-        c = IngredientFactory.produce_obj(session=current_session, id=slug)
+        c = IngredientFactory.produce_obj(id=slug)
         return ObjectSerializer.serialize(c, 'dict')
 
     @api.response(204, 'successful delete')
@@ -116,8 +116,8 @@ class IngredientEndpoint(Resource):
         :param slug:
         :return:
         """
-        i = IngredientFactory.produce_obj(session=current_session, id=slug)
-        IngredientFactory.delete_obj(session=current_session, obj=i)
+        i = IngredientFactory.produce_obj(id=slug)
+        IngredientFactory.delete_obj(obj=i)
 
         # Invalidate caches and de-index.
         IngredientScanCache.invalidate()
@@ -165,9 +165,9 @@ class IngredientRefreshEndpoint(Resource):
         :param slug:
         :return: None
         """
-        i = IngredientFactory.produce_obj(session=current_session, id=slug)
-        i.refresh(session=current_session)
-        IngredientFactory.update_obj(session=current_session, obj=i)
+        i = IngredientFactory.produce_obj(id=slug)
+        i.refresh()
+        IngredientFactory.update_obj(obj=i)
         IngredientIndexer.index(i)
 
         # Invalidate cache
