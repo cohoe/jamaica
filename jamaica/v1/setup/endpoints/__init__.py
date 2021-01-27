@@ -21,8 +21,8 @@ class SetupEndpoint(Resource):
         Setup the program.
         """
         # Reset the database.
-        DatabaseService.connector.drop_all()
-        DatabaseService.connector.create_all()
+        DatabaseService.drop_all()
+        DatabaseService.create_all()
 
         # Setup indexes. Each index init() will drop and re-create.
         index_factory.init()
