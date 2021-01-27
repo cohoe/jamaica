@@ -1,6 +1,6 @@
 from flask_restx import fields
 from jamaica.v1.restx import api
-from jamaica.v1.serializers import DisplayItemBase, TextItem, NullableString
+from jamaica.v1.serializers import DisplayItemBase, TextItem, SpecComponentItem, CitationItem
 
 
 OriginItem = api.model('OriginItem', {
@@ -16,22 +16,6 @@ CocktailImageItem = api.model('CocktailImageItem', {
     'text': fields.String(description='Description of the image.', example='Boy with apple.', required=True),
     'href': fields.String(description='URI of the image.', example='https://example.com/booze.png', required=True),
     'credit': fields.String(description='Photographer or other image credit.', example='Michelle Jay', required=True)
-})
-
-CitationItem = api.model('CitationItem', {
-    'title': fields.String(description='Title of the citation.', example='Death & Co: Modern Classic Cocktails', required=True),
-    'author': fields.List(NullableString(), description='Author of the work being cited', example=['Jillian Vose', 'Ivy Mix']),
-    'date': fields.Integer(description='Date that the citation was published.', example=1812),
-    'publisher': fields.String(description='Publisher of the citation.', example='Ten Speed Press'),
-    'page': fields.Integer(description='If using a book or other printed medium, specify the page number.', example=69),
-    'href': fields.String(description='URI of the website of the citation or to purchase the book.', example='https://example.com/booze'),
-    'issue': fields.String(description='Deprecated'),
-})
-
-SpecComponentItem = api.inherit('SpecComponentItem', DisplayItemBase, {
-    'quantity': fields.Float(description='Quantity of the ingredient in the specified unit which is described in another field. Can be omitted in certain cases such as a rinse.', example=1.5),
-    'unit': fields.String(description='Unit of measure for this component. Can be omitted in certain cases such as muddling while citrus.', example='oz'),
-    'notes': fields.List(fields.Nested(TextItem), description='Notes on the component.')
 })
 
 GlasswareItem = api.inherit('GlasswareItem', DisplayItemBase, {})

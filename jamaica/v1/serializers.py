@@ -32,3 +32,19 @@ CocktailSearchItem = api.inherit('CocktailSearchItem', SearchResultBase, {
     'construction_slug': fields.String(attribute='hit.spec.construction.slug', description='Construction slug'),
     'component_display_names': fields.List(fields.String(attribute='display_name'), attribute='hit.spec.components', description='Display names of components in this spec', example=['rum', 'sherry', 'vermouth']),
 })
+
+SpecComponentItem = api.inherit('SpecComponentItem', DisplayItemBase, {
+    'quantity': fields.Float(description='Quantity of the ingredient in the specified unit which is described in another field. Can be omitted in certain cases such as a rinse.', example=1.5),
+    'unit': fields.String(description='Unit of measure for this component. Can be omitted in certain cases such as muddling while citrus.', example='oz'),
+    'notes': fields.List(fields.Nested(TextItem), description='Notes on the component.')
+})
+
+CitationItem = api.model('CitationItem', {
+    'title': fields.String(description='Title of the citation.', example='Death & Co: Modern Classic Cocktails', required=True),
+    'author': fields.List(NullableString(), description='Author of the work being cited', example=['Jillian Vose', 'Ivy Mix']),
+    'date': fields.Integer(description='Date that the citation was published.', example=1812),
+    'publisher': fields.String(description='Publisher of the citation.', example='Ten Speed Press'),
+    'page': fields.Integer(description='If using a book or other printed medium, specify the page number.', example=69),
+    'href': fields.String(description='URI of the website of the citation or to purchase the book.', example='https://example.com/booze'),
+    'issue': fields.String(description='Deprecated'),
+})
