@@ -37,6 +37,7 @@ class IngredientsEndpoint(Resource):
         :return: Ingredient you created.
         """
         i = IngredientFactory.raw_to_obj(api.payload)
+        i.refresh()
         IngredientFactory.store_obj(obj=i)
         IngredientIndexer.index(i)
 

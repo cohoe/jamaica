@@ -19,7 +19,8 @@ IngredientSubstitution = api.model('IngredientSubstitution', {
     'parents': fields.List(fields.String, descriptiopn='List of parent slugs going to the root of the tree.'),
     'children': fields.List(fields.String(), attribute='children', description='Slugs of the children (all lower levels in the tree) of this ingredient.'),
     'siblings': fields.List(fields.String(), attribute='siblings', description='Slugs of the siblings (same level in the tree) of this ingredient.'),
-    'implies': fields.List(fields.String(), attribute='implies', description='List of slugs that this implies')
+    'implies': fields.List(fields.String(), attribute='implies', description='List of slugs that this implies'),
+    'implies_root': fields.String(attribute='implies_root', description='Slug of the root family of ingredients.')
 })
 
 IngredientConditionItem = api.model('IngredientConditionItem', {
