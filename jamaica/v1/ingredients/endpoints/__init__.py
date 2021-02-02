@@ -92,7 +92,7 @@ class IngredientTreeEndpoint(Resource):
         :return: Dict
         """
         ingredient_tree = IngredientTreeCache.retrieve()
-        return json.loads(ingredient_tree.tree.to_json(with_data=True))
+        return json.loads(ingredient_tree.to_json())
 
 
 @ns.route('/<string:slug>')
