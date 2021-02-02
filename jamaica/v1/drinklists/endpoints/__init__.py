@@ -5,7 +5,7 @@ from jamaica.v1.drinklists.serializers import DrinkListObject, DrinkListSearchIt
 from jamaica.v1.drinklists.parsers import drinklist_list_parser
 from flask_sqlalchemy_session import current_session
 
-from barbados.factories import DrinkListFactory
+from barbados.factories.drinklistfactory import DrinkListFactory
 from barbados.serializers import ObjectSerializer
 from barbados.caches.tablescan import DrinkListScanCache
 from barbados.indexers.drinklist import DrinkListIndexer
