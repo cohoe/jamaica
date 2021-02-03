@@ -2,8 +2,7 @@ import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
 from jamaica.v1.inventories.serializers import InventoryObject
-from jamaica.v1.serializers import CocktailSearchItem
-from jamaica.v1.inventories.parsers import inventory_resolve_parser, inventory_recipes_parser
+from jamaica.v1.inventories.parsers import inventory_recipes_parser
 from jamaica.v1.inventories.serializers import InventoryResolutionSummaryObject, InventoryItemObject
 from flask_sqlalchemy_session import current_session
 
@@ -123,26 +122,59 @@ class InventoryFullEndpoint(Resource):
         return ObjectSerializer.serialize(i, 'dict')
 
 
+@ns.route('/<uuid:id>/items/<string:slug>')
+@api.doc(params={
+    'id': 'An inventory ID',
+    'slug': 'An item slug'
+})
+class InventoryItemsEndpoint(Resource):
+
+    @api.response(200, 'success')
+    @api.marshal_with(InventoryItemObject)
+    def get(self, id, slug):
+        """
+        Return a single inventory item.
+        :param id: GUID of the inventory.
+        :param slug: Slug of the item.
+        :return: InventoryItem
+        """
+        i = InventoryFactory.produce_obj(id=id, expand=True)
+        ii = i.items.get(slug)
+
+        if not ii:
+            raise KeyError("Item %s not found in inventory %s." % (slug, id))
+
+        return ObjectSerializer.serialize(ii, 'dict')
+
+
 @ns.route('/<uuid:id>/recipes')
+@ns.route('/<uuid:id>/recipes/<string:cocktail_slug>')
+@ns.route('/<uuid:id>/recipes/<string:cocktail_slug>/<string:spec_slug>')
 @api.doc(params={'id': 'An object ID.'})
 class InventoryRecipesEndpoint(Resource):
 
     @api.response(200, 'success')
     @api.marshal_list_with(InventoryResolutionSummaryObject)
-    def get(self, id):
+    def get(self, id, cocktail_slug=None, spec_slug=None):
         """
-        @TODO this, something?
         :param id:
+        :param cocktail_slug:
+        :param spec_slug:
         :return:
         """
         i = InventoryFactory.produce_obj(id=id)
-        cocktails_cache = CocktailScanCache.retrieve()
 
         results = []
-        for raw_c in json.loads(cocktails_cache):
-            c = CocktailFactory.produce_obj(id=raw_c.get('slug'))
-            c_results = RecipeResolver.resolve(inventory=i, cocktail=c)
-            results += c_results
+        if cocktail_slug:
+            c = CocktailFactory.produce_obj(id=cocktail_slug)
+            results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=spec_slug)
+        else:
+            # @TODO fetch from cache for RecipeResolver
+            cocktails_cache = CocktailScanCache.retrieve()
+            for raw_c in json.loads(cocktails_cache):
+                c = CocktailFactory.produce_obj(id=raw_c.get('slug'))
+                c_results = RecipeResolver.resolve(inventory=i, cocktail=c)
+                results += c_results
 
         return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
 
@@ -163,56 +195,3 @@ class InventoryRecipesEndpoint(Resource):
             return []
 
         return InventorySpecResolutionSearch(**args).execute()
-
-
-@ns.route('/<uuid:id>/resolve')
-@api.doc(params={'id': 'An object ID.'})
-class InventoryResolveEndpoint(Resource):
-
-    @api.response(200, 'success')
-    @api.expect(inventory_resolve_parser, validate=True)
-    @api.marshal_list_with(InventoryResolutionSummaryObject)
-    def get(self, id):
-        """
-        :param id: GUID of the object.
-        """
-        args = inventory_resolve_parser.parse_args(strict=True)
-
-        # Don't return any results if all parameters are empty.
-        # https://stackoverflow.com/questions/35253971/how-to-check-if-all-values-of-a-dictionary-are-0
-        if all(value is None for value in args.values()):
-            return []
-
-        i = InventoryFactory.produce_obj(id=id)
-
-        results = []
-        if args.cocktail:
-            c = CocktailFactory.produce_obj(id=args.cocktail)
-            results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=args.spec)
-
-        return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
-
-
-@ns.route('/<uuid:id>/item/<string:slug>')
-@api.doc(params={
-    'id': 'An inventory ID',
-    'slug': 'An item slug'
-})
-class InventoryItemEndpoint(Resource):
-
-    @api.response(200, 'success')
-    @api.marshal_with(InventoryItemObject)
-    def get(self, id, slug):
-        """
-        Return a single inventory item.
-        :param id: GUID of the inventory.
-        :param slug: Slug of the item.
-        :return: InventoryItem
-        """
-        i = InventoryFactory.produce_obj(id=id, expand=True)
-        ii = i.items.get(slug)
-
-        if not ii:
-            raise KeyError("Item %s not found in inventory %s." % (slug, id))
-
-        return ObjectSerializer.serialize(ii, 'dict')
