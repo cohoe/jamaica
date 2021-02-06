@@ -1,10 +1,11 @@
 from flask import Flask, Blueprint
 from jamaica import settings
-from jamaica.v1.restx import api
+from jamaica.cache import flask_cache
 from flask_cors import CORS
 from flask_sqlalchemy_session import flask_scoped_session
 from flask_uuid import FlaskUUID
 
+from jamaica.v1.restx import api
 from jamaica.v1.cocktails.endpoints import ns as cocktails_namespace
 from jamaica.v1.ingredients.endpoints import ns as ingredients_namespace
 from jamaica.v1.drinklists.endpoints import ns as drinklists_namespace
@@ -21,7 +22,11 @@ app = Flask('jamaica')
 FlaskUUID(app)
 
 CORS(app, origins=['0.0.0.0:8080', '0.0.0.0:3000']) # @TODO make this come from Registry, along with other app config?
+
+# Dependent service setup
 session = flask_scoped_session(DatabaseService.connector.Session, app) # this doesn't use get_session. https://flask-sqlalchemy-session.readthedocs.io/en/v1.1/
+flask_cache.init_app(app)
+
 
 # https://github.com/postrational/rest_api_demo/blob/master/rest_api_demo/app.py
 def configure_app(flask_app):

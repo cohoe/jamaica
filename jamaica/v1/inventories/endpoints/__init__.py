@@ -1,5 +1,6 @@
 import json
 from flask_restx import Resource
+from jamaica.cache import flask_cache
 from jamaica.v1.restx import api
 from jamaica.v1.inventories.serializers import InventoryObject
 from jamaica.v1.inventories.parsers import inventory_recipes_parser
@@ -155,6 +156,7 @@ class InventoryRecipesEndpoint(Resource):
 
     @api.response(200, 'success')
     @api.marshal_list_with(InventoryResolutionSummaryObject)
+    @flask_cache.cached()
     def get(self, id, cocktail_slug=None, spec_slug=None):
         """
         :param id:

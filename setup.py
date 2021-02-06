@@ -13,6 +13,7 @@ setup(
         'flask_sqlalchemy_session',
         'barbados @ git+https://github.com/cohoe/barbados@master',
         'england @ git+https://github.com/cohoe/england@master',
-        'flask_uuid'
+        'flask_uuid',
+        'flask_caching'
     ],
 )
