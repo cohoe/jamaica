@@ -60,6 +60,10 @@ def main():
     initialize_app(app)
     app.run(debug=settings.FLASK_DEBUG, host='0.0.0.0', port=8080)
 
+    # @TODO disable this when we get real
+    with app.app_context():
+        flask_cache.clear()
+
 
 if __name__ == "__main__":
     main()
