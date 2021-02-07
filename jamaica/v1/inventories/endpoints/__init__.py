@@ -156,7 +156,7 @@ class InventoryRecipesEndpoint(Resource):
 
     @api.response(200, 'success')
     @api.marshal_list_with(InventoryResolutionSummaryObject)
-    @flask_cache.cached()
+    # @flask_cache.cached()
     def get(self, id, cocktail_slug=None, spec_slug=None):
         """
         :param id:
