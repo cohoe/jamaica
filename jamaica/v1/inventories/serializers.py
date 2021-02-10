@@ -48,4 +48,5 @@ InventoryResolutionSummaryObject = api.model('InventoryResolutionSummaryObject',
     'status_count': fields.Nested(InventoryResolutionStatusCount, attribute='status_count'),
     'citations': fields.List(fields.Nested(CitationItem), attribute='citations'),
     'garnish': fields.List(fields.Nested(SpecComponentItem), attribute='garnish'),
+    'generated_at': fields.String(attribute='generated_at')
 })
