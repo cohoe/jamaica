@@ -9,6 +9,7 @@ from flask_sqlalchemy_session import current_session
 
 from barbados.factories.inventoryfactory import InventoryFactory
 from barbados.factories.cocktailfactory import CocktailFactory
+from barbados.factories.reciperesolution import RecipeResolutionFactory
 from barbados.serializers import ObjectSerializer
 from barbados.caches.tablescan import InventoryScanCache
 from barbados.resolvers.recipe import RecipeResolver
@@ -148,16 +149,14 @@ class InventoryItemsEndpoint(Resource):
         return ObjectSerializer.serialize(ii, 'dict')
 
 
-@ns.route('/<uuid:id>/recipes')
 @ns.route('/<uuid:id>/recipes/<string:cocktail_slug>')
 @ns.route('/<uuid:id>/recipes/<string:cocktail_slug>/<string:spec_slug>')
-@api.doc(params={'id': 'An object ID.'})
-class InventoryRecipesEndpoint(Resource):
+@api.doc(params={'id': 'Inventory ID object.'})
+class InventoryRecipeEndpoint(Resource):
 
     @api.response(200, 'success')
     @api.marshal_list_with(InventoryResolutionSummaryObject)
-    # @flask_cache.cached()
-    def get(self, id, cocktail_slug=None, spec_slug=None):
+    def get(self, id, cocktail_slug, spec_slug=None):
         """
         :param id:
         :param cocktail_slug:
@@ -166,17 +165,47 @@ class InventoryRecipesEndpoint(Resource):
         """
         i = InventoryFactory.produce_obj(id=id)
 
+        c = CocktailFactory.produce_obj(id=cocktail_slug)
+        results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=spec_slug)
+
+        return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
+
+    @api.response(204, 'successful delete')
+    def delete(self, id, cocktail_slug, spec_slug=None):
+        """
+        :param id:
+        :param cocktail_slug:
+        :param spec_slug:
+        :return:
+        """
+        i = InventoryFactory.produce_obj(id=id)
+
+        c = CocktailFactory.produce_obj(id=cocktail_slug)
+        results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=spec_slug)
+
+        [RecipeResolutionFactory.delete_obj(rs, id_attr='index_id') for rs in results]
+
+
+@ns.route('/<uuid:id>/recipes')
+@api.doc(params={'id': 'Inventory ID object.'})
+class InventoryRecipesEndpoint(Resource):
+
+    @api.response(200, 'success')
+    @api.marshal_list_with(InventoryResolutionSummaryObject)
+    @flask_cache.cached()
+    def get(self, id):
+        """
+        :param id:
+        :return:
+        """
+        i = InventoryFactory.produce_obj(id=id)
+
         results = []
-        if cocktail_slug:
-            c = CocktailFactory.produce_obj(id=cocktail_slug)
-            results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=spec_slug)
-        else:
-            # @TODO fetch from cache for RecipeResolver
-            cocktails_cache = CocktailScanCache.retrieve()
-            for raw_c in json.loads(cocktails_cache):
-                c = CocktailFactory.produce_obj(id=raw_c.get('slug'))
-                c_results = RecipeResolver.resolve(inventory=i, cocktail=c)
-                results += c_results
+        cocktails_cache = CocktailScanCache.retrieve()
+        for raw_c in json.loads(cocktails_cache):
+            c = CocktailFactory.produce_obj(id=raw_c.get('slug'))
+            c_results = RecipeResolver.resolve(inventory=i, cocktail=c)
+            results += c_results
 
         return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
 
