@@ -15,6 +15,7 @@ from barbados.caches.tablescan import InventoryScanCache
 from barbados.resolvers.recipe import RecipeResolver
 from barbados.caches.tablescan import CocktailScanCache
 from barbados.search.inventoryspecresolution import InventorySpecResolutionSearch
+from barbados.indexers.inventoryspec import InventorySpecResolutionIndexer
 
 
 ns = api.namespace('v1/inventories', description='Inventories.')
@@ -168,6 +169,10 @@ class InventoryRecipeEndpoint(Resource):
         c = CocktailFactory.produce_obj(id=cocktail_slug)
         results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=spec_slug)
 
+        # Save the things we got.
+        [RecipeResolutionFactory.store_obj(rs) for rs in results]
+        [InventorySpecResolutionIndexer.index(rs) for rs in results]
+
         return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
 
     @api.response(204, 'successful delete')
@@ -183,7 +188,11 @@ class InventoryRecipeEndpoint(Resource):
         c = CocktailFactory.produce_obj(id=cocktail_slug)
         results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=spec_slug)
 
+        # Drop
         [RecipeResolutionFactory.delete_obj(rs, id_attr='index_id') for rs in results]
+        [InventorySpecResolutionIndexer.index(rs) for rs in results]
+
+        return None, 204
 
 
 @ns.route('/<uuid:id>/recipes')
