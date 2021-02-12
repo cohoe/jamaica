@@ -21,7 +21,7 @@ from barbados.indexers.inventoryspec import InventorySpecResolutionIndexer
 ns = api.namespace('v1/inventories', description='Inventories.')
 
 
-@ns.route('/')
+@ns.route('')
 class InventoriesEndpoint(Resource):
 
     @api.response(200, 'success')

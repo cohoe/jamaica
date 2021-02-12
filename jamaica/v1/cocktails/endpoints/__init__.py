@@ -16,7 +16,7 @@ from barbados.indexers.recipe import RecipeIndexer
 ns = api.namespace('v1/cocktails', description='Cocktail recipes.')
 
 
-@ns.route('/')
+@ns.route('')
 class CocktailsEndpoint(Resource):
 
     @api.response(200, 'success')

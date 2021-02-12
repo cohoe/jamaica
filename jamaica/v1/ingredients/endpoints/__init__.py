@@ -15,7 +15,7 @@ from barbados.indexers.ingredient import IngredientIndexer
 ns = api.namespace('v1/ingredients', description='Ingredient database.')
 
 
-@ns.route('/')
+@ns.route('')
 class IngredientsEndpoint(Resource):
 
     @api.response(200, 'success')

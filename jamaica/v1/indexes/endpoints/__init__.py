@@ -9,7 +9,7 @@ from barbados.indexes import index_factory
 ns = api.namespace('v1/indexes', description='Search indexes.')
 
 
-@ns.route('/')
+@ns.route('')
 class IndexesEndpoint(Resource):
 
     @api.response(200, 'success')

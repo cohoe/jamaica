@@ -14,7 +14,7 @@ from barbados.search.drinklist import DrinkListSearch
 ns = api.namespace('v1/drinklists', description='Drink lists.')
 
 
-@ns.route('/')
+@ns.route('')
 class DrinkListsEndpoint(Resource):
 
     @api.response(200, 'success')

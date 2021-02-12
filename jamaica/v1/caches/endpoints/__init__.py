@@ -6,7 +6,7 @@ from barbados.caches import Caches
 ns = api.namespace('v1/caches', description='Caches.')
 
 
-@ns.route('/')
+@ns.route('')
 class CachesEndpoint(Resource):
 
     @api.response(200, 'success')
