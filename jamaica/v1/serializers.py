@@ -48,3 +48,5 @@ CitationItem = api.model('CitationItem', {
     'href': fields.String(description='URI of the website of the citation or to purchase the book.', example='https://example.com/booze'),
     'issue': fields.String(description='Deprecated'),
 })
+
+ConstructionItem = api.inherit('ConstructionItem', DisplayItemBase, {})

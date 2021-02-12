@@ -13,6 +13,7 @@ from jamaica.v1.caches.endpoints import ns as caches_namespace
 from jamaica.v1.inventories.endpoints import ns as inventories_namespace
 from jamaica.v1.indexes.endpoints import ns as indexes_namespace
 from jamaica.v1.setup.endpoints import ns as setup_namespace
+from jamaica.v1.constructions.endpoints import ns as constructions_namespace
 
 from barbados.services.database import DatabaseService
 
@@ -52,6 +53,7 @@ def initialize_app(flask_app):
     api.add_namespace(inventories_namespace)
     api.add_namespace(indexes_namespace)
     api.add_namespace(setup_namespace)
+    api.add_namespace(constructions_namespace)
 
     flask_app.register_blueprint(blueprint)
 
