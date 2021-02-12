@@ -201,7 +201,7 @@ class InventoryRecipesEndpoint(Resource):
 
     @api.response(200, 'success')
     @api.marshal_list_with(InventoryResolutionSummaryObject)
-    @flask_cache.cached()
+    # @flask_cache.cached()
     def get(self, id):
         """
         :param id:
@@ -215,6 +215,10 @@ class InventoryRecipesEndpoint(Resource):
             c = CocktailFactory.produce_obj(id=raw_c.get('slug'))
             c_results = RecipeResolver.resolve(inventory=i, cocktail=c)
             results += c_results
+
+        # Save the things we got.
+        [RecipeResolutionFactory.store_obj(rs) for rs in results]
+        [InventorySpecResolutionIndexer.index(rs) for rs in results]
 
         return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
 
