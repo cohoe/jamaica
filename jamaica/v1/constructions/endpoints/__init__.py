@@ -1,6 +1,7 @@
 import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
+from flask_sqlalchemy_session import current_session
 
 from jamaica.v1.serializers import ConstructionItem
 
@@ -40,6 +41,21 @@ class ConstructionsEndpoint(Resource):
         ConstructionScanCache.invalidate()
 
         return ObjectSerializer.serialize(c, 'dict')
+
+    @api.response(204, 'successful delete')
+    def delete(self):
+        """
+        Delete all constructions from the database.
+        :return: None
+        """
+        serialized_constructions = json.loads(ConstructionScanCache.retrieve())
+        objs = [ConstructionFactory.raw_to_obj(construction) for construction in serialized_constructions]
+        for c in objs:
+            ConstructionFactory.delete_obj(c, commit=False)
+
+        current_session.commit()
+        ConstructionScanCache.invalidate()
+        return len(objs), 204
 
 
 @ns.route('/<string:slug>')
