@@ -16,6 +16,7 @@ from barbados.resolvers.recipe import RecipeResolver
 from barbados.caches.tablescan import CocktailScanCache
 from barbados.search.inventoryspecresolution import InventorySpecResolutionSearch
 from barbados.indexers.inventoryspec import InventorySpecResolutionIndexer
+from barbados.indexers.inventory import InventoryIndexer
 
 
 ns = api.namespace('v1/inventories', description='Inventories.')
@@ -46,8 +47,8 @@ class InventoriesEndpoint(Resource):
         i = InventoryFactory.raw_to_obj(api.payload)
         InventoryFactory.store_obj(obj=i)
 
-        # @TODO index inventories?
-        # indexer_factory.get_indexer(m).index(m)
+        # Index
+        InventoryIndexer.index(i)
 
         # Invalidate Cache
         InventoryScanCache.invalidate()
@@ -67,8 +68,7 @@ class InventoriesEndpoint(Resource):
 
         current_session.commit()
 
-        # @TODO indexes
-        # InventoryIndexer.empty()
+        InventoryIndexer.empty()
         InventoryScanCache.invalidate()
 
         return len(objects)
@@ -103,7 +103,7 @@ class InventoryEndpoint(Resource):
 
         # Invalidate Cache
         InventoryScanCache.invalidate()
-        # indexer_factory.get_indexer(i).delete(i)
+        InventoryIndexer.delete(i)
 
 
 @ns.route('/<uuid:id>/full')
@@ -121,6 +121,7 @@ class InventoryFullEndpoint(Resource):
         :raises KeyError: not found
         """
         i = InventoryFactory.produce_obj(id=id, expand=True)
+        InventoryIndexer.index(i)
         return ObjectSerializer.serialize(i, 'dict')
 
 
