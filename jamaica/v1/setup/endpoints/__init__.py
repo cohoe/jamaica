@@ -6,7 +6,7 @@ from jamaica.v1.restx import api
 
 from barbados.services.database import DatabaseService
 from barbados.services.logging import LogService
-from barbados.indexes import index_factory
+from barbados.indexes import Indexes
 from barbados.caches import Caches
 
 ns = api.namespace('v1/setup', description='setup')
@@ -25,7 +25,7 @@ class SetupEndpoint(Resource):
         DatabaseService.create_all()
 
         # Setup indexes. Each index init() will drop and re-create.
-        index_factory.init()
+        Indexes.init()
         self._kibana_settings()
 
         # Clear all caches.

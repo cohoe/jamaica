@@ -2,8 +2,8 @@ from flask_restx import Resource
 from jamaica.v1.restx import api
 from flask_sqlalchemy_session import current_session
 
-from barbados.indexers import indexer_factory
-from barbados.indexes import index_factory
+from barbados.indexers import Indexers
+from barbados.indexes import Indexes
 
 
 ns = api.namespace('v1/indexes', description='Search indexes.')
@@ -18,7 +18,7 @@ class IndexesEndpoint(Resource):
         List all Indexes
         :return: List of Index keys
         """
-        return list(index_factory.get_indexes().keys())
+        return list(Indexes.get_indexes().keys())
 
 
 @ns.route('/<string:name>')
@@ -30,8 +30,8 @@ class IndexEndpoint(Resource):
         """
         Re-index all objects that are supposed to be in an index.
         """
-        index = index_factory.get_index(name=name)
-        indexer = indexer_factory.indexer_for(index)
+        index = Indexes.get_index(name=name)
+        indexer = Indexers.indexer_for(index)
 
         counter = indexer.reindex(current_session)
         return counter
@@ -43,7 +43,7 @@ class IndexEndpoint(Resource):
         :param name: The name key of the index.
         :return: Number of documents deleted.
         """
-        index = index_factory.get_index(name=name)
+        index = Indexes.get_index(name=name)
         counter = index.delete_all()
 
         return counter

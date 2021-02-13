@@ -170,7 +170,7 @@ class InventoryRecipeEndpoint(Resource):
         results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=spec_slug)
 
         # Save the things we got.
-        [RecipeResolutionFactory.store_obj(rs) for rs in results]
+        [RecipeResolutionFactory.store_obj(rs, overwrite=True) for rs in results]
         [InventorySpecResolutionIndexer.index(rs) for rs in results]
 
         return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
