@@ -103,7 +103,6 @@ class InventoryEndpoint(Resource):
 
         # Invalidate Cache
         InventoryScanCache.invalidate()
-        # @TODO this
         # indexer_factory.get_indexer(i).delete(i)
 
 
@@ -221,6 +220,20 @@ class InventoryRecipesEndpoint(Resource):
         [InventorySpecResolutionIndexer.index(rs) for rs in results]
 
         return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
+
+    @api.response(200, 'successful delete')
+    def delete(self, id):
+        """
+        Delete all recipe resolutions for this inventory
+        :param id: Inventory ID UUID
+        :return: Count of deletions.
+        """
+        results = RecipeResolutionFactory.produce_all_objs_from_inventory(inventory_id=id)
+        for rs in results:
+            RecipeResolutionFactory.delete_obj(rs, id_attr='index_id', commit=False)
+        current_session.commit()
+
+        return len(results), 200
 
 
 @ns.route('/<uuid:id>/recipes/search')
