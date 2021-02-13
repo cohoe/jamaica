@@ -71,8 +71,6 @@ class InventoriesEndpoint(Resource):
         InventoryIndexer.empty()
         InventoryScanCache.invalidate()
 
-        return len(objects)
-
 
 @ns.route('/<uuid:id>')
 @api.doc(params={'id': 'An object ID.'})
@@ -189,7 +187,7 @@ class InventoryRecipeEndpoint(Resource):
         results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=spec_slug)
 
         # Drop
-        [RecipeResolutionFactory.delete_obj(rs, id_attr='index_id') for rs in results]
+        [RecipeResolutionFactory.delete_obj(rs) for rs in results]
         [RecipeResolutionIndexer.index(rs) for rs in results]
 
         return None, 204
@@ -217,12 +215,12 @@ class InventoryRecipesEndpoint(Resource):
             results += c_results
 
         # Save the things we got.
-        [RecipeResolutionFactory.store_obj(rs) for rs in results]
+        [RecipeResolutionFactory.store_obj(rs, overwrite=True) for rs in results]
         [RecipeResolutionIndexer.index(rs) for rs in results]
 
         return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
 
-    @api.response(200, 'successful delete')
+    @api.response(204, 'successful delete')
     def delete(self, id):
         """
         Delete all recipe resolutions for this inventory
@@ -231,10 +229,8 @@ class InventoryRecipesEndpoint(Resource):
         """
         results = RecipeResolutionFactory.produce_all_objs_from_inventory(inventory_id=id)
         for rs in results:
-            RecipeResolutionFactory.delete_obj(rs, id_attr='index_id', commit=False)
+            RecipeResolutionFactory.delete_obj(rs, commit=False)
         current_session.commit()
-
-        return len(results), 200
 
 
 @ns.route('/<uuid:id>/recipes/search')
