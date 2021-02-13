@@ -14,8 +14,8 @@ from barbados.serializers import ObjectSerializer
 from barbados.caches.tablescan import InventoryScanCache
 from barbados.resolvers.recipe import RecipeResolver
 from barbados.caches.tablescan import CocktailScanCache
-from barbados.search.inventoryspecresolution import InventorySpecResolutionSearch
-from barbados.indexers.inventoryspec import InventorySpecResolutionIndexer
+from barbados.search.reciperesolution import RecipeResolutionSearch
+from barbados.indexers.reciperesolution import RecipeResolutionIndexer
 from barbados.indexers.inventory import InventoryIndexer
 
 
@@ -171,7 +171,7 @@ class InventoryRecipeEndpoint(Resource):
 
         # Save the things we got.
         [RecipeResolutionFactory.store_obj(rs, overwrite=True) for rs in results]
-        [InventorySpecResolutionIndexer.index(rs) for rs in results]
+        [RecipeResolutionIndexer.index(rs) for rs in results]
 
         return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
 
@@ -190,7 +190,7 @@ class InventoryRecipeEndpoint(Resource):
 
         # Drop
         [RecipeResolutionFactory.delete_obj(rs, id_attr='index_id') for rs in results]
-        [InventorySpecResolutionIndexer.index(rs) for rs in results]
+        [RecipeResolutionIndexer.index(rs) for rs in results]
 
         return None, 204
 
@@ -218,7 +218,7 @@ class InventoryRecipesEndpoint(Resource):
 
         # Save the things we got.
         [RecipeResolutionFactory.store_obj(rs) for rs in results]
-        [InventorySpecResolutionIndexer.index(rs) for rs in results]
+        [RecipeResolutionIndexer.index(rs) for rs in results]
 
         return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
 
@@ -252,4 +252,4 @@ class InventoryRecipesEndpoint(Resource):
         if all(value is None for value in args.values()):
             return []
 
-        return InventorySpecResolutionSearch(**args).execute()
+        return RecipeResolutionSearch(**args).execute()
