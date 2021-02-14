@@ -7,7 +7,7 @@ from jamaica.v1.inventories.parsers import inventory_recipes_parser
 from jamaica.v1.inventories.serializers import InventoryResolutionSummaryObject, InventoryItemObject
 from flask_sqlalchemy_session import current_session
 
-from barbados.factories.inventoryfactory import InventoryFactory
+from barbados.factories.inventory import InventoryFactory
 from barbados.factories.cocktailfactory import CocktailFactory
 from barbados.factories.reciperesolution import RecipeResolutionFactory
 from barbados.serializers import ObjectSerializer

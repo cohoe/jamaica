@@ -8,7 +8,7 @@ from flask_sqlalchemy_session import current_session
 from barbados.search.ingredient import IngredientSearch
 from barbados.caches.ingredienttree import IngredientTreeCache
 from barbados.caches.tablescan import IngredientScanCache
-from barbados.factories.ingredientfactory import IngredientFactory
+from barbados.factories.ingredient import IngredientFactory
 from barbados.serializers import ObjectSerializer
 from barbados.indexers.ingredient import IngredientIndexer
 
