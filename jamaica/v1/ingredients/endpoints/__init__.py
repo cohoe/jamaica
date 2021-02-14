@@ -38,7 +38,7 @@ class IngredientsEndpoint(Resource):
         """
         i = IngredientFactory.raw_to_obj(api.payload)
         i.refresh()
-        IngredientFactory.store_obj(obj=i)
+        IngredientFactory.insert_obj(obj=i)
         IngredientIndexer.index(i)
 
         # Invalidate cache

@@ -35,7 +35,7 @@ class ConstructionsEndpoint(Resource):
         :return: Serialized Construction object.
         """
         c = ConstructionFactory.raw_to_obj(api.payload)
-        ConstructionFactory.store_obj(obj=c)
+        ConstructionFactory.insert_obj(obj=c)
 
         # Invalidate Cache
         ConstructionScanCache.invalidate()

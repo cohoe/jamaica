@@ -45,7 +45,7 @@ class InventoriesEndpoint(Resource):
         :raises IntegrityError:
         """
         i = InventoryFactory.raw_to_obj(api.payload)
-        InventoryFactory.store_obj(obj=i)
+        InventoryFactory.insert_obj(obj=i)
 
         # Index
         InventoryIndexer.index(i)
@@ -168,7 +168,7 @@ class InventoryRecipeEndpoint(Resource):
         results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=spec_slug)
 
         # Save the things we got.
-        [RecipeResolutionFactory.store_obj(rs, overwrite=True) for rs in results]
+        [RecipeResolutionFactory.insert_obj(rs, overwrite=True) for rs in results]
         [RecipeResolutionIndexer.index(rs) for rs in results]
 
         return [ObjectSerializer.serialize(rs, 'dict') for rs in results]
@@ -215,7 +215,7 @@ class InventoryRecipesEndpoint(Resource):
             results += c_results
 
         # Save the things we got.
-        [RecipeResolutionFactory.store_obj(rs, overwrite=True) for rs in results]
+        [RecipeResolutionFactory.insert_obj(rs, overwrite=True) for rs in results]
         [RecipeResolutionIndexer.index(rs) for rs in results]
 
         return [ObjectSerializer.serialize(rs, 'dict') for rs in results]

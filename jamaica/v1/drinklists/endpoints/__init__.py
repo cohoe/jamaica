@@ -36,7 +36,7 @@ class DrinkListsEndpoint(Resource):
         :return: DrinkList you created.
         """
         m = DrinkListFactory.raw_to_obj(api.payload)
-        DrinkListFactory.store_obj(obj=m)
+        DrinkListFactory.insert_obj(obj=m)
         DrinkListIndexer.index(m)
 
         # Invalidate Cache

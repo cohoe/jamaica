@@ -38,7 +38,7 @@ class CocktailsEndpoint(Resource):
         :return: Serialized Cocktail object.
         """
         c = CocktailFactory.raw_to_obj(api.payload, api.payload.get('slug'))
-        CocktailFactory.store_obj(obj=c)
+        CocktailFactory.insert_obj(obj=c)
         RecipeIndexer.index(c)
 
         # Invalidate Cache
