@@ -56,7 +56,7 @@ def key_error_handler(error):
     # https://stackoverflow.com/questions/24998968/why-does-strkeyerror-add-extra-quotes
     # @TODO get this to the rest of the handlers. Though not sure it's needed?
     message = str(error).strip('"').strip("'")
-    return {'message': message}, 404
+    return {'message': message, 'details': str(error)}, 404
 
 
 @api.marshal_with(ErrorModel, code=404)
