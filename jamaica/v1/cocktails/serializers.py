@@ -1,6 +1,6 @@
 from flask_restx import fields
 from jamaica.v1.restx import api
-from jamaica.v1.serializers import DisplayItemBase, TextItem, SpecComponentItem, CitationItem, ConstructionItem
+from jamaica.v1.serializers import DisplayItemBase, TextItem, SpecComponentItem, CitationItem, ConstructionItem, GlasswareItem
 
 
 OriginItem = api.model('OriginItem', {
@@ -17,8 +17,6 @@ CocktailImageItem = api.model('CocktailImageItem', {
     'href': fields.String(description='URI of the image.', example='https://example.com/booze.png', required=True),
     'credit': fields.String(description='Photographer or other image credit.', example='Michelle Jay', required=True)
 })
-
-GlasswareItem = api.inherit('GlasswareItem', DisplayItemBase, {})
 
 SpecItem = api.inherit('SpecItem', DisplayItemBase, {
     'origin': fields.Nested(OriginItem, description='Origin of the spec.'),

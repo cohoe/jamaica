@@ -51,3 +51,5 @@ CitationItem = api.model('CitationItem', {
 })
 
 ConstructionItem = api.inherit('ConstructionItem', DisplayItemBase, {})
+
+GlasswareItem = api.inherit('GlasswareItem', DisplayItemBase, {})
