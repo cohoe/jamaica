@@ -42,7 +42,8 @@ SpecComponentItem = api.inherit('SpecComponentItem', DisplayItemBase, {
 CitationItem = api.model('CitationItem', {
     'title': fields.String(description='Title of the citation.', example='Death & Co: Modern Classic Cocktails', required=True),
     'author': fields.List(NullableString(), description='Author of the work being cited', example=['Jillian Vose', 'Ivy Mix']),
-    'date': fields.Integer(description='Date that the citation was published.', example=1812),
+    'date': fields.Date(description='Date that the citation was published.', example='01-01-1970'),
+    'year': fields.Integer(description='Year if a specific date is not available.', example=1812),
     'publisher': fields.String(description='Publisher of the citation.', example='Ten Speed Press'),
     'page': fields.Integer(description='If using a book or other printed medium, specify the page number.', example=69),
     'href': fields.String(description='URI of the website of the citation or to purchase the book.', example='https://example.com/booze'),
