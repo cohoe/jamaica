@@ -8,7 +8,7 @@ from jamaica.v1.inventories.serializers import InventoryResolutionSummaryObject,
 from flask_sqlalchemy_session import current_session
 
 from barbados.factories.inventory import InventoryFactory
-from barbados.factories.cocktailfactory import CocktailFactory
+from barbados.factories.cocktail import CocktailFactory
 from barbados.factories.reciperesolution import RecipeResolutionFactory
 from barbados.serializers import ObjectSerializer
 from barbados.caches.tablescan import InventoryScanCache

@@ -9,7 +9,7 @@ from flask_sqlalchemy_session import current_session
 from barbados.search.cocktail import CocktailSearch
 from barbados.caches.tablescan import CocktailScanCache
 from barbados.caches.recipebibliography import RecipeBibliographyCache
-from barbados.factories.cocktailfactory import CocktailFactory
+from barbados.factories.cocktail import CocktailFactory
 from barbados.serializers import ObjectSerializer
 from barbados.indexers.recipe import RecipeIndexer
 
@@ -37,7 +37,7 @@ class CocktailsEndpoint(Resource):
         Create a new cocktail.
         :return: Serialized Cocktail object.
         """
-        c = CocktailFactory.raw_to_obj(api.payload, api.payload.get('slug'))
+        c = CocktailFactory.raw_to_obj(api.payload)
         CocktailFactory.insert_obj(obj=c)
         RecipeIndexer.index(c)
 
