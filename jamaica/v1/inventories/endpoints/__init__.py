@@ -239,8 +239,6 @@ class InventoryRecipesEndpoint(Resource):
 class InventoryRecipesEndpoint(Resource):
 
     def get(self, id):
-        # @TODO ponder a better way to do this. It can't go in the parser itself because
-        # that lets end users specify their own value.
         inventory_recipes_parser.add_argument('inventory_id', default=str(id))
         args = inventory_recipes_parser.parse_args(strict=True)
 
