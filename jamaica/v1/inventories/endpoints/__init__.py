@@ -1,5 +1,4 @@
 import json
-import numpy
 from flask_restx import Resource
 from jamaica.cache import flask_cache
 from jamaica.v1.restx import api
@@ -18,6 +17,7 @@ from barbados.caches.tablescan import CocktailScanCache
 from barbados.search.reciperesolution import RecipeResolutionSearch
 from barbados.indexers.reciperesolution import RecipeResolutionIndexer
 from barbados.indexers.inventory import InventoryIndexer
+from barbados.reports.inventory import InventoryReport
 
 
 ns = api.namespace('v1/inventories', description='Inventories.')
@@ -258,45 +258,5 @@ class InventoryReportEndpoint(Resource):
 
     def get(self, id):
         i = InventoryFactory.produce_obj(id=id)
-
-        from barbados.objects.resolution.status import MissingResolutionStatus
-
-        total = RecipeResolutionSearch().execute()
-        missing_0 = RecipeResolutionSearch(missing=0).execute()
-        missing_1 = RecipeResolutionSearch(missing=1).execute()
-        missing_2plus = RecipeResolutionSearch(missing='2+').execute()
-
-        missing_components = []
-        missing_any = missing_1 + missing_2plus
-
-        for missing_component in missing_any:
-            rs = RecipeResolutionFactory.raw_to_obj(missing_component.get('hit'))
-            missing_components += rs.get_components_by_status(MissingResolutionStatus)
-
-        # https://stackoverflow.com/questions/12282232/how-do-i-count-unique-values-inside-a-list
-        values, counts = numpy.unique(missing_components, return_counts=True)
-        # https://www.geeksforgeeks.org/python-convert-two-lists-into-a-dictionary/
-        missing_counts = {values[i]: counts[i] for i in range(len(values))}
-        # https://careerkarma.com/blog/python-sort-a-dictionary-by-value/
-        sorted_counts = sorted(missing_counts.items(), key=lambda x: x[1], reverse=True)
-        new_missing_counts = {i[0]: int(i[1]) for i in sorted_counts}
-        # sorted_counts = sorted(missing_counts)
-        print(new_missing_counts)
-
-        # @TODO most useful ingredient?
-        # @TODO should report list all drink names or slugs?
-        # @TODO add datetime generated
-        # @TODO use the word tally
-        # @TODO count ingredients you have, also implied, also total
-        # @TODO give percentage of what you can make
-        report = {
-            'inventory_id': str(i.id),
-            'count_total_recipes': len(total),
-            'count_missing_0': len(missing_0),
-            'count_missing_1': len(missing_1),
-            'count_missing_2+': len(missing_2plus),
-            'count_missing_any': len(missing_any),
-            'missing_component_tally': new_missing_counts
-        }
-
-        return report
+        r = InventoryReport(inventory=i)
+        return r.run()
