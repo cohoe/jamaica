@@ -1,4 +1,3 @@
-import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
 from jamaica.v1.drinklists.serializers import DrinkListObject, DrinkListSearchItem
@@ -24,7 +23,7 @@ class DrinkListsEndpoint(Resource):
         List all DrinkLists
         :return: List of DrinkList dicts
         """
-        serialized_objects = json.loads(DrinkListScanCache.retrieve())
+        serialized_objects = DrinkListScanCache.retrieve()
         return serialized_objects
 
     @api.response(200, 'success')

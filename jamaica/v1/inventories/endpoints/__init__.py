@@ -1,4 +1,3 @@
-import json
 from flask_restx import Resource
 from jamaica.cache import flask_cache
 from jamaica.v1.restx import api
@@ -33,7 +32,7 @@ class InventoriesEndpoint(Resource):
         List all Inventories
         :return: List of Inventory dicts
         """
-        serialized_objects = json.loads(InventoryScanCache.retrieve())
+        serialized_objects = InventoryScanCache.retrieve()
         return serialized_objects
 
     @api.response(200, 'success')
@@ -210,7 +209,7 @@ class InventoryRecipesEndpoint(Resource):
 
         results = []
         cocktails_cache = CocktailScanCache.retrieve()
-        for raw_c in json.loads(cocktails_cache):
+        for raw_c in cocktails_cache:
             c = CocktailFactory.produce_obj(id=raw_c.get('slug'))
             c_results = RecipeResolver.resolve(inventory=i, cocktail=c)
             results += c_results

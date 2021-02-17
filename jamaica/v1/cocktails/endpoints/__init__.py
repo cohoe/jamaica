@@ -1,4 +1,3 @@
-import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
 from jamaica.v1.serializers import CocktailSearchItem
@@ -26,7 +25,7 @@ class CocktailsEndpoint(Resource):
         Return a list of all fully-detailed cocktail objects
         :return: List[Dict]
         """
-        serialized_cocktails = json.loads(CocktailScanCache.retrieve())
+        serialized_cocktails = CocktailScanCache.retrieve()
         return serialized_cocktails
 
     @api.response(200, 'success')
@@ -127,5 +126,5 @@ class CocktailBibliographyEndpoint(Resource):
         cocktail in the database. Citation needed? I think not!
         :return: List[Citation]
         """
-        serialized_citations = json.loads(RecipeBibliographyCache.retrieve())
+        serialized_citations = RecipeBibliographyCache.retrieve()
         return serialized_citations

@@ -1,4 +1,3 @@
-import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
 from flask_sqlalchemy_session import current_session
@@ -23,7 +22,7 @@ class GlasswareEndpoint(Resource):
         Return a list of all glassware.
         :return: List[Dict]
         """
-        serialized_glassware = json.loads(GlasswareScanCache.retrieve())
+        serialized_glassware = GlasswareScanCache.retrieve()
         return serialized_glassware
 
     @api.response(200, 'success')
@@ -48,7 +47,7 @@ class GlasswareEndpoint(Resource):
         Delete all glassware from the database.
         :return: None
         """
-        serialized_glassware = json.loads(GlasswareScanCache.retrieve())
+        serialized_glassware = GlasswareScanCache.retrieve()
         objs = [GlasswareFactory.raw_to_obj(glassware) for glassware in serialized_glassware]
         for c in objs:
             GlasswareFactory.delete_obj(c, commit=False)

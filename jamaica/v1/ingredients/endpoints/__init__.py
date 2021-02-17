@@ -25,7 +25,7 @@ class IngredientsEndpoint(Resource):
         List all ingredients
         :return: List of Ingredient dicts
         """
-        serialized_ingredients = json.loads(IngredientScanCache.retrieve())
+        serialized_ingredients = IngredientScanCache.retrieve()
         return serialized_ingredients
 
     @api.response(200, 'success')

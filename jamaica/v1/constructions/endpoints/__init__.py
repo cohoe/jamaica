@@ -1,4 +1,3 @@
-import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
 from flask_sqlalchemy_session import current_session
@@ -23,7 +22,7 @@ class ConstructionsEndpoint(Resource):
         Return a list of all constructions.
         :return: List[Dict]
         """
-        serialized_constructions = json.loads(ConstructionScanCache.retrieve())
+        serialized_constructions = ConstructionScanCache.retrieve()
         return serialized_constructions
 
     @api.response(200, 'success')
@@ -48,7 +47,7 @@ class ConstructionsEndpoint(Resource):
         Delete all constructions from the database.
         :return: None
         """
-        serialized_constructions = json.loads(ConstructionScanCache.retrieve())
+        serialized_constructions = ConstructionScanCache.retrieve()
         objs = [ConstructionFactory.raw_to_obj(construction) for construction in serialized_constructions]
         for c in objs:
             ConstructionFactory.delete_obj(c, commit=False)
