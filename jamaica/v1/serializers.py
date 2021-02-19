@@ -9,6 +9,11 @@ class NullableString(fields.String):
     __schema_example__ = 'nullable string'
 
 
+class NullableBoolean(fields.Boolean):
+    __schema_type__ = ['boolean', 'null']
+    __schema_example__ = 'nullable boolean'
+
+
 DisplayItemBase = api.model('DisplayItemBase', {
     'slug': fields.String(attribute='slug', description='This items slug (id).', required=True, example='la-viaa'),
     'display_name': fields.String(attribute='display_name', description='This items display name.', example='La Viaa'),
@@ -37,7 +42,7 @@ SpecComponentItem = api.inherit('SpecComponentItem', DisplayItemBase, {
     'quantity': fields.Float(description='Quantity of the ingredient in the specified unit which is described in another field. Can be omitted in certain cases such as a rinse.', example=1.5),
     'unit': fields.String(description='Unit of measure for this component. Can be omitted in certain cases such as muddling while citrus.', example='oz'),
     'notes': fields.List(fields.Nested(TextItem), description='Notes on the component.'),
-    'optional': fields.Boolean(description='Optionality of this component'),
+    'optional': NullableBoolean(description='Optionality of this component'),
     'preparation': NullableString(description='Preparation of this component if special.')
 })
 
