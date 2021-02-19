@@ -1,21 +1,21 @@
 from flask_restx import fields
 from jamaica.v1.restx import api
-from jamaica.v1.serializers import DisplayItemBase, SearchResultBase, NullableString
+from jamaica.v1.serializers import SearchResultBase, NullableString
 
-DrinkListItemObject = api.model('DrinkListItemObject', {
+
+ListItemObject = api.model('ListItemObject', {
     'cocktail_slug': fields.String(attribute='cocktail_slug', description='Slug of the cocktail.'),
     'spec_slug': NullableString(attribute='spec_slug', description='Slug of the specific spec.'),
     'highlight': fields.Boolean(attribute='highlight', description='Boolean of whether this is highlighted or not.')
 })
 
-DrinkListObject = api.model('DrinkListObject', {
-    'id': fields.String(attribute='id', description='ID of this drinklist.'),
-    'display_name': fields.String(attribute='display_name', description='Display name of this drinklist.'),
-    'items': fields.List(fields.Nested(DrinkListItemObject), attribute='items'),
+ListObject = api.model('ListObject', {
+    'id': fields.String(attribute='id', description='ID of this list.'),
+    'display_name': fields.String(attribute='display_name', description='Display name of this list.'),
+    'items': fields.List(fields.Nested(ListItemObject), attribute='items'),
 })
 
-# @TODO notes?
-DrinkListSearchItem = api.inherit('DrinkListSearchItem', SearchResultBase, {
+ListSearchItem = api.inherit('ListSearchItem', SearchResultBase, {
     'slug': fields.String(attribute='hit.slug', description='This items slug.'),
     'display_name': fields.String(attribute='hit.display_name', description='This items display name.'),
 })

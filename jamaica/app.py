@@ -8,7 +8,7 @@ from flask_uuid import FlaskUUID
 from jamaica.v1.restx import api
 from jamaica.v1.cocktails.endpoints import ns as cocktails_namespace
 from jamaica.v1.ingredients.endpoints import ns as ingredients_namespace
-from jamaica.v1.drinklists.endpoints import ns as drinklists_namespace
+from jamaica.v1.lists.endpoints import ns as lists_namespace
 from jamaica.v1.caches.endpoints import ns as caches_namespace
 from jamaica.v1.inventories.endpoints import ns as inventories_namespace
 from jamaica.v1.indexes.endpoints import ns as indexes_namespace
@@ -49,7 +49,7 @@ def initialize_app(flask_app):
     api.init_app(blueprint)
     api.add_namespace(cocktails_namespace)
     api.add_namespace(ingredients_namespace)
-    api.add_namespace(drinklists_namespace)
+    api.add_namespace(lists_namespace)
     api.add_namespace(caches_namespace)
     api.add_namespace(inventories_namespace)
     api.add_namespace(indexes_namespace)
