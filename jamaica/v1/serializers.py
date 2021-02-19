@@ -36,7 +36,9 @@ CocktailSearchItem = api.inherit('CocktailSearchItem', SearchResultBase, {
 SpecComponentItem = api.inherit('SpecComponentItem', DisplayItemBase, {
     'quantity': fields.Float(description='Quantity of the ingredient in the specified unit which is described in another field. Can be omitted in certain cases such as a rinse.', example=1.5),
     'unit': fields.String(description='Unit of measure for this component. Can be omitted in certain cases such as muddling while citrus.', example='oz'),
-    'notes': fields.List(fields.Nested(TextItem), description='Notes on the component.')
+    'notes': fields.List(fields.Nested(TextItem), description='Notes on the component.'),
+    'optional': fields.Boolean(description='Optionality of this component'),
+    'preparation': NullableString(description='Preparation of this component if special.')
 })
 
 CitationItem = api.model('CitationItem', {
