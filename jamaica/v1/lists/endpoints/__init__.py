@@ -146,6 +146,42 @@ class ListItemsEndpoint(Resource):
 @api.doc(params={'id': 'A List id.', 'slug': 'item slug'})
 class ListItemsItemEndpoint(Resource):
 
+    @api.response(200, 'success')
+    @api.marshal_with(ListItemObject)
+    def get(self, id, slug):
+        """
+        Get an inventories item.
+        :param id:
+        :param slug:
+        :return: Serialized List
+        """
+        lst = ListFactory.produce_obj(id=id)
+        i = lst.get_item(slug)
+        return ObjectSerializer.serialize(i, 'dict')
+
+    @api.response(200, 'success')
+    @api.expect(ListItemObject, validate=True)
+    @api.marshal_with(ListItemObject)
+    def post(self, id, slug):
+        """
+        # @TODO prevent changing slugs
+        Replace an inventories item.
+        :param id:
+        :param slug:
+        :return: Serialized List
+        """
+        lst = ListFactory.produce_obj(id=id)
+        i = ListItemFactory.raw_to_obj(api.payload)
+
+        lst.replace_item(i)
+        ListFactory.update_obj(obj=lst, id_attr='id')
+        ListIndexer.index(lst)
+
+        # Invalidate Cache
+        ListScanCache.invalidate()
+
+        return ObjectSerializer.serialize(i, 'dict')
+
     @api.response(204, 'successful delete')
     def delete(self, id, slug):
         """
