@@ -16,4 +16,7 @@ setup(
         'flask_uuid',
         'flask_caching'
     ],
+    test_requires=[
+        'pytest'
+    ]
 )
