@@ -1,10 +1,11 @@
 from flask_restx import Resource
 from jamaica.v1.restx import api
-from jamaica.v1.lists.serializers import ListObject, ListSearchItem
+from jamaica.v1.lists.serializers import ListObject, ListSearchItem, ListItemObject
 from jamaica.v1.lists.parsers import list_parser
 from flask_sqlalchemy_session import current_session
 
 from barbados.factories.list import ListFactory
+from barbados.factories.listitem import ListItemFactory
 from barbados.serializers import ObjectSerializer
 from barbados.caches.tablescan import ListScanCache
 from barbados.indexers.list import ListIndexer
@@ -103,3 +104,59 @@ class ListEndpoint(Resource):
         # Invalidate Cache and de-index.
         ListScanCache.invalidate()
         ListIndexer.delete(m)
+
+
+@ns.route('/<uuid:id>/items')
+# @ns.route('/<uuid:id>/items/<slug>')
+@api.doc(params={'id': 'A List id.', 'slug': 'item slug'})
+class ListItemsEndpoint(Resource):
+
+    @api.response(200, 'success')
+    @api.marshal_list_with(ListItemObject)
+    def get(self, id):
+        """
+        Get an inventories items from the database.
+        :param id:
+        :return: Serialized List
+        """
+        lst = ListFactory.produce_obj(id=id)
+        return [ObjectSerializer.serialize(i, 'dict') for i in lst.items]
+
+    @api.response(200, 'success')
+    @api.expect(ListItemObject, validate=True)
+    @api.marshal_with(ListItemObject)
+    def post(self, id):
+        """
+        Add an item to a list.
+        :return: Item that you created.
+        """
+        lst = ListFactory.produce_obj(id)
+        i = ListItemFactory.raw_to_obj(api.payload)
+
+        lst.items.append(i)
+        ListFactory.update_obj(obj=lst, id_attr='id')
+        ListIndexer.index(lst)
+
+        # Invalidate Cache
+        ListScanCache.invalidate()
+
+        return ObjectSerializer.serialize(i, 'dict')
+
+    # @api.response(204, 'successful delete')
+    # @api.marshal_with(ListItemObject)
+    # def post(self, id):
+    #     """
+    #     Add an item to a list.
+    #     :return: Item that you created.
+    #     """
+    #     lst = ListFactory.produce_obj(id)
+    #     i = ListItemFactory.raw_to_obj(api.payload)
+    #
+    #     lst.items.append(i)
+    #     ListFactory.update_obj(obj=lst, id_attr='id')
+    #     ListIndexer.index(lst)
+    #
+    #     # Invalidate Cache
+    #     ListScanCache.invalidate()
+    #
+    #     return ObjectSerializer.serialize(i, 'dict')
