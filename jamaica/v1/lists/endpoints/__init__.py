@@ -107,8 +107,7 @@ class ListEndpoint(Resource):
 
 
 @ns.route('/<uuid:id>/items')
-# @ns.route('/<uuid:id>/items/<slug>')
-@api.doc(params={'id': 'A List id.', 'slug': 'item slug'})
+@api.doc(params={'id': 'A List id.'})
 class ListItemsEndpoint(Resource):
 
     @api.response(200, 'success')
@@ -133,7 +132,7 @@ class ListItemsEndpoint(Resource):
         lst = ListFactory.produce_obj(id)
         i = ListItemFactory.raw_to_obj(api.payload)
 
-        lst.items.append(i)
+        lst.add_item(i)
         ListFactory.update_obj(obj=lst, id_attr='id')
         ListIndexer.index(lst)
 
@@ -142,21 +141,26 @@ class ListItemsEndpoint(Resource):
 
         return ObjectSerializer.serialize(i, 'dict')
 
-    # @api.response(204, 'successful delete')
-    # @api.marshal_with(ListItemObject)
-    # def post(self, id):
-    #     """
-    #     Add an item to a list.
-    #     :return: Item that you created.
-    #     """
-    #     lst = ListFactory.produce_obj(id)
-    #     i = ListItemFactory.raw_to_obj(api.payload)
-    #
-    #     lst.items.append(i)
-    #     ListFactory.update_obj(obj=lst, id_attr='id')
-    #     ListIndexer.index(lst)
-    #
-    #     # Invalidate Cache
-    #     ListScanCache.invalidate()
-    #
-    #     return ObjectSerializer.serialize(i, 'dict')
+
+@ns.route('/<uuid:id>/items/<slug>')
+@api.doc(params={'id': 'A List id.', 'slug': 'item slug'})
+class ListItemsItemEndpoint(Resource):
+
+    @api.response(204, 'successful delete')
+    def delete(self, id, slug):
+        """
+        Delete an item to a list.
+        :param id: List ID
+        :param slug: item slug
+        :return: None
+        """
+        lst = ListFactory.produce_obj(id)
+
+        lst.remove_item(slug)
+        ListFactory.update_obj(obj=lst, id_attr='id')
+        ListIndexer.index(lst)
+
+        # Invalidate Cache
+        ListScanCache.invalidate()
+
+        return None, 204
