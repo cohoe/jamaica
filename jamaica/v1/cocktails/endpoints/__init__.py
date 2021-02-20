@@ -1,6 +1,7 @@
+import json
 from flask_restx import Resource
 from jamaica.v1.restx import api
-from jamaica.v1.serializers import CocktailSearchItem
+from jamaica.v1.serializers import CocktailSearchItem, TextItem
 from jamaica.v1.cocktails.serializers import CocktailItem, CitationItem
 from jamaica.v1.cocktails.parsers import cocktail_list_parser
 from flask_sqlalchemy_session import current_session
@@ -8,6 +9,7 @@ from flask_sqlalchemy_session import current_session
 from barbados.search.cocktail import CocktailSearch
 from barbados.caches.tablescan import CocktailScanCache
 from barbados.caches.recipebibliography import RecipeBibliographyCache
+from barbados.caches.notebook import NotebookCache
 from barbados.factories.cocktail import CocktailFactory
 from barbados.serializers import ObjectSerializer
 from barbados.indexers.recipe import RecipeIndexer
@@ -127,4 +129,13 @@ class CocktailBibliographyEndpoint(Resource):
         :return: List[Citation]
         """
         serialized_citations = RecipeBibliographyCache.retrieve()
-        return serialized_citations
+        return json.loads(serialized_citations)
+
+
+@ns.route('/notebook')
+class CocktailNotebookEndpoint(Resource):
+
+    @api.response(200, 'success')
+    @api.marshal_list_with(TextItem)
+    def get(self):
+        return json.loads(NotebookCache.retrieve())
