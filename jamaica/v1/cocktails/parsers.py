@@ -12,3 +12,4 @@ cocktail_list_parser.add_argument('garnish', type=inputs.boolean, help='Boolean 
 cocktail_list_parser.add_argument('citation_name', type=str, help='Citation name keyword')
 cocktail_list_parser.add_argument('citation_author', type=str, help='Citation author keyword')
 cocktail_list_parser.add_argument('instructions', type=str, help='String in instructions')
+cocktail_list_parser.add_argument('all', type=str, help='All fields')
