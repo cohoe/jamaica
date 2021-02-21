@@ -1,6 +1,6 @@
 from flask_restx import fields
 from jamaica.v1.restx import api
-from jamaica.v1.serializers import DisplayItemBase, TextItem, SpecComponentItem, CitationItem, ConstructionItem, GlasswareItem
+from jamaica.v1.serializers import DisplayItemBase, TextItem, ComponentItem, CitationItem, ConstructionItem, GlasswareItem
 
 
 OriginItem = api.model('OriginItem', {
@@ -22,8 +22,8 @@ SpecItem = api.inherit('SpecItem', DisplayItemBase, {
     'origin': fields.Nested(OriginItem, description='Origin of the spec.'),
     'glassware': fields.List(fields.Nested(GlasswareItem), description='Type of glass that should be used.'),
     'construction': fields.Nested(ConstructionItem, description='Construction method of the spec.'),
-    'components': fields.List(fields.Nested(SpecComponentItem), description='Components of the recipe.', required=True),
-    'garnish': fields.List(fields.Nested(SpecComponentItem), description='Garnish for the recipe.'),
+    'components': fields.List(fields.Nested(ComponentItem), description='Components of the recipe.', required=True),
+    'garnish': fields.List(fields.Nested(ComponentItem), description='Garnish for the recipe.'),
     'straw': fields.Boolean(description='Should a straw be used with this spec.', example=False),
     'citations': fields.List(fields.Nested(CitationItem), description='Spec citations.'),
     'images': fields.List(fields.Nested(CocktailImageItem), description='Reference images of the spec.'),

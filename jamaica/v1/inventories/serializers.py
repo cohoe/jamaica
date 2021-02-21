@@ -1,6 +1,6 @@
 from flask_restx import fields
 from jamaica.v1.restx import api
-from jamaica.v1.serializers import SpecComponentItem, CitationItem
+from jamaica.v1.serializers import ComponentItem, CitationItem
 
 InventoryItemObject = api.model('InventoryItemObject', {
     'slug': fields.String(description='Slug of this inventory item.', attribute='slug', example='regans-orange-bitters'),
@@ -47,6 +47,6 @@ InventoryResolutionSummaryObject = api.model('InventoryResolutionSummaryObject',
     'construction_slug': fields.String(attribute='construction_slug'),
     'status_count': fields.Nested(InventoryResolutionStatusCount, attribute='status_count'),
     'citations': fields.List(fields.Nested(CitationItem), attribute='citations'),
-    'garnish': fields.List(fields.Nested(SpecComponentItem), attribute='garnish'),
+    'garnish': fields.List(fields.Nested(ComponentItem), attribute='garnish'),
     'generated_at': fields.String(attribute='generated_at')
 })

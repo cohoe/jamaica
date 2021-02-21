@@ -11,12 +11,13 @@ def test_list_get(client):
 
 def test_single_get(client):
     """Test that a single ingredient was returned"""
-    endpoint = '/api/v1/ingredients/rum'
-    result = client.get(endpoint)
+    result = client.get('/api/v1/ingredients/rum')
     data = json.loads(result.data)
     assert data.get('slug') == 'rum'
     assert data.get('display_name') == 'Rum'
     assert data.get('kind') == 'family'
+    assert len(data.get('instructions')) == 0
+    assert len(data.get('components')) == 0
 
 
 def test_search_get(client):
@@ -33,3 +34,13 @@ def test_substitution_get(client):
     data = json.loads(result.data)
     assert data.get('kind') == 'product'
     assert data.get('implies_root') == 'aged-rum'
+
+
+def test_simple_syrup(client):
+    """Test simple syrup ingredient"""
+    result = client.get('/api/v1/ingredients/simple-syrup')
+    data = json.loads(result.data)
+    assert data.get('display_name') == 'Simple Syrup'
+    assert len(data.get('components')) == 2
+    assert len(data.get('instructions')) >= 1
+    assert 'container' in data.get('instructions')[0].get('text')

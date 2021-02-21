@@ -38,7 +38,7 @@ CocktailSearchItem = api.inherit('CocktailSearchItem', SearchResultBase, {
     'component_display_names': fields.List(fields.String(attribute='display_name'), attribute='hit.spec.components', description='Display names of components in this spec', example=['rum', 'sherry', 'vermouth']),
 })
 
-SpecComponentItem = api.inherit('SpecComponentItem', DisplayItemBase, {
+ComponentItem = api.inherit('ComponentItem', DisplayItemBase, {
     'quantity': fields.Float(description='Quantity of the ingredient in the specified unit which is described in another field. Can be omitted in certain cases such as a rinse.', example=1.5),
     'unit': fields.String(description='Unit of measure for this component. Can be omitted in certain cases such as muddling while citrus.', example='oz'),
     'notes': fields.List(fields.Nested(TextItem), description='Notes on the component.'),

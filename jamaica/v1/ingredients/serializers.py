@@ -1,6 +1,6 @@
 from flask_restx import fields
 from jamaica.v1.restx import api
-from jamaica.v1.serializers import DisplayItemBase, SearchResultBase, NullableString
+from jamaica.v1.serializers import DisplayItemBase, SearchResultBase, NullableString, ComponentItem, TextItem
 
 
 IngredientSearchItem = api.inherit('IngredientSearchItem', SearchResultBase, {
@@ -39,4 +39,6 @@ IngredientObject = api.inherit('IngredientObject', DisplayItemBase, {
     'last_refresh': NullableString(attribute='last_refresh', description='datetime of the last refresh of this object.', required=False),
     'elements_include': fields.List(fields.String(), attribute='elements_include', required=False),
     'elements_exclude': fields.List(fields.String(), attribute='elements_exclude', required=False),
+    'components': fields.List(fields.Nested(ComponentItem), description='List of components to make this ingredient'),
+    'instructions': fields.List(fields.Nested(TextItem), description='List of instructions to make this ingredient'),
 })
