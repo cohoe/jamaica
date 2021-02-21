@@ -1,5 +1,6 @@
 import json
 from .client import client
+from barbados.factories.spec import SpecFactory
 
 
 def test_list_get(client):
@@ -30,3 +31,20 @@ def test_bibliography_get(client):
     result = client.get('/api/v1/cocktails/bibliography')
     data = json.loads(result.data)
     assert len(data) > 1
+
+
+###
+# Old Fashioned
+###
+def test_old_fashioned(client):
+    """Test the Old Fashioned cocktail"""
+    endpoint = '/api/v1/cocktails/old-fashioned'
+    result = client.get(endpoint)
+    data = json.loads(result.data)
+    assert len(data.get('specs')) == 2
+
+    for spec in data.get('specs'):
+        s = SpecFactory.raw_to_obj(spec)
+
+        if s.slug == 'death-co':
+            assert s.display_name == 'Death & Co'
