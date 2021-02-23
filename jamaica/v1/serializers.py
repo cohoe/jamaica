@@ -57,6 +57,8 @@ CitationItem = api.model('CitationItem', {
     'issue': fields.String(description='Deprecated'),
 })
 
-ConstructionItem = api.inherit('ConstructionItem', DisplayItemBase, {})
+ConstructionItem = api.inherit('ConstructionItem', DisplayItemBase, {
+    'default_instructions': fields.List(fields.Nested(TextItem), description='List of instruction text objects.')
+})
 
 GlasswareItem = api.inherit('GlasswareItem', DisplayItemBase, {})

@@ -4,7 +4,7 @@ from flask_restx import Api, fields
 from jamaica import settings
 # from jamaica import serializers
 from sqlalchemy.exc import IntegrityError
-from barbados.exceptions import ValidationException, ServiceUnavailableException
+from barbados.exceptions import ValidationException, ServiceUnavailableException, FactoryUpdateException
 
 
 class CustomApi(Api):
@@ -89,6 +89,7 @@ def integrity_error_handler(error):
 
 @api.marshal_with(ErrorModel, code=400)
 @api.errorhandler(ValidationException)
+@api.errorhandler(FactoryUpdateException)
 def validation_error_handler(error):
     """
     ObjectValidator failed.
@@ -98,7 +99,7 @@ def validation_error_handler(error):
     return {'message': str(error)}, 400
 
 
-@api.marshal_with(ErrorModel, code=400)
+@api.marshal_with(ErrorModel, code=500)
 @api.errorhandler(ServiceUnavailableException)
 def service_error_handler(error):
     """

@@ -19,39 +19,33 @@ class ConstructionsEndpoint(Resource):
     @api.marshal_list_with(ConstructionItem)
     def get(self):
         """
-        Return a list of all constructions.
-        :return: List[Dict]
+        List all Constructions.
+        :return: List of serialized Construction objects.
         """
-        serialized_constructions = ConstructionScanCache.retrieve()
-        return serialized_constructions
+        return ConstructionScanCache.retrieve()
 
-    @api.response(200, 'success')
+    @api.response(201, 'created')
     @api.expect(ConstructionItem, validate=True)
     @api.marshal_with(ConstructionItem)
     def post(self):
         """
-        Create a new construction.
+        Insert new Construction.
         :return: Serialized Construction object.
         """
         c = ConstructionFactory.raw_to_obj(api.payload)
         ConstructionFactory.insert_obj(obj=c)
-
-        # Invalidate Cache
         ConstructionScanCache.invalidate()
-
-        return ObjectSerializer.serialize(c, 'dict')
+        return ObjectSerializer.serialize(c, 'dict'), 201
 
     @api.response(204, 'successful delete')
     def delete(self):
         """
-        Delete all constructions from the database.
-        :return: None
+        Delete all Constructions.
+        :return: Count of deleted objects.
         """
-        serialized_constructions = ConstructionScanCache.retrieve()
-        objs = [ConstructionFactory.raw_to_obj(construction) for construction in serialized_constructions]
+        objs = [ConstructionFactory.raw_to_obj(construction) for construction in ConstructionScanCache.retrieve()]
         for c in objs:
             ConstructionFactory.delete_obj(c, commit=False)
-
         current_session.commit()
         ConstructionScanCache.invalidate()
         return len(objs), 204
@@ -62,20 +56,35 @@ class ConstructionsEndpoint(Resource):
 class ConstructionEndpoint(Resource):
 
     @api.response(200, 'success')
+    @api.marshal_with(ConstructionItem)
     def get(self, slug):
         """
-        Get a construction.
-        :param slug: Construction slug
-        :return: Serialized Construction object
+        Get a Construction.
+        :param slug: Construction slug.
+        :return: Serialized Construction object.
         """
         c = ConstructionFactory.produce_obj(id=slug)
         return ObjectSerializer.serialize(c, 'dict')
 
+    @api.expect(ConstructionItem, validate=True)
+    @api.marshal_with(ConstructionItem)
+    @api.response(200, 'success')
+    def post(self, slug):
+        """
+        Update a Construction.
+        :param slug: Construction slug.
+        :return: Serialized Construction object.
+        """
+        c = ConstructionFactory.raw_to_obj(api.payload)
+        ConstructionFactory.update_obj(obj=c, id_value=slug)
+        ConstructionScanCache.invalidate()
+        return ObjectSerializer.serialize(c, 'dict'), 200
+
     @api.response(204, 'successful delete')
     def delete(self, slug):
         """
-        Delete a construction from the database.
-        :param slug: Slug of a construction
+        Delete a Construction.
+        :param slug: Construction slug.
         :return: None
         """
         c = ConstructionFactory.produce_obj(id=slug)
