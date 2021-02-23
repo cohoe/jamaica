@@ -44,6 +44,8 @@ class InventoriesEndpoint(Resource):
         :return: Object that you created.
         :raises IntegrityError:
         """
+        # https://stackoverflow.com/questions/11277432/how-can-i-remove-a-key-from-a-python-dictionary
+        api.payload.pop('id', None)
         i = InventoryFactory.raw_to_obj(api.payload)
         InventoryFactory.insert_obj(obj=i)
 
