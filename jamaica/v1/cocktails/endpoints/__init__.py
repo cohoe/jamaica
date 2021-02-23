@@ -30,7 +30,7 @@ class CocktailsEndpoint(Resource):
         serialized_cocktails = CocktailScanCache.retrieve()
         return serialized_cocktails
 
-    @api.response(200, 'success')
+    @api.response(201, 'created')
     @api.expect(CocktailItem, validate=True)
     @api.marshal_list_with(CocktailItem)
     def post(self):
@@ -45,7 +45,7 @@ class CocktailsEndpoint(Resource):
         # Invalidate Cache
         CocktailScanCache.invalidate()
 
-        return ObjectSerializer.serialize(c, 'dict')
+        return ObjectSerializer.serialize(c, 'dict'), 201
 
     @api.response(204, 'successful delete')
     def delete(self):
@@ -61,7 +61,7 @@ class CocktailsEndpoint(Resource):
         current_session.commit()
         CocktailScanCache.invalidate()
 
-        return len(objects)
+        return len(objects), 204
 
 
 @ns.route('/search')
@@ -112,9 +112,9 @@ class CocktailEndpoint(Resource):
         """
         c = CocktailFactory.produce_obj(id=slug)
         CocktailFactory.delete_obj(obj=c)
-
         CocktailScanCache.invalidate()
         RecipeIndexer.delete(c)
+        return None, 204
 
 
 @ns.route('/bibliography')

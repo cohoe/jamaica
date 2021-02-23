@@ -10,6 +10,7 @@ from barbados.serializers import ObjectSerializer
 from barbados.caches.tablescan import ListScanCache
 from barbados.indexers.list import ListIndexer
 from barbados.search.lists import ListsSearch
+from barbados.exceptions import FactoryUpdateException
 
 ns = api.namespace('v1/lists', description='Lists.')
 
@@ -24,10 +25,9 @@ class ListsEndpoint(Resource):
         List all Lists
         :return: List of List dicts
         """
-        serialized_objects = ListScanCache.retrieve()
-        return serialized_objects
+        return ListScanCache.retrieve()
 
-    @api.response(200, 'success')
+    @api.response(201, 'created')
     @api.expect(ListObject, validate=True)
     @api.marshal_with(ListObject)
     def post(self):
@@ -42,7 +42,7 @@ class ListsEndpoint(Resource):
         # Invalidate Cache
         ListScanCache.invalidate()
 
-        return ObjectSerializer.serialize(m, 'dict')
+        return ObjectSerializer.serialize(m, 'dict'), 201
 
     @api.response(204, 'successful delete')
     def delete(self):
@@ -58,7 +58,7 @@ class ListsEndpoint(Resource):
         current_session.commit()
         ListScanCache.invalidate()
 
-        return len(objects)
+        return len(objects), 204
 
 
 @ns.route('/search')
@@ -104,6 +104,8 @@ class ListEndpoint(Resource):
         # Invalidate Cache and de-index.
         ListScanCache.invalidate()
         ListIndexer.delete(m)
+
+        return None, 204
 
 
 @ns.route('/<uuid:id>/items')
@@ -159,12 +161,11 @@ class ListItemsItemEndpoint(Resource):
         i = lst.get_item(slug)
         return ObjectSerializer.serialize(i, 'dict')
 
-    @api.response(200, 'success')
+    @api.response(201, 'created')
     @api.expect(ListItemObject, validate=True)
     @api.marshal_with(ListItemObject)
     def post(self, id, slug):
         """
-        # @TODO prevent changing slugs
         Replace an inventories item.
         :param id:
         :param slug:
@@ -173,14 +174,17 @@ class ListItemsItemEndpoint(Resource):
         lst = ListFactory.produce_obj(id=id)
         i = ListItemFactory.raw_to_obj(api.payload)
 
+        if i.cocktail_slug != slug:
+            raise FactoryUpdateException("Cannot change slug of inventory item %s -> %s" % (slug, i.cocktail_slug))
+
         lst.replace_item(i)
-        ListFactory.update_obj(obj=lst, id_attr='id')
+        ListFactory.update_obj(obj=lst, id_attr='id', id_value=id)
         ListIndexer.index(lst)
 
         # Invalidate Cache
         ListScanCache.invalidate()
 
-        return ObjectSerializer.serialize(i, 'dict')
+        return ObjectSerializer.serialize(i, 'dict'), 201
 
     @api.response(204, 'successful delete')
     def delete(self, id, slug):
@@ -193,7 +197,7 @@ class ListItemsItemEndpoint(Resource):
         lst = ListFactory.produce_obj(id)
 
         lst.remove_item(slug)
-        ListFactory.update_obj(obj=lst, id_attr='id')
+        ListFactory.update_obj(obj=lst, id_attr='id', id_value=lst.id)
         ListIndexer.index(lst)
 
         # Invalidate Cache

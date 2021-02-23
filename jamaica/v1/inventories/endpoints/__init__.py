@@ -35,7 +35,7 @@ class InventoriesEndpoint(Resource):
         serialized_objects = InventoryScanCache.retrieve()
         return serialized_objects
 
-    @api.response(200, 'success')
+    @api.response(201, 'created')
     @api.expect(InventoryObject, validate=True)
     @api.marshal_with(InventoryObject)
     def post(self):
@@ -53,7 +53,7 @@ class InventoriesEndpoint(Resource):
         # Invalidate Cache
         InventoryScanCache.invalidate()
 
-        return ObjectSerializer.serialize(i, 'dict')
+        return ObjectSerializer.serialize(i, 'dict'), 201
 
     @api.response(204, 'successful delete')
     def delete(self):
@@ -70,6 +70,8 @@ class InventoriesEndpoint(Resource):
 
         InventoryIndexer.empty()
         InventoryScanCache.invalidate()
+
+        return len(objects), 204
 
 
 @ns.route('/<uuid:id>')
@@ -102,6 +104,8 @@ class InventoryEndpoint(Resource):
         # Invalidate Cache
         InventoryScanCache.invalidate()
         InventoryIndexer.delete(i)
+
+        return None, 204
 
 
 @ns.route('/<uuid:id>/full')
@@ -231,6 +235,8 @@ class InventoryRecipesEndpoint(Resource):
         for rs in results:
             RecipeResolutionFactory.delete_obj(rs, commit=False)
         current_session.commit()
+
+        return len(results), 204
 
 
 @ns.route('/<uuid:id>/recipes/search')

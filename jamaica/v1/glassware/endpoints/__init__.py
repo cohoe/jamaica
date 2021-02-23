@@ -25,7 +25,7 @@ class GlasswareEndpoint(Resource):
         serialized_glassware = GlasswareScanCache.retrieve()
         return serialized_glassware
 
-    @api.response(200, 'success')
+    @api.response(201, 'created')
     @api.expect(GlasswareItem, validate=True)
     @api.marshal_with(GlasswareItem)
     def post(self):
@@ -39,7 +39,7 @@ class GlasswareEndpoint(Resource):
         # Invalidate Cache
         GlasswareScanCache.invalidate()
 
-        return ObjectSerializer.serialize(c, 'dict')
+        return ObjectSerializer.serialize(c, 'dict'), 201
 
     @api.response(204, 'successful delete')
     def delete(self):
@@ -59,7 +59,7 @@ class GlasswareEndpoint(Resource):
 
 @ns.route('/<string:slug>')
 @api.doc(params={'slug': 'A glassware slug.'})
-class glasswareEndpoint(Resource):
+class GlasswareEndpoint(Resource):
 
     @api.response(200, 'success')
     def get(self, slug):

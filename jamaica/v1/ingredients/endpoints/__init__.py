@@ -28,7 +28,7 @@ class IngredientsEndpoint(Resource):
         serialized_ingredients = IngredientScanCache.retrieve()
         return serialized_ingredients
 
-    @api.response(200, 'success')
+    @api.response(201, 'created')
     @api.expect(IngredientObject, validate=True)
     @api.marshal_with(IngredientObject)
     def post(self):
@@ -45,7 +45,7 @@ class IngredientsEndpoint(Resource):
         IngredientScanCache.invalidate()
         IngredientTreeCache.invalidate()
 
-        return ObjectSerializer.serialize(i, 'dict')
+        return ObjectSerializer.serialize(i, 'dict'), 201
 
     @api.response(204, 'successful delete')
     def delete(self):
@@ -63,7 +63,7 @@ class IngredientsEndpoint(Resource):
         IngredientScanCache.invalidate()
         IngredientTreeCache.invalidate()
 
-        return len(objects)
+        return len(objects), 204
 
 
 @ns.route('/search')
@@ -125,6 +125,8 @@ class IngredientEndpoint(Resource):
         IngredientTreeCache.invalidate()
         IngredientIndexer.delete(i)
 
+        return None, 204
+
 
 @ns.route('/<string:slug>/subtree')
 class IngredientSubtreeEndpoint(Resource):
@@ -168,7 +170,7 @@ class IngredientRefreshEndpoint(Resource):
         """
         i = IngredientFactory.produce_obj(id=slug)
         i.refresh()
-        IngredientFactory.update_obj(obj=i)
+        IngredientFactory.update_obj(obj=i, id_value=slug)
         IngredientIndexer.index(i)
 
         # Invalidate cache
