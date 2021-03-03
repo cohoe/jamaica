@@ -1,72 +1,89 @@
 from flask import Flask, Blueprint
-from jamaica import settings
 from jamaica.cache import flask_cache
 from flask_cors import CORS
 from flask_sqlalchemy_session import flask_scoped_session
 from flask_uuid import FlaskUUID
-
+from jamaica.settings import settings_to_dict, app_settings, app_runtime, cors_settings
 from jamaica.v1.restx import api
-from jamaica.v1.cocktails.endpoints import ns as cocktails_namespace
-from jamaica.v1.ingredients.endpoints import ns as ingredients_namespace
-from jamaica.v1.lists.endpoints import ns as lists_namespace
-from jamaica.v1.caches.endpoints import ns as caches_namespace
-from jamaica.v1.inventories.endpoints import ns as inventories_namespace
-from jamaica.v1.indexes.endpoints import ns as indexes_namespace
-from jamaica.v1.setup.endpoints import ns as setup_namespace
-from jamaica.v1.constructions.endpoints import ns as constructions_namespace
-from jamaica.v1.glassware.endpoints import ns as glassware_namespace
-
 from barbados.services.database import DatabaseService
 
-app = Flask('jamaica')
+# Endpoints
+import jamaica.v1.cocktails.endpoints
+import jamaica.v1.ingredients.endpoints
+import jamaica.v1.lists.endpoints
+import jamaica.v1.caches.endpoints
+import jamaica.v1.inventories.endpoints
+import jamaica.v1.indexes.endpoints
+import jamaica.v1.setup.endpoints
+import jamaica.v1.constructions.endpoints
+import jamaica.v1.glassware.endpoints
 
-# https://github.com/wbolster/flask-uuid
-FlaskUUID(app)
 
-CORS(app, origins=['0.0.0.0:8080', '0.0.0.0:3000']) # @TODO make this come from Registry, along with other app config?
-
-# Dependent service setup
-session = flask_scoped_session(DatabaseService.connector.Session, app) # this doesn't use get_session. https://flask-sqlalchemy-session.readthedocs.io/en/v1.1/
-flask_cache.init_app(app)
-
-
-# https://github.com/postrational/rest_api_demo/blob/master/rest_api_demo/app.py
 def configure_app(flask_app):
-    flask_app.config['SWAGGER_UI_DOC_EXPANSION'] = settings.RESTPLUS_SWAGGER_UI_DOC_EXPANSION
-    flask_app.config['RESTPLUS_VALIDATE'] = settings.RESTPLUS_VALIDATE
-    flask_app.config['RESTPLUS_MASK_SWAGGER'] = settings.RESTPLUS_MASK_SWAGGER
-    flask_app.config['ERROR_404_HELP'] = settings.RESTPLUS_ERROR_404_HELP
-    flask_app.config['RESTPLUS_MASK_HEADER'] = settings.RESTPLUS_MASK_HEADER
-    # https://github.com/python-restx/flask-restx/issues/27
-    flask_app.config["PROPAGATE_EXCEPTIONS"] = False
+    """
+    Configure the Flask instance with any special parameters.
+    https://github.com/postrational/rest_api_demo/blob/master/rest_api_demo/app.py
+    :param flask_app: flask.Flask instance.
+    :return: None
+    """
+    for key, setting in app_settings.items():
+        flask_app.config[key] = setting.get_value()
 
 
-def initialize_app(flask_app):
-    configure_app(flask_app)
-
+def initialize_endpoints(flask_app):
+    """
+    Setup the various API endpoints.
+    :param flask_app: flask.Flask instance.
+    :return: None
+    """
     blueprint = Blueprint('api', __name__, url_prefix='/api')
 
     api.init_app(blueprint)
-    api.add_namespace(cocktails_namespace)
-    api.add_namespace(ingredients_namespace)
-    api.add_namespace(lists_namespace)
-    api.add_namespace(caches_namespace)
-    api.add_namespace(inventories_namespace)
-    api.add_namespace(indexes_namespace)
-    api.add_namespace(setup_namespace)
-    api.add_namespace(constructions_namespace)
-    api.add_namespace(glassware_namespace)
+    api.add_namespace(jamaica.v1.cocktails.endpoints.ns)
+    api.add_namespace(jamaica.v1.ingredients.endpoints.ns)
+    api.add_namespace(jamaica.v1.lists.endpoints.ns)
+    api.add_namespace(jamaica.v1.caches.endpoints.ns)
+    api.add_namespace(jamaica.v1.inventories.endpoints.ns)
+    api.add_namespace(jamaica.v1.indexes.endpoints.ns)
+    api.add_namespace(jamaica.v1.setup.endpoints.ns)
+    api.add_namespace(jamaica.v1.constructions.endpoints.ns)
+    api.add_namespace(jamaica.v1.glassware.endpoints.ns)
 
     flask_app.register_blueprint(blueprint)
 
 
-def main():
-    initialize_app(app)
-    app.run(debug=settings.FLASK_DEBUG, host='0.0.0.0', port=8080)
+def setup_cors(flask_app):
+    CORS(flask_app, **settings_to_dict(cors_settings))
+
+
+def setup_cache(flask_app):
+    """
+    Setup endpoint caching.
+    :param flask_app:
+    :return:
+    """
+    flask_cache.init_app(flask_app)
 
     # @TODO disable this when we get real
-    with app.app_context():
+    with flask_app.app_context():
         flask_cache.clear()
+
+
+app = Flask('jamaica')
+configure_app(app)
+
+# Dependent service setup
+# This doesn't use get_session. https://flask-sqlalchemy-session.readthedocs.io/en/v1.1/
+session = flask_scoped_session(DatabaseService.connector.Session, app)
+# https://github.com/wbolster/flask-uuid
+FlaskUUID(app)
+
+
+def main():
+    initialize_endpoints(app)
+    setup_cors(app)
+    setup_cache(app)
+    app.run(**settings_to_dict(app_runtime))
 
 
 if __name__ == "__main__":

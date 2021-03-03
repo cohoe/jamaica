@@ -4,7 +4,7 @@ from jamaica import app
 # https://flask.palletsprojects.com/en/1.1.x/testing/
 
 with app.app.app_context():
-    app.initialize_app(app.app)
+    app.initialize_endpoints(app.app)
 
 
 @pytest.fixture()
