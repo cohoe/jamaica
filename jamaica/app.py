@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from flask import Flask, Blueprint
 from jamaica.cache import flask_cache
 from flask_cors import CORS
