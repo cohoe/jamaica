@@ -19,6 +19,7 @@ import jamaica.v1.indexes.endpoints
 import jamaica.v1.setup.endpoints
 import jamaica.v1.constructions.endpoints
 import jamaica.v1.glassware.endpoints
+import jamaica.v1.auth.endpoints
 
 
 def configure_app(flask_app):
@@ -50,6 +51,7 @@ def initialize_endpoints(flask_app):
     api.add_namespace(jamaica.v1.setup.endpoints.ns)
     api.add_namespace(jamaica.v1.constructions.endpoints.ns)
     api.add_namespace(jamaica.v1.glassware.endpoints.ns)
+    api.add_namespace(jamaica.v1.auth.endpoints.ns)
 
     flask_app.register_blueprint(blueprint)
 
