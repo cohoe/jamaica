@@ -54,7 +54,7 @@ class AuthRedirectEndpoint(Resource):
     @api.response(200, 'success')
     def get(self):
         """
-        Authentication redirect handler.
+        Authentication redirect callback handler.
         :return:
         """
         pass

@@ -14,7 +14,7 @@ def settings_to_dict(settings):
 # https://github.com/postrational/rest_api_demo/blob/master/rest_api_demo/settings.py
 app_settings = {
     # Flask-Restplus settings
-    'SWAGGER_UI_DOC_EXPANSION': Setting(path='/api/flask/swagger_ui_doc_expansion', default='list', type_=str),
+    # 'SWAGGER_UI_DOC_EXPANSION': Setting(path='/api/flask/swagger_ui_doc_expansion', default='list', type_=str),
     'RESTPLUS_VALIDATE': Setting(path='/api/flask/restplus_validate', default=True, type_=bool),
     'RESTPLUS_MASK_SWAGGER': Setting(path='/api/flask/restplus_mask_swagger', default=False, type_=bool),
     'ERROR_404_HELP': Setting(path='/api/flask/restplus_error_404_help', default=False, type_=bool),
