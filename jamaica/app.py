@@ -5,7 +5,7 @@ from jamaica.cache import flask_cache
 from flask_cors import CORS
 from flask_sqlalchemy_session import flask_scoped_session
 from flask_uuid import FlaskUUID
-from jamaica.settings import settings_to_dict, app_settings, app_runtime, cors_settings
+from jamaica.settings import settings_to_dict, app_settings, app_runtime, cors_settings, auth0_settings
 from jamaica.v1.restx import api
 from barbados.services.database import DatabaseService
 
@@ -82,6 +82,29 @@ session = flask_scoped_session(DatabaseService.connector.Session, app)
 # https://github.com/wbolster/flask-uuid
 FlaskUUID(app)
 
+
+from authlib.integrations.flask_client import OAuth
+oauth = OAuth(app)
+
+auth0 = oauth.register(**auth0_settings)
+
+# @TODO settingize this
+# https://stackoverflow.com/questions/26080872/secret-key-not-set-in-flask-session-using-the-flask-session-extension
+app.secret_key = 'test'
+
+from functools import wraps
+from flask import redirect
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'profile' not in session:
+            # Redirect to Login page here
+            return redirect('/')
+        return f(*args, **kwargs)
+
+    return decorated
+# app.requires_auth = requires_auth
 
 def main():
     initialize_endpoints(app)

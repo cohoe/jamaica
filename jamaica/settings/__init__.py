@@ -33,3 +33,15 @@ app_runtime = {
 cors_settings = {
     'origins': Setting(path='/api/flask/cors_origins', default=['0.0.0.0:8080', '0.0.0.0:3000'], type_=list)
 }
+
+auth0_settings = {
+    'name': 'auth0',
+    'client_id': Setting(path='/auth/auth0/client_id', type_=str),
+    'client_secret': Setting(path='/auth/auth0/client_secret', type_=str),
+    'api_base_url': Setting(path='/auth/auth0/api_base_url', type_=str),
+    'access_token_url': Setting(path='/auth/auth0/access_token_url', type_=str),
+    'authorize_url': Setting(path='/auth/auth0/authorize_url', type_=str),
+    'client_kwargs': {
+        'scope': 'openid profile email',
+    },
+}

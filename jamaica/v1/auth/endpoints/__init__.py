@@ -1,11 +1,15 @@
 from flask_restx import Resource
 from jamaica.v1.restx import api
 
+from jamaica.app import auth0
+from flask import session, redirect
+from six.moves.urllib.parse import urlencode
+
 ns = api.namespace('v1/auth', description='Authentication.')
 
-
-@ns.route('')
-class AuthEndpoint(Resource):
+# https://auth0.com/docs/quickstart/webapp/python/01-login
+@ns.route('/info')
+class AuthInfoEndpoint(Resource):
 
     @api.response(200, 'success')
     def get(self):
@@ -13,7 +17,7 @@ class AuthEndpoint(Resource):
         Get information about the currently logged in session.
         :return:
         """
-        pass
+        return session.get('jwt_payload')
 
 
 @ns.route('/login')
@@ -25,7 +29,7 @@ class AuthLoginEndpoint(Resource):
         Log in and create a new authentication setting.
         :return:
         """
-        pass
+        return auth0.authorize_redirect(redirect_uri='http://localhost:8080/api/v1/auth/redirect')
 
     @api.response(200, 'success')
     def post(self):
@@ -45,7 +49,11 @@ class AuthLogoutEndpoint(Resource):
         Log out a session.
         :return:
         """
-        pass
+        # Clear session stored data
+        session.clear()
+        # Redirect user to logout endpoint
+        params = {'returnTo': 'http://localhost:8080/api/', 'client_id': '@TODO REDACTED'}
+        return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
 
 @ns.route('/redirect')
@@ -57,4 +65,17 @@ class AuthRedirectEndpoint(Resource):
         Authentication redirect callback handler.
         :return:
         """
-        pass
+        # Handles response from token endpoint
+        auth0.authorize_access_token()
+        resp = auth0.get('userinfo')
+        userinfo = resp.json()
+        print(userinfo)
+
+        # Store the user information in flask session.
+        session['jwt_payload'] = userinfo
+        session['profile'] = {
+            'user_id': userinfo['sub'],
+            'name': userinfo['name'],
+            'picture': userinfo['picture']
+        }
+        return redirect('/api/v1/auth/info')
