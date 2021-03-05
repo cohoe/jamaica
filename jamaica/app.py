@@ -86,7 +86,7 @@ FlaskUUID(app)
 from authlib.integrations.flask_client import OAuth
 oauth = OAuth(app)
 
-auth0 = oauth.register(**auth0_settings)
+auth0 = oauth.register(**settings_to_dict(auth0_settings))
 
 # @TODO settingize this
 # https://stackoverflow.com/questions/26080872/secret-key-not-set-in-flask-session-using-the-flask-session-extension

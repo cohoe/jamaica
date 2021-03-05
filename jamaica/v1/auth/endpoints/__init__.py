@@ -4,8 +4,10 @@ from jamaica.v1.restx import api
 from jamaica.app import auth0
 from flask import session, redirect
 from six.moves.urllib.parse import urlencode
+from jamaica.settings import auth0_settings
 
 ns = api.namespace('v1/auth', description='Authentication.')
+
 
 # https://auth0.com/docs/quickstart/webapp/python/01-login
 @ns.route('/info')
@@ -52,7 +54,7 @@ class AuthLogoutEndpoint(Resource):
         # Clear session stored data
         session.clear()
         # Redirect user to logout endpoint
-        params = {'returnTo': 'http://localhost:8080/api/', 'client_id': '@TODO REDACTED'}
+        params = {'returnTo': 'http://localhost:8080/api/', 'client_id': auth0_settings.get('client_id').get_value()}
         return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
 
@@ -69,7 +71,6 @@ class AuthRedirectEndpoint(Resource):
         auth0.authorize_access_token()
         resp = auth0.get('userinfo')
         userinfo = resp.json()
-        print(userinfo)
 
         # Store the user information in flask session.
         session['jwt_payload'] = userinfo
