@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from flask import Flask, Blueprint
+from functools import wraps
+from flask import Flask, Blueprint, redirect
 from jamaica.cache import flask_cache
 from flask_cors import CORS
 from flask_sqlalchemy_session import flask_scoped_session
@@ -8,6 +9,7 @@ from flask_uuid import FlaskUUID
 from jamaica.settings import settings_to_dict, app_settings, app_runtime, cors_settings, auth0_settings
 from jamaica.v1.restx import api
 from barbados.services.database import DatabaseService
+from barbados.settings import Setting
 
 # Endpoints
 import jamaica.v1.cocktails.endpoints
@@ -88,12 +90,9 @@ oauth = OAuth(app)
 
 auth0 = oauth.register(**settings_to_dict(auth0_settings))
 
-# @TODO settingize this
 # https://stackoverflow.com/questions/26080872/secret-key-not-set-in-flask-session-using-the-flask-session-extension
-app.secret_key = 'test'
+app.secret_key = Setting(path='/api/flask/secret_key', type_=str).get_value(),
 
-from functools import wraps
-from flask import redirect
 
 def requires_auth(f):
     @wraps(f)
@@ -105,6 +104,7 @@ def requires_auth(f):
 
     return decorated
 # app.requires_auth = requires_auth
+
 
 def main():
     initialize_endpoints(app)
