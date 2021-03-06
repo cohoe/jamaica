@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-from functools import wraps
-from flask import Flask, Blueprint, redirect
+from flask import Flask, Blueprint
 from jamaica.cache import flask_cache
 from flask_cors import CORS
 from flask_sqlalchemy_session import flask_scoped_session
@@ -91,19 +90,7 @@ oauth = OAuth(app)
 auth0 = oauth.register(**settings_to_dict(auth0_settings))
 
 # https://stackoverflow.com/questions/26080872/secret-key-not-set-in-flask-session-using-the-flask-session-extension
-app.secret_key = Setting(path='/api/flask/secret_key', type_=str).get_value(),
-
-
-def requires_auth(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if 'profile' not in session:
-            # Redirect to Login page here
-            return redirect('/')
-        return f(*args, **kwargs)
-
-    return decorated
-# app.requires_auth = requires_auth
+app.secret_key = Setting(path='/api/flask/secret_key', type_=str).get_value()
 
 
 def main():

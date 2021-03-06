@@ -1,7 +1,7 @@
 from flask_restx import Resource
 from jamaica.v1.restx import api
 
-from jamaica.app import auth0
+from jamaica.app import auth0#, requires_auth
 from flask import session, redirect
 from six.moves.urllib.parse import urlencode
 from jamaica.settings import auth0_settings
@@ -9,10 +9,24 @@ from jamaica.settings import auth0_settings
 ns = api.namespace('v1/auth', description='Authentication.')
 
 
+from functools import wraps
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'profile' not in session:
+            # Redirect to Login page here
+            # return redirect('/api/v1/auth/login')
+            return redirect('/api/v1/auth/login')
+        return f(*args, **kwargs)
+
+    return decorated
+
+
 # https://auth0.com/docs/quickstart/webapp/python/01-login
 @ns.route('/info')
 class AuthInfoEndpoint(Resource):
 
+    @requires_auth
     @api.response(200, 'success')
     def get(self):
         """
