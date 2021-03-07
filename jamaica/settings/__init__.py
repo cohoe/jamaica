@@ -13,7 +13,9 @@ app_settings = Settings(
     PROPAGATE_EXCEPTIONS=Setting(path='/api/flask/propagate_exceptions', default=False, type_=bool),
     # https://stackoverflow.com/questions/26080872/secret-key-not-set-in-flask-session-using-the-flask-session-extension
     SECRET_KEY=Setting(path='/api/flask/secret_key', default='Testing!', type_=str),
-    SECURITY_PASSWORD_SALT=Setting('/api/flask/security_password_salt', default='123123123', type_=str)
+    SECURITY_PASSWORD_SALT=Setting('/api/flask/security_password_salt', default='123123123', type_=str),
+    WTF_CSRF_ENABLED=Setting('/api/flask/csrf_enabled', default=False, type_=bool)
+
 )
 
 runtime_settings = Settings(

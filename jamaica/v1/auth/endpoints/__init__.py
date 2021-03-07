@@ -3,14 +3,15 @@ from jamaica.v1.restx import api
 
 ns = api.namespace('v1/auth', description='Authentication.')
 
-from flask_security import auth_required, current_user
+from flask_security import auth_required, current_user, auth_token_required
 
 
 @ns.route('/info')
 class AuthInfoEndpoint(Resource):
 
     @api.response(200, 'success')
-    @auth_required()
+    # https://stackoverflow.com/questions/28727954/how-to-get-auth-token-required-in-flask-security-working
+    @auth_token_required
     def get(self):
         """
         Get information about the currently logged in session.
