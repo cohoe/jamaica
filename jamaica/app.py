@@ -5,7 +5,7 @@ from jamaica.cache import flask_cache
 from flask_cors import CORS
 from flask_sqlalchemy_session import flask_scoped_session
 from flask_uuid import FlaskUUID
-from jamaica.settings import settings_to_dict, app_settings, app_runtime, cors_settings, auth0_settings
+from jamaica.settings import app_settings, runtime_settings, cors_settings, auth0_settings, secret_key_setting
 from jamaica.v1.restx import api
 from barbados.services.database import DatabaseService
 from barbados.settings import Setting
@@ -30,8 +30,7 @@ def configure_app(flask_app):
     :param flask_app: flask.Flask instance.
     :return: None
     """
-    for key, setting in app_settings.items():
-        flask_app.config[key] = setting.get_value()
+    flask_app.config.update(app_settings)
 
 
 def initialize_endpoints(flask_app):
@@ -58,7 +57,7 @@ def initialize_endpoints(flask_app):
 
 
 def setup_cors(flask_app):
-    CORS(flask_app, **settings_to_dict(cors_settings))
+    CORS(flask_app, **cors_settings)
 
 
 def setup_cache(flask_app):
@@ -87,17 +86,17 @@ FlaskUUID(app)
 from authlib.integrations.flask_client import OAuth
 oauth = OAuth(app)
 
-auth0 = oauth.register(**settings_to_dict(auth0_settings))
+auth0 = oauth.register(**auth0_settings)
 
 # https://stackoverflow.com/questions/26080872/secret-key-not-set-in-flask-session-using-the-flask-session-extension
-app.secret_key = Setting(path='/api/flask/secret_key', type_=str).get_value()
+app.secret_key = secret_key_setting
 
 
 def main():
     initialize_endpoints(app)
     setup_cors(app)
     setup_cache(app)
-    app.run(**settings_to_dict(app_runtime))
+    app.run(**runtime_settings)
 
 
 if __name__ == "__main__":

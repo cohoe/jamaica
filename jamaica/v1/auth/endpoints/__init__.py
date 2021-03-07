@@ -68,7 +68,7 @@ class AuthLogoutEndpoint(Resource):
         # Clear session stored data
         session.clear()
         # Redirect user to logout endpoint
-        params = {'returnTo': 'http://localhost:8080/api/', 'client_id': auth0_settings.get('client_id').get_value()}
+        params = {'returnTo': 'http://localhost:8080/api/', 'client_id': auth0_settings.get('client_id')}
         return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
 
