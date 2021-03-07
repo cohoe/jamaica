@@ -4,6 +4,8 @@ from jamaica.v1.restx import api
 ns = api.namespace('v1/auth', description='Authentication.')
 
 from flask_security import auth_required, current_user, auth_token_required
+from flask import request
+import flask_security.views
 
 
 @ns.route('/info')
@@ -39,7 +41,10 @@ class AuthLoginEndpoint(Resource):
         Log in and create a new authentication setting.
         :return:
         """
-        pass
+        print(request.is_json)
+        print(request.args)
+        return flask_security.views.login()
+
 
 
 @ns.route('/logout')
