@@ -5,10 +5,9 @@ from jamaica.cache import flask_cache
 from flask_cors import CORS
 from flask_sqlalchemy_session import flask_scoped_session
 from flask_uuid import FlaskUUID
-from jamaica.settings import app_settings, runtime_settings, cors_settings, auth0_settings, secret_key_setting
+from jamaica.settings import app_settings, runtime_settings, cors_settings, secret_key_setting
 from jamaica.v1.restx import api
 from barbados.services.database import DatabaseService
-from barbados.settings import Setting
 
 # Endpoints
 import jamaica.v1.cocktails.endpoints
@@ -40,18 +39,22 @@ def initialize_endpoints(flask_app):
     :return: None
     """
     blueprint = Blueprint('api', __name__, url_prefix='/api')
-
     api.init_app(blueprint)
-    api.add_namespace(jamaica.v1.cocktails.endpoints.ns)
-    api.add_namespace(jamaica.v1.ingredients.endpoints.ns)
-    api.add_namespace(jamaica.v1.lists.endpoints.ns)
-    api.add_namespace(jamaica.v1.caches.endpoints.ns)
-    api.add_namespace(jamaica.v1.inventories.endpoints.ns)
-    api.add_namespace(jamaica.v1.indexes.endpoints.ns)
-    api.add_namespace(jamaica.v1.setup.endpoints.ns)
-    api.add_namespace(jamaica.v1.constructions.endpoints.ns)
-    api.add_namespace(jamaica.v1.glassware.endpoints.ns)
-    api.add_namespace(jamaica.v1.auth.endpoints.ns)
+
+    namespaces = [
+        jamaica.v1.cocktails.endpoints.ns,
+        jamaica.v1.ingredients.endpoints.ns,
+        jamaica.v1.lists.endpoints.ns,
+        jamaica.v1.caches.endpoints.ns,
+        jamaica.v1.inventories.endpoints.ns,
+        jamaica.v1.indexes.endpoints.ns,
+        jamaica.v1.setup.endpoints.ns,
+        jamaica.v1.constructions.endpoints.ns,
+        jamaica.v1.glassware.endpoints.ns,
+        jamaica.v1.auth.endpoints.ns,
+    ]
+    for ns in namespaces:
+        api.add_namespace(ns)
 
     flask_app.register_blueprint(blueprint)
 
@@ -81,12 +84,6 @@ configure_app(app)
 session = flask_scoped_session(DatabaseService.connector.Session, app)
 # https://github.com/wbolster/flask-uuid
 FlaskUUID(app)
-
-
-from authlib.integrations.flask_client import OAuth
-oauth = OAuth(app)
-
-auth0 = oauth.register(**auth0_settings)
 
 # https://stackoverflow.com/questions/26080872/secret-key-not-set-in-flask-session-using-the-flask-session-extension
 app.secret_key = secret_key_setting
