@@ -11,6 +11,9 @@ app_settings = Settings(
     RESTPLUS_MASK_HEADER=Setting(path='/api/flask/restplus_mask_header', default=False, type_=bool),
     # # https://github.com/python-restx/flask-restx/issues/27
     PROPAGATE_EXCEPTIONS=Setting(path='/api/flask/propagate_exceptions', default=False, type_=bool),
+    # https://stackoverflow.com/questions/26080872/secret-key-not-set-in-flask-session-using-the-flask-session-extension
+    SECRET_KEY=Setting(path='/api/flask/secret_key', default='Testing!', type_=str),
+    SECURITY_PASSWORD_SALT=Setting('/api/flask/security_password_salt', default='123123123', type_=str)
 )
 
 runtime_settings = Settings(
@@ -22,5 +25,3 @@ runtime_settings = Settings(
 cors_settings = Settings(
     origins=Setting(path='/api/flask/cors_origins', default=['0.0.0.0:8080', '0.0.0.0:3000'], type_=list)
 )
-
-secret_key_setting = Setting(path='/api/flask/secret_key', default='Testing!', type_=str)

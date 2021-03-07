@@ -3,17 +3,22 @@ from jamaica.v1.restx import api
 
 ns = api.namespace('v1/auth', description='Authentication.')
 
+from flask_security import auth_required, current_user
+
 
 @ns.route('/info')
 class AuthInfoEndpoint(Resource):
 
     @api.response(200, 'success')
+    @auth_required()
     def get(self):
         """
         Get information about the currently logged in session.
         :return:
         """
-        pass
+        # import json
+        # return json.loads(current_user)
+        print(current_user.id, current_user.email, current_user.username)
 
 
 @ns.route('/login')
