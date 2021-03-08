@@ -15,7 +15,8 @@ setup(
         'england @ git+https://github.com/cohoe/england@master',
         'flask_uuid',
         'flask_caching',
-        'flask'
+        'flask',
+        'flask-security-too'
     ],
     test_requires=[
         'pytest'

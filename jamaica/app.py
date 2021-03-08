@@ -97,6 +97,7 @@ security = Security(app, user_datastore)
 
 UserModel.query = session.query_property()
 
+
 @app.before_first_request
 def create_user():
     DatabaseService.connector.create_all()

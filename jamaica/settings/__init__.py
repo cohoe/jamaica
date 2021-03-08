@@ -14,7 +14,8 @@ app_settings = Settings(
     # https://stackoverflow.com/questions/26080872/secret-key-not-set-in-flask-session-using-the-flask-session-extension
     SECRET_KEY=Setting(path='/api/flask/secret_key', default='Testing!', type_=str),
     SECURITY_PASSWORD_SALT=Setting('/api/flask/security_password_salt', default='123123123', type_=str),
-    WTF_CSRF_ENABLED=Setting('/api/flask/csrf_enabled', default=False, type_=bool)
+    WTF_CSRF_ENABLED=Setting('/api/flask/csrf_enabled', default=False, type_=bool),
+    SECURITY_BACKWARDS_COMPAT_AUTH_TOKEN=Setting('/api/flask/compat_auth_token', default=True, type_=bool)
 
 )
 
