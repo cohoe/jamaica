@@ -15,8 +15,10 @@ app_settings = Settings(
     SECRET_KEY=Setting(path='/api/flask/secret_key', default='Testing!', type_=str),
     SECURITY_PASSWORD_SALT=Setting('/api/flask/security_password_salt', default='123123123', type_=str),
     WTF_CSRF_ENABLED=Setting('/api/flask/csrf_enabled', default=False, type_=bool),
-    SECURITY_BACKWARDS_COMPAT_AUTH_TOKEN=Setting('/api/flask/compat_auth_token', default=True, type_=bool)
-
+    SECURITY_BACKWARDS_COMPAT_AUTH_TOKEN=Setting('/api/flask/compat_auth_token', default=True, type_=bool),
+    SECURITY_TOKEN_MAX_AGE=Setting('/api/flask/security_token_max_age', default=86400, type_=int),
+    SECURITY_POST_LOGIN_VIEW=Setting('/api/flask/security_post_login_redirect', default='/api/v1/auth/login/redirect', type_=str),
+    SECURITY_POST_LOGOUT_VIEW=Setting('/api/flask/security_post_logout_redirect', default='/api/v1/auth/logout/redirect', type_=str),
 )
 
 runtime_settings = Settings(

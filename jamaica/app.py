@@ -93,7 +93,7 @@ from barbados.models.user import UserModel
 from barbados.models.role import RoleModel
 from barbados.models.userrolebinding import UserRoleBindingModel
 user_datastore = SQLAlchemySessionUserDatastore(session, UserModel, RoleModel)
-security = Security(app, user_datastore)
+security = Security(app, user_datastore, register_blueprint=False)
 
 UserModel.query = session.query_property()
 

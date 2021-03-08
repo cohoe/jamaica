@@ -9,6 +9,7 @@ from flask import request
 import flask_security.views
 from barbados.factories.user import UserFactory
 from barbados.serializers import ObjectSerializer
+from flask_security.utils import get_post_logout_redirect
 
 
 @ns.route('/info')
@@ -24,6 +25,7 @@ class AuthInfoEndpoint(Resource):
         """
         # import json
         # return json.loads(current_user)
+        print(current_user.get_auth_token())
         u = UserFactory.model_to_obj(current_user)
         return ObjectSerializer.serialize(u, 'dict')
 
@@ -43,7 +45,7 @@ class AuthLoginEndpoint(Resource):
 
     @api.response(200, 'success')
     @api.expect(UserItem, validate=True)
-    # @TODO marshall_with
+    # @TODO marshal_with
     def post(self):
         """
         Log in and create a new authentication session.
@@ -56,7 +58,8 @@ class AuthLoginEndpoint(Resource):
 class AuthLogoutEndpoint(Resource):
 
     @api.response(200, 'success')
-    def get(self):
+    # @TODO marshal_with
+    def post(self):
         """
         Log out a session.
         :return:
@@ -64,13 +67,27 @@ class AuthLogoutEndpoint(Resource):
         return flask_security.views.logout()
 
 
-@ns.route('/redirect')
-class AuthRedirectEndpoint(Resource):
+@ns.route('/login/redirect')
+class AuthLoginRedirectEndpoint(Resource):
 
     @api.response(200, 'success')
     def get(self):
         """
-        Authentication redirect callback handler.
+        Authentication login redirect callback handler.
+        Reserved for any future usage.
         :return:
         """
-        pass
+        return "LOLZ YOU LOGIN"
+
+
+@ns.route('/logout/redirect')
+class AuthLogoutRedirectEndpoint(Resource):
+
+    @api.response(200, 'success')
+    def get(self):
+        """
+        Authentication logout redirect callback handler.
+        Reserved for any future usage.
+        :return:
+        """
+        return "LOLZ YOU LOGOUT"
