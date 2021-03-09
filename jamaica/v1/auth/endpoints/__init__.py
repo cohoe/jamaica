@@ -33,15 +33,15 @@ class AuthInfoEndpoint(Resource):
 @ns.route('/login')
 class AuthLoginEndpoint(Resource):
 
-    @api.response(200, 'success')
-    def get(self):
-        """
-        Log in and create a new authentication session.
-        Reserved in case I ever use a service that needs a function
-        to redirect to the service.
-        :return:
-        """
-        pass
+    # @api.response(200, 'success')
+    # def get(self):
+    #     """
+    #     Log in and create a new authentication session.
+    #     Reserved in case I ever use a service that needs a function
+    #     to redirect to the service.
+    #     :return:
+    #     """
+    #     pass
 
     @api.response(200, 'success')
     @api.expect(UserItem, validate=True)
@@ -67,27 +67,27 @@ class AuthLogoutEndpoint(Resource):
         return flask_security.views.logout()
 
 
-@ns.route('/login/redirect')
-class AuthLoginRedirectEndpoint(Resource):
+# @ns.route('/login/redirect')
+# class AuthLoginRedirectEndpoint(Resource):
+#
+#     @api.response(200, 'success')
+#     def get(self):
+#         """
+#         Authentication login redirect callback handler.
+#         Reserved for any future usage.
+#         :return:
+#         """
+#         pass
 
-    @api.response(200, 'success')
-    def get(self):
-        """
-        Authentication login redirect callback handler.
-        Reserved for any future usage.
-        :return:
-        """
-        return "LOLZ YOU LOGIN"
 
-
-@ns.route('/logout/redirect')
-class AuthLogoutRedirectEndpoint(Resource):
-
-    @api.response(200, 'success')
-    def get(self):
-        """
-        Authentication logout redirect callback handler.
-        Reserved for any future usage.
-        :return:
-        """
-        return "LOLZ YOU LOGOUT"
+# @ns.route('/logout/redirect')
+# class AuthLogoutRedirectEndpoint(Resource):
+#
+#     @api.response(200, 'success')
+#     def get(self):
+#         """
+#         Authentication logout redirect callback handler.
+#         Reserved for any future usage.
+#         :return:
+#         """
+#         pass
