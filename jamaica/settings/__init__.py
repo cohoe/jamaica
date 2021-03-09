@@ -28,5 +28,5 @@ runtime_settings = Settings(
 )
 
 cors_settings = Settings(
-    origins=Setting(path='/api/flask/cors_origins', default=['0.0.0.0:8080', '0.0.0.0:3000'], type_=list)
+    origins=Setting(path='/api/flask/cors_origins', default=['0.0.0.0:8080', '0.0.0.0:3000', 'http://localhost:3000'], type_=list)
 )
