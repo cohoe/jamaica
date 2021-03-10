@@ -16,7 +16,6 @@ from flask_security.utils import get_post_logout_redirect
 class AuthInfoEndpoint(Resource):
 
     @api.response(200, 'success')
-    # https://stackoverflow.com/questions/28727954/how-to-get-auth-token-required-in-flask-security-working
     @auth_token_required
     def get(self):
         """
@@ -49,6 +48,12 @@ class AuthLoginEndpoint(Resource):
     def post(self):
         """
         Log in and create a new authentication session.
+        Because I set SECURITY_BACKWARDS_COMPAT_AUTH_TOKEN in the settings we don't require the user
+        to add a query param here to get the auth token. Since I don't support GET there isn't much
+        risk of leaking the token on a GET request.
+        https://stackoverflow.com/questions/27356877/token-based-authentication-with-flask-security-extension
+        https://flask-security-too.readthedocs.io/en/stable/features.html?highlight=include_auth_token
+        https://github.com/Flask-Middleware/flask-security/blob/master/flask_security/views.py
         :return:
         """
         return flask_security.views.login()
