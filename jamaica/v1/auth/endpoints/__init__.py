@@ -119,17 +119,21 @@ class AuthLogoutEndpoint(Resource):
 class AuthLoginRedirectEndpoint(Resource):
 
     @api.response(200, 'success')
-    @api.expect(cognito_parser, validate=True)
+    # @api.expect(cognito_parser, validate=True)
     def get(self):
         """
         Authentication login redirect callback handler.
         Reserved for any future usage.
         :return:
         """
-        args = cognito_parser.parse_args(strict=True)
+        # args = cognito_parser.parse_args(strict=True)
         # https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-app-integration.html
         # https://github.com/awslabs/aws-support-tools/blob/master/Cognito/decode-verify-jwt/decode-verify-jwt.py
-        print(args)
+        # print(args)
+        # Well shit.
+        # https://stackoverflow.com/questions/53566536/python-get-url-fragment-identifier-with-flask
+        foo = request
+        print(foo)
 
 
 # @ns.route('/logout/redirect')
