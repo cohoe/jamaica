@@ -31,3 +31,9 @@ runtime_settings = Settings(
 cors_settings = Settings(
     origins=Setting(path='/api/flask/cors_origins', default=['0.0.0.0:8080', '0.0.0.0:3000', 'http://localhost:3000'], type_=list)
 )
+
+cognito_settings = Settings(
+    client_id=Setting(path='/auth/cognito/client_id', type_=str),
+    client_secret=Setting(path='/auth/cognito/client_secret', type_=str),
+    user_pool_id=Setting(path='/auth/cognito/user_pool_id', type_=str)
+)

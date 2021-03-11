@@ -4,19 +4,45 @@ from jamaica.v1.auth.serializers import UserItem
 
 ns = api.namespace('v1/auth', description='Authentication.')
 
-from flask_security import auth_required, current_user, auth_token_required
+# from flask_security import auth_required, current_user, auth_token_required
 from flask import request
-import flask_security.views
-from barbados.factories.user import UserFactory
-from barbados.serializers import ObjectSerializer
+# import flask_security.views
+# from barbados.factories.user import UserFactory
+# from barbados.serializers import ObjectSerializer
 from flask_security.utils import get_post_logout_redirect
+
+# https://github.com/capless/warrant
+
+from warrant import Cognito
+
+from jamaica.settings import cognito_settings
+from flask import session, redirect
+
+from functools import wraps
+from werkzeug.exceptions import Unauthorized
+import urllib.parse
+from jamaica.v1.auth.parsers import cognito_parser
+
+
+def auth_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'authentication' not in session:
+            raise Unauthorized()
+        return f(*args, **kwargs)
+
+    return decorated
+
+
+# u = Cognito(**cognito_settings)
+# print(u)
 
 
 @ns.route('/info')
 class AuthInfoEndpoint(Resource):
 
     @api.response(200, 'success')
-    @auth_token_required
+    @auth_required
     def get(self):
         """
         Get information about the currently logged in session.
@@ -24,23 +50,28 @@ class AuthInfoEndpoint(Resource):
         """
         # import json
         # return json.loads(current_user)
-        print(current_user.get_auth_token())
-        u = UserFactory.model_to_obj(current_user)
-        return ObjectSerializer.serialize(u, 'dict')
+        # print(current_user.get_auth_token())
+        # u = UserFactory.model_to_obj(current_user)
+        # return ObjectSerializer.serialize(u, 'dict')
+        print(session)
 
 
 @ns.route('/login')
 class AuthLoginEndpoint(Resource):
 
-    # @api.response(200, 'success')
-    # def get(self):
-    #     """
-    #     Log in and create a new authentication session.
-    #     Reserved in case I ever use a service that needs a function
-    #     to redirect to the service.
-    #     :return:
-    #     """
-    #     pass
+    @api.response(200, 'success')
+    def get(self):
+        """
+        Log in and create a new authentication session.
+        Reserved in case I ever use a service that needs a function
+        to redirect to the service.
+        :return:
+        """
+        # redirect_url = "%s?" % ()
+        # https://www.urlencoder.io/python/
+        base_url = 'https://grantcohoe-amari-test.auth.us-east-1.amazoncognito.com/login'
+        redirect_url = "%s?client_id=%s&redirect_uri=%s&response_type=token" % (base_url, cognito_settings.get('client_id'), urllib.parse.quote('http://localhost:8080/api/v1/auth/login/redirect'))
+        return redirect(redirect_url)
 
     @api.response(200, 'success')
     @api.expect(UserItem, validate=True)
@@ -56,7 +87,18 @@ class AuthLoginEndpoint(Resource):
         https://github.com/Flask-Middleware/flask-security/blob/master/flask_security/views.py
         :return:
         """
-        return flask_security.views.login()
+        # return flask_security.views.login()
+        print(api.payload)
+        usr = Cognito(**cognito_settings, username=api.payload.get('username'))
+        usr.authenticate(api.payload.get('password'))
+        authentication_data = {
+            'refresh_token': usr.refresh_token,
+            'id_token': usr.id_token,
+            'access_token': usr.access_token,
+            'foo': 'lolzwat',
+        }
+        session.update({'authentication': authentication_data})
+        return authentication_data
 
 
 @ns.route('/logout')
@@ -69,20 +111,25 @@ class AuthLogoutEndpoint(Resource):
         Log out a session.
         :return:
         """
-        return flask_security.views.logout()
+        # return flask_security.views.logout()
+        pass
 
 
-# @ns.route('/login/redirect')
-# class AuthLoginRedirectEndpoint(Resource):
-#
-#     @api.response(200, 'success')
-#     def get(self):
-#         """
-#         Authentication login redirect callback handler.
-#         Reserved for any future usage.
-#         :return:
-#         """
-#         pass
+@ns.route('/login/redirect')
+class AuthLoginRedirectEndpoint(Resource):
+
+    @api.response(200, 'success')
+    @api.expect(cognito_parser, validate=True)
+    def get(self):
+        """
+        Authentication login redirect callback handler.
+        Reserved for any future usage.
+        :return:
+        """
+        args = cognito_parser.parse_args(strict=True)
+        # https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-app-integration.html
+        # https://github.com/awslabs/aws-support-tools/blob/master/Cognito/decode-verify-jwt/decode-verify-jwt.py
+        print(args)
 
 
 # @ns.route('/logout/redirect')
