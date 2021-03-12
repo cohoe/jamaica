@@ -18,28 +18,32 @@ from flask_security.utils import get_post_logout_redirect
 from jamaica.settings import cognito_settings
 from flask import session, redirect
 
-from functools import wraps
-from werkzeug.exceptions import Unauthorized
+# from functools import wraps
+# from werkzeug.exceptions import Unauthorized
 import urllib.parse
 from jamaica.v1.auth.parsers import cognito_parser
+# from jamaica.v1.auth.serializers import RedirectItem
 
 
-from jamaica.app import aws_auth
+# from jamaica.app import aws_auth
 from flask import jsonify
 
-
-def auth_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if 'authentication' not in session:
-            raise Unauthorized()
-        return f(*args, **kwargs)
-
-    return decorated
+#
+# def auth_required(f):
+#     @wraps(f)
+#     def decorated(*args, **kwargs):
+#         if 'authentication' not in session:
+#             raise Unauthorized()
+#         return f(*args, **kwargs)
+#
+#     return decorated
 
 
 # u = Cognito(**cognito_settings)
 # print(u)
+
+
+from flask_cognito import cognito_auth_required, current_user, current_cognito_jwt, cognito_group_permissions
 
 
 @ns.route('/info')
@@ -47,8 +51,9 @@ class AuthInfoEndpoint(Resource):
 
     # @api.response(200, 'success')
     # @auth_required
-    # @TODO this is still all kinds of busted
-    @aws_auth.authentication_required
+    # @aws_auth.authentication_required
+    @cognito_auth_required
+    @cognito_group_permissions(['admin', 'developer'])
     def get(self):
         """
         Get information about the currently logged in session.
@@ -61,23 +66,31 @@ class AuthInfoEndpoint(Resource):
         # return ObjectSerializer.serialize(u, 'dict')
         print(session)
 
-        from flask_awscognito.utils import get_state
-        expected_state = get_state(aws_auth.user_pool_id, aws_auth.user_pool_client_id)
-        print(expected_state)
-        token = aws_auth.get_access_token(request.args)
-
-        # print()
-        # print(aws_auth.get_access_token())
-        return {
-            'access_token': token,
-            'state': expected_state
-        }
+        # from flask_awscognito.utils import get_state
+        # expected_state = get_state(aws_auth.user_pool_id, aws_auth.user_pool_client_id)
+        # print(expected_state)
+        # token = aws_auth.get_access_token(request.args)
+        #
+        # # print()
+        # # print(aws_auth.get_access_token())
+        # return {
+        #     'access_token': token,
+        #     'state': expected_state
+        # }
+        print(current_cognito_jwt)
+        # return jsonify({
+        #     'cognito_username': current_cognito_jwt['username'],   # from cognito pool
+        #     'cognito_groups': current_cognito_jwt['cognito:groups'],
+        #     'user_id': current_user.id,   # from your database
+        # })
+        return jsonify(dict(current_cognito_jwt))
 
 
 @ns.route('/login')
 class AuthLoginEndpoint(Resource):
 
     @api.response(200, 'success')
+    # @api.marshal_with(RedirectItem)
     def get(self):
         """
         Log in and create a new authentication session.
@@ -85,12 +98,27 @@ class AuthLoginEndpoint(Resource):
         to redirect to the service.
         :return:
         """
+        def get_sign_in_url():
+            from jamaica.settings import app_settings
+            from urllib.parse import quote, urlencode, urlparse
+            # quoted_redirect_url = quote(self.redirect_url)
+            # state = get_state(self.user_pool_id, self.user_pool_client_id)
+            full_url = (
+                f"{app_settings.get('AWS_COGNITO_DOMAIN')}/login"
+                f"?response_type=token"
+                f"&client_id={app_settings.get('COGNITO_APP_CLIENT_ID')}"
+                f"&redirect_uri={quote(app_settings.get('AWS_COGNITO_REDIRECT_URL'))}"
+                # f"&state={state}"
+            )
+            return full_url
+
+        return redirect(get_sign_in_url())
         # redirect_url = "%s?" % ()
         # https://www.urlencoder.io/python/
         # base_url = 'https://grantcohoe-amari-test.auth.us-east-1.amazoncognito.com/login'
         # redirect_url = "%s?client_id=%s&redirect_uri=%s&response_type=token" % (base_url, cognito_settings.get('client_id'), urllib.parse.quote('http://localhost:8080/api/v1/auth/login/redirect'))
         # return redirect(redirect_url)
-        return redirect(aws_auth.get_sign_in_url())
+        # return redirect(aws_auth.get_sign_in_url())
 
 
     # @api.response(200, 'success')
@@ -126,13 +154,16 @@ class AuthLogoutEndpoint(Resource):
 
     @api.response(200, 'success')
     # @TODO marshal_with
-    def post(self):
+    def get(self):
         """
         Log out a session.
         :return:
         """
         # return flask_security.views.logout()
-        pass
+        session.clear()
+        # @TODO create a thing to get signout url then redirect to the handler
+        return redirect('/api/v1/auth/info')
+        # pass
 
 
 @ns.route('/login/redirect')
@@ -155,12 +186,16 @@ class AuthLoginRedirectEndpoint(Resource):
         # foo = request
         # print(foo)
 
-        access_token = aws_auth.get_access_token(request.args)
-        # session.update({'access_token': access_token})
+        # access_token = aws_auth.get_access_token(request.args)
+        # # session.update({'access_token': access_token})
+        # return {
+        #     'access_token': access_token,
+        #     'state': request.args.get('state')
+        # }
         return {
-            'access_token': access_token,
-            'state': request.args.get('state')
+            'message': "Token is in the URL fragment above."
         }
+
 
 
 # @ns.route('/logout/redirect')

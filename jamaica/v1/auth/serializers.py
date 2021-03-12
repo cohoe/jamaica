@@ -6,3 +6,8 @@ UserItem = api.model('UserItem', {
     'username': fields.String(description='Users username', required=True),
     'password': fields.String(description='Users password.', required=True)
 })
+# NAH
+# RedirectItem = api.model('RedirectItem', {
+#     'location': fields.String(description='URL to redirect to', required=True),
+#     'code': fields.String(description='HTTP redirect status code', required=True)
+# })

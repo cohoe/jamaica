@@ -20,13 +20,20 @@ app_settings = Settings(
     SECURITY_TOKEN_MAX_AGE=Setting('/api/flask/security_token_max_age', default=86400, type_=int),
     SECURITY_POST_LOGIN_VIEW=Setting('/api/flask/security_post_login_redirect', default='/api/v1/auth/login/redirect', type_=str),
     SECURITY_POST_LOGOUT_VIEW=Setting('/api/flask/security_post_logout_redirect', default='/api/v1/auth/logout/redirect', type_=str),
-    # NEXT
+    # Flask-AWSCognito
     AWS_DEFAULT_REGION='us-east-1',
     AWS_COGNITO_DOMAIN=Setting(path='/auth/cognito/domain_prefix', type_=str),
     AWS_COGNITO_USER_POOL_ID=Setting(path='/auth/cognito/user_pool_id', type_=str),
     AWS_COGNITO_USER_POOL_CLIENT_ID=Setting(path='/auth/cognito/client_id', type_=str),
     AWS_COGNITO_USER_POOL_CLIENT_SECRET=Setting(path='/auth/cognito/client_secret', type_=str),
-    AWS_COGNITO_REDIRECT_URL='http://localhost:8080/api/v1/auth/login/redirect'
+    AWS_COGNITO_REDIRECT_URL='http://localhost:8080/api/v1/auth/login/redirect',
+    # Flask-Cognito
+    COGNITO_REGION='us-east-1',
+    COGNITO_USERPOOL_ID=Setting(path='/auth/cognito/user_pool_id', type_=str),
+    COGNITO_APP_CLIENT_ID=Setting(path='/auth/cognito/client_id', type_=str),
+    COGNITO_CHECK_TOKEN_EXPIRATION=False,
+    COGNITO_JWT_HEADER_NAME='X-MyApp-Authorization',
+    COGNITO_JWT_HEADER_PREFIX='Bearer',
 )
 
 runtime_settings = Settings(
