@@ -99,7 +99,37 @@ UserModel.query = session.query_property()
 
 
 from flask_awscognito import AWSCognitoAuthentication
-aws_auth = AWSCognitoAuthentication(app)
+from functools import wraps
+from flask_awscognito.utils import extract_access_token
+from flask_awscognito.exceptions import TokenVerifyError
+from flask import request, abort, g
+
+
+class JamaicaCognito(AWSCognitoAuthentication):
+
+    def authentication_required(self, view):
+        @wraps(view)
+        def decorated(*args, **kwargs):
+            if not self.app.config.get("TESTING"):
+                access_token = extract_access_token(request.headers)
+                try:
+                    self.token_service.verify(access_token)
+                    self.claims = self.token_service.claims
+                    g.cognito_claims = self.claims
+                except TokenVerifyError as e:
+                    _ = request.data
+                    # abort(401, response=make_response(jsonify(message=str(e)), 401))
+                    # The way this is exists in the normal thing doesn't work
+                    # Had to go my own way. RIP.
+                    abort(status=401, description=str(e))
+                    # abort(make_response(jsonify(message=str(e)), 401))
+
+            return view(*args, **kwargs)
+        return decorated
+
+
+aws_auth = JamaicaCognito(app)
+
 
 
 @app.before_first_request
