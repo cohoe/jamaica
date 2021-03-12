@@ -13,7 +13,7 @@ from flask_security.utils import get_post_logout_redirect
 
 # https://github.com/capless/warrant
 
-from warrant import Cognito
+# from warrant import Cognito
 
 from jamaica.settings import cognito_settings
 from flask import session, redirect

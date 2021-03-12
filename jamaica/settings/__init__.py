@@ -22,7 +22,7 @@ app_settings = Settings(
     SECURITY_POST_LOGOUT_VIEW=Setting('/api/flask/security_post_logout_redirect', default='/api/v1/auth/logout/redirect', type_=str),
     # NEXT
     AWS_DEFAULT_REGION='us-east-1',
-    AWS_COGNITO_DOMAIN='@TODO FIXME',
+    AWS_COGNITO_DOMAIN=Setting(path='/auth/cognito/domain_prefix', type_=str),
     AWS_COGNITO_USER_POOL_ID=Setting(path='/auth/cognito/user_pool_id', type_=str),
     AWS_COGNITO_USER_POOL_CLIENT_ID=Setting(path='/auth/cognito/client_id', type_=str),
     AWS_COGNITO_USER_POOL_CLIENT_SECRET=Setting(path='/auth/cognito/client_secret', type_=str),
