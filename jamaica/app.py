@@ -98,6 +98,10 @@ security = Security(app, user_datastore, register_blueprint=False)
 UserModel.query = session.query_property()
 
 
+from flask_awscognito import AWSCognitoAuthentication
+aws_auth = AWSCognitoAuthentication(app)
+
+
 @app.before_first_request
 def create_user():
     DatabaseService.connector.create_all()
