@@ -29,7 +29,7 @@ cognito_settings = Settings(
     COGNITO_REGION=Setting(path='/auth/cognito/region', default='us-east-1', type_=str),
     COGNITO_USERPOOL_ID=Setting(path='/auth/cognito/user_pool_id', type_=str),
     COGNITO_APP_CLIENT_ID=Setting(path='/auth/cognito/client_id', type_=str),
-    COGNITO_CHECK_TOKEN_EXPIRATION=Setting(path='/auth/cognito/check_token_expiration', default=True, type_=bool),
+    COGNITO_CHECK_TOKEN_EXPIRATION=Setting(path='/auth/cognito/check_token_expiration', default=False, type_=bool),
     COGNITO_JWT_HEADER_NAME=Setting(path='/auth/cognito/token_header_name', default='X-Jamaica-Authorization', type_=str),
     COGNITO_JWT_HEADER_PREFIX='Bearer',
     COGNITO_DOMAIN=Setting(path='/auth/cognito/domain', type_=str),

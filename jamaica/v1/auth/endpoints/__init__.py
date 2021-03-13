@@ -1,68 +1,19 @@
 from flask_restx import Resource
 from jamaica.v1.restx import api
 
-from jamaica.settings import cognito_settings
 from flask import session, redirect, jsonify
-from urllib.parse import quote
-from flask_cognito import cognito_auth_required, current_cognito_jwt, cognito_check_groups
-from jamaica.v1.parsers import auth_parser
-from jamaica.v1.restx import ErrorModel
+from flask_cognito import current_cognito_jwt
+from jamaica.auth import jamaica_authn_required, jamaica_authz_required, get_sign_in_url, get_sign_out_url
 
 ns = api.namespace('v1/auth', description='Authentication.')
-
-
-def get_sign_in_url():
-    """
-    Get the Cognito Sign-in URL.
-    This was lifted from the Flask-AWSCognito module (not to be confused with Flask-Cognito).
-    :return: String
-    """
-    return (
-        f"{cognito_settings.get('COGNITO_DOMAIN')}/login"
-        f"?response_type=token"
-        f"&client_id={cognito_settings.get('COGNITO_APP_CLIENT_ID')}"
-        f"&redirect_uri={quote(cognito_settings.get('COGNITO_LOGIN_REDIRECT_URL'))}"
-    )
-
-
-def get_sign_out_url():
-    """
-    Get the Cognito Sign-out URL.
-    :return: String
-    """
-    return (
-        f"{cognito_settings.get('COGNITO_DOMAIN')}/logout"
-        f"?client_id={cognito_settings.get('COGNITO_APP_CLIENT_ID')}"
-        f"&logout_uri={quote(cognito_settings.get('COGNITO_LOGOUT_REDIRECT_URL'))}"
-    )
-
-
-def jamaica_auth_required(function):
-    """
-    Common decorator for a normal authenticated HTTP request.
-    https://adamj.eu/tech/2020/04/01/how-to-combine-two-python-decorators/
-    NOTE - this does NOT imply an HTTP 200 success. You are responsible for doing that
-    on your own.
-    :param function: Function to decorate.
-    # @TODO This does not play nice with the cognito_check_groups decorator.
-    :return: Decorated function.
-    """
-
-    def decorator(func):
-        func = api.response(401, 'Unauthorized. You are not authenticated.', ErrorModel)(func)
-        func = api.response(403, 'Forbidden. You were authenticated, but not allowed.', ErrorModel)(func)
-        func = cognito_auth_required(func)
-        return func
-
-    return decorator(function)
 
 
 @ns.route('/info')
 class AuthInfoEndpoint(Resource):
 
     @api.response(200, 'success')
-    @jamaica_auth_required
-    @cognito_check_groups(['admins'])
+    @jamaica_authn_required()
+    # @jamaica_authz_required()
     def get(self):
         """
         Get information about the currently logged in session.
