@@ -12,7 +12,7 @@ app_settings = Settings(
     # # https://github.com/python-restx/flask-restx/issues/27
     PROPAGATE_EXCEPTIONS=Setting(path='/api/flask/propagate_exceptions', default=False, type_=bool),
     # https://stackoverflow.com/questions/26080872/secret-key-not-set-in-flask-session-using-the-flask-session-extension
-    # SECRET_KEY=Setting(path='/api/flask/secret_key', default='Testing!', type_=str),
+    SECRET_KEY=Setting(path='/api/flask/secret_key', default='Testing!', type_=str),
 )
 
 runtime_settings = Settings(

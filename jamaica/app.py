@@ -5,9 +5,10 @@ from jamaica.cache import flask_cache
 from flask_cors import CORS
 from flask_sqlalchemy_session import flask_scoped_session
 from flask_uuid import FlaskUUID
-from jamaica.settings import app_settings, runtime_settings, cors_settings
+from jamaica.settings import app_settings, runtime_settings, cors_settings, cognito_settings
 from jamaica.v1.restx import api
 from barbados.services.database import DatabaseService
+from flask_cognito import CognitoAuth
 
 # Endpoints
 import jamaica.v1.cocktails.endpoints
@@ -85,69 +86,9 @@ session = flask_scoped_session(DatabaseService.connector.Session, app)
 # https://github.com/wbolster/flask-uuid
 FlaskUUID(app)
 
-### Auth Stuff
-
-# https://flask-security-too.readthedocs.io/en/stable/quickstart.html#basic-sqlalchemy-application-with-session
-# from flask_security import SQLAlchemySessionUserDatastore, Security, hash_password
-# from barbados.models.user import UserModel
-# from barbados.models.role import RoleModel
-# from barbados.models.userrolebinding import UserRoleBindingModel
-# user_datastore = SQLAlchemySessionUserDatastore(session, UserModel, RoleModel)
-# security = Security(app, user_datastore, register_blueprint=False)
-#
-# UserModel.query = session.query_property()
-#
-#
-# from flask_awscognito import AWSCognitoAuthentication
-# from functools import wraps
-# from flask_awscognito.utils import extract_access_token
-# from flask_awscognito.exceptions import TokenVerifyError
-# from flask import request, abort, g
-#
-#
-# class JamaicaCognito(AWSCognitoAuthentication):
-#
-#     def authentication_required(self, view):
-#         @wraps(view)
-#         def decorated(*args, **kwargs):
-#             if not self.app.config.get("TESTING"):
-#                 access_token = extract_access_token(request.headers)
-#                 try:
-#                     self.token_service.verify(access_token)
-#                     self.claims = self.token_service.claims
-#                     g.cognito_claims = self.claims
-#                 except TokenVerifyError as e:
-#                     _ = request.data
-#                     # abort(401, response=make_response(jsonify(message=str(e)), 401))
-#                     # The way this is exists in the normal thing doesn't work
-#                     # Had to go my own way. RIP.
-#                     abort(status=401, description=str(e))
-#                     # abort(make_response(jsonify(message=str(e)), 401))
-#
-#             return view(*args, **kwargs)
-#         return decorated
-#
-#
-# aws_auth = JamaicaCognito(app)
-#
-#
-#
-# @app.before_first_request
-# def create_user():
-#     DatabaseService.connector.create_all()
-#     if not user_datastore.find_user(email="test@me.com"):
-#         user_datastore.create_user(email="test@me.com", password=hash_password("password"))
-#     session.commit()
-
-
-from flask_cognito import CognitoAuth
-from jamaica.settings import cognito_settings
+# Authentication
 app.config.update(cognito_settings)
 cogauth = CognitoAuth(app)
-
-
-
-### End Auth Stuff
 
 
 def main():

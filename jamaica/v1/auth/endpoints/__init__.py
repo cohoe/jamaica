@@ -4,7 +4,7 @@ from jamaica.v1.restx import api
 from jamaica.settings import cognito_settings
 from flask import session, redirect, jsonify
 from urllib.parse import quote
-from flask_cognito import cognito_auth_required, current_cognito_jwt
+from flask_cognito import cognito_auth_required, current_cognito_jwt, cognito_group_permissions
 
 ns = api.namespace('v1/auth', description='Authentication.')
 
@@ -12,6 +12,7 @@ ns = api.namespace('v1/auth', description='Authentication.')
 def get_sign_in_url():
     """
     Get the Cognito Sign-in URL.
+    This was lifted from the Flask-AWSCognito module (not to be confused with Flask-Cognito).
     :return: String
     """
     return (
@@ -29,7 +30,7 @@ def get_sign_out_url():
     """
     return (
         f"{cognito_settings.get('COGNITO_DOMAIN')}/logout"
-        f"&client_id={cognito_settings.get('COGNITO_APP_CLIENT_ID')}"
+        f"?client_id={cognito_settings.get('COGNITO_APP_CLIENT_ID')}"
         f"&logout_uri={quote(cognito_settings.get('COGNITO_LOGOUT_REDIRECT_URL'))}"
     )
 
@@ -39,12 +40,12 @@ class AuthInfoEndpoint(Resource):
 
     @api.response(200, 'success')
     @cognito_auth_required
+    # @cognito_group_permissions(['admins'])
     def get(self):
         """
         Get information about the currently logged in session.
         :return:
         """
-        print(current_cognito_jwt)
         return jsonify(dict(current_cognito_jwt))
 
 
