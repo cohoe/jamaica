@@ -34,10 +34,9 @@ def jamaica_authn_required():
     """
     Common decorator for a normal authenticated HTTP request.
     https://adamj.eu/tech/2020/04/01/how-to-combine-two-python-decorators/
-    NOTE - this does NOT imply an HTTP 200 success. You are responsible for doing that
-    on your own.
-    :param function: Function to decorate.
-    # @TODO This does not play nice with the cognito_check_groups decorator.
+    BE AWARE:
+    * This does NOT imply an HTTP 200 success. You are responsible for doing that on your own.
+    * This does not play nice with the cognito_check_groups decorator. It has its own instead.
     :return: Decorated function.
     """
 

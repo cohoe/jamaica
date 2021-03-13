@@ -31,8 +31,9 @@ cognito_settings = Settings(
     COGNITO_APP_CLIENT_ID=Setting(path='/auth/cognito/client_id', type_=str),
     COGNITO_CHECK_TOKEN_EXPIRATION=Setting(path='/auth/cognito/check_token_expiration', default=False, type_=bool),
     COGNITO_JWT_HEADER_NAME=Setting(path='/auth/cognito/token_header_name', default='X-Jamaica-Authorization', type_=str),
-    COGNITO_JWT_HEADER_PREFIX='Bearer',
+    COGNITO_JWT_HEADER_PREFIX=Setting(path='/auth/cognito/token_header_prefix', default='Bearer', type_=str),
     COGNITO_DOMAIN=Setting(path='/auth/cognito/domain', type_=str),
+    # @TODO once there is somewhere better to send to, do that.
     COGNITO_LOGIN_REDIRECT_URL='http://localhost:8080/api/v1/auth/login/redirect',
     COGNITO_LOGOUT_REDIRECT_URL='http://localhost:8080/api/v1/auth/logout/redirect',
 )
