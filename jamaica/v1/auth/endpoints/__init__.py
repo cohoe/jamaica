@@ -37,34 +37,32 @@ def get_sign_out_url():
     )
 
 
-def jamaica_auth_required(groups=[]):
+def jamaica_auth_required(function):
     """
     Common decorator for a normal authenticated HTTP request.
     https://adamj.eu/tech/2020/04/01/how-to-combine-two-python-decorators/
     NOTE - this does NOT imply an HTTP 200 success. You are responsible for doing that
     on your own.
+    :param function: Function to decorate.
+    # @TODO This does not play nice with the cognito_check_groups decorator.
     :return: Decorated function.
     """
 
     def decorator(func):
-        # func = api.response(401, 'Unauthorized. You are not authenticated.', ErrorModel)(func)
-        # func = api.response(403, 'Forbidden. You were authenticated, but not allowed.', ErrorModel)(func)
+        func = api.response(401, 'Unauthorized. You are not authenticated.', ErrorModel)(func)
+        func = api.response(403, 'Forbidden. You were authenticated, but not allowed.', ErrorModel)(func)
         func = cognito_auth_required(func)
-        # print(groups)
-        # if groups:
-        #     func = cognito_group_permissions(groups)(func)
-        func = cognito_check_groups(groups)(func)
         return func
 
-    return decorator
+    return decorator(function)
 
 
 @ns.route('/info')
 class AuthInfoEndpoint(Resource):
 
     @api.response(200, 'success')
-    @jamaica_auth_required(groups=['admins'])
-    # @cognito_check_groups(['admins'])
+    @jamaica_auth_required
+    @cognito_check_groups(['admins'])
     def get(self):
         """
         Get information about the currently logged in session.
