@@ -141,6 +141,8 @@ FlaskUUID(app)
 
 
 from flask_cognito import CognitoAuth
+from jamaica.settings import cognito_settings
+app.config.update(cognito_settings)
 cogauth = CognitoAuth(app)
 
 
