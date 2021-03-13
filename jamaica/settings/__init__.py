@@ -13,13 +13,6 @@ app_settings = Settings(
     PROPAGATE_EXCEPTIONS=Setting(path='/api/flask/propagate_exceptions', default=False, type_=bool),
     # https://stackoverflow.com/questions/26080872/secret-key-not-set-in-flask-session-using-the-flask-session-extension
     SECRET_KEY=Setting(path='/api/flask/secret_key', default='Testing!', type_=str),
-    # Flask-Security
-    SECURITY_PASSWORD_SALT=Setting('/api/flask/security_password_salt', default='123123123', type_=str),
-    WTF_CSRF_ENABLED=Setting('/api/flask/csrf_enabled', default=False, type_=bool),
-    SECURITY_BACKWARDS_COMPAT_AUTH_TOKEN=Setting('/api/flask/compat_auth_token', default=True, type_=bool),
-    SECURITY_TOKEN_MAX_AGE=Setting('/api/flask/security_token_max_age', default=86400, type_=int),
-    SECURITY_POST_LOGIN_VIEW=Setting('/api/flask/security_post_login_redirect', default='/api/v1/auth/login/redirect', type_=str),
-    SECURITY_POST_LOGOUT_VIEW=Setting('/api/flask/security_post_logout_redirect', default='/api/v1/auth/logout/redirect', type_=str),
 )
 
 runtime_settings = Settings(
@@ -30,4 +23,16 @@ runtime_settings = Settings(
 
 cors_settings = Settings(
     origins=Setting(path='/api/flask/cors_origins', default=['0.0.0.0:8080', '0.0.0.0:3000', 'http://localhost:3000'], type_=list)
+)
+
+cognito_settings = Settings(
+    COGNITO_REGION=Setting(path='/auth/cognito/region', default='us-east-1', type_=str),
+    COGNITO_USERPOOL_ID=Setting(path='/auth/cognito/user_pool_id', type_=str),
+    COGNITO_APP_CLIENT_ID=Setting(path='/auth/cognito/client_id', type_=str),
+    COGNITO_CHECK_TOKEN_EXPIRATION=Setting(path='/auth/cognito/check_token_expiration', default=False, type_=bool),
+    COGNITO_JWT_HEADER_NAME=Setting(path='/auth/cognito/token_header_name', default='X-Jamaica-Authorization', type_=str),
+    COGNITO_JWT_HEADER_PREFIX='Bearer',
+    COGNITO_DOMAIN=Setting(path='/auth/cognito/domain', type_=str),
+    COGNITO_LOGIN_REDIRECT_URL='http://localhost:8080/api/v1/auth/login/redirect',
+    COGNITO_LOGOUT_REDIRECT_URL='http://localhost:8080/api/v1/auth/logout/redirect',
 )

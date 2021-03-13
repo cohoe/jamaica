@@ -5,9 +5,10 @@ from jamaica.cache import flask_cache
 from flask_cors import CORS
 from flask_sqlalchemy_session import flask_scoped_session
 from flask_uuid import FlaskUUID
-from jamaica.settings import app_settings, runtime_settings, cors_settings
+from jamaica.settings import app_settings, runtime_settings, cors_settings, cognito_settings
 from jamaica.v1.restx import api
 from barbados.services.database import DatabaseService
+from flask_cognito import CognitoAuth
 
 # Endpoints
 import jamaica.v1.cocktails.endpoints
@@ -85,30 +86,10 @@ session = flask_scoped_session(DatabaseService.connector.Session, app)
 # https://github.com/wbolster/flask-uuid
 FlaskUUID(app)
 
-### Auth Stuff
+# Authentication
+app.config.update(cognito_settings)
+cogauth = CognitoAuth(app)
 
-# https://flask-security-too.readthedocs.io/en/stable/quickstart.html#basic-sqlalchemy-application-with-session
-from flask_security import SQLAlchemySessionUserDatastore, Security, hash_password
-from barbados.models.user import UserModel
-from barbados.models.role import RoleModel
-from barbados.models.userrolebinding import UserRoleBindingModel
-user_datastore = SQLAlchemySessionUserDatastore(session, UserModel, RoleModel)
-security = Security(app, user_datastore, register_blueprint=False)
-
-UserModel.query = session.query_property()
-
-
-@app.before_first_request
-def create_user():
-    DatabaseService.connector.create_all()
-    if not user_datastore.find_user(email="test@me.com"):
-        user_datastore.create_user(email="test@me.com", password=hash_password("password"))
-    session.commit()
-
-
-
-
-### End Auth Stuff
 
 def main():
     initialize_endpoints(app)

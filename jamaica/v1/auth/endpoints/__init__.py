@@ -1,98 +1,99 @@
 from flask_restx import Resource
 from jamaica.v1.restx import api
-from jamaica.v1.auth.serializers import UserItem
+
+from jamaica.settings import cognito_settings
+from flask import session, redirect, jsonify
+from urllib.parse import quote
+from flask_cognito import cognito_auth_required, current_cognito_jwt, cognito_group_permissions
 
 ns = api.namespace('v1/auth', description='Authentication.')
 
-from flask_security import auth_required, current_user, auth_token_required
-from flask import request
-import flask_security.views
-from barbados.factories.user import UserFactory
-from barbados.serializers import ObjectSerializer
-from flask_security.utils import get_post_logout_redirect
+
+def get_sign_in_url():
+    """
+    Get the Cognito Sign-in URL.
+    This was lifted from the Flask-AWSCognito module (not to be confused with Flask-Cognito).
+    :return: String
+    """
+    return (
+        f"{cognito_settings.get('COGNITO_DOMAIN')}/login"
+        f"?response_type=token"
+        f"&client_id={cognito_settings.get('COGNITO_APP_CLIENT_ID')}"
+        f"&redirect_uri={quote(cognito_settings.get('COGNITO_LOGIN_REDIRECT_URL'))}"
+    )
+
+
+def get_sign_out_url():
+    """
+    Get the Cognito Sign-out URL.
+    :return: String
+    """
+    return (
+        f"{cognito_settings.get('COGNITO_DOMAIN')}/logout"
+        f"?client_id={cognito_settings.get('COGNITO_APP_CLIENT_ID')}"
+        f"&logout_uri={quote(cognito_settings.get('COGNITO_LOGOUT_REDIRECT_URL'))}"
+    )
 
 
 @ns.route('/info')
 class AuthInfoEndpoint(Resource):
 
     @api.response(200, 'success')
-    @auth_token_required
+    @cognito_auth_required
+    # @cognito_group_permissions(['admins'])
     def get(self):
         """
         Get information about the currently logged in session.
         :return:
         """
-        # import json
-        # return json.loads(current_user)
-        print(current_user.get_auth_token())
-        u = UserFactory.model_to_obj(current_user)
-        return ObjectSerializer.serialize(u, 'dict')
+        return jsonify(dict(current_cognito_jwt))
 
 
 @ns.route('/login')
 class AuthLoginEndpoint(Resource):
 
-    # @api.response(200, 'success')
-    # def get(self):
-    #     """
-    #     Log in and create a new authentication session.
-    #     Reserved in case I ever use a service that needs a function
-    #     to redirect to the service.
-    #     :return:
-    #     """
-    #     pass
-
     @api.response(200, 'success')
-    @api.expect(UserItem, validate=True)
-    # @TODO marshal_with
-    def post(self):
+    def get(self):
         """
-        Log in and create a new authentication session.
-        Because I set SECURITY_BACKWARDS_COMPAT_AUTH_TOKEN in the settings we don't require the user
-        to add a query param here to get the auth token. Since I don't support GET there isn't much
-        risk of leaking the token on a GET request.
-        https://stackoverflow.com/questions/27356877/token-based-authentication-with-flask-security-extension
-        https://flask-security-too.readthedocs.io/en/stable/features.html?highlight=include_auth_token
-        https://github.com/Flask-Middleware/flask-security/blob/master/flask_security/views.py
-        :return:
+        Return a redirect to the Cognito sign-in URL.
+        :return: HTTP 302
         """
-        return flask_security.views.login()
+        return redirect(get_sign_in_url())
 
 
 @ns.route('/logout')
 class AuthLogoutEndpoint(Resource):
 
     @api.response(200, 'success')
-    # @TODO marshal_with
-    def post(self):
+    def get(self):
         """
         Log out a session.
         :return:
         """
-        return flask_security.views.logout()
+        session.clear()
+        return redirect(get_sign_out_url())
 
 
-# @ns.route('/login/redirect')
-# class AuthLoginRedirectEndpoint(Resource):
-#
-#     @api.response(200, 'success')
-#     def get(self):
-#         """
-#         Authentication login redirect callback handler.
-#         Reserved for any future usage.
-#         :return:
-#         """
-#         pass
+@ns.route('/login/redirect')
+class AuthLoginRedirectEndpoint(Resource):
+
+    @api.response(200, 'success')
+    def get(self):
+        """
+        Authentication login redirect callback handler.
+        Reserved for any future usage.
+        :return:
+        """
+        return {'message': "Token is in the URL fragment above."}
 
 
-# @ns.route('/logout/redirect')
-# class AuthLogoutRedirectEndpoint(Resource):
-#
-#     @api.response(200, 'success')
-#     def get(self):
-#         """
-#         Authentication logout redirect callback handler.
-#         Reserved for any future usage.
-#         :return:
-#         """
-#         pass
+@ns.route('/logout/redirect')
+class AuthLogoutRedirectEndpoint(Resource):
+
+    @api.response(200, 'success')
+    def get(self):
+        """
+        Authentication logout redirect callback handler.
+        :return:
+        """
+        return {'message': "This does not expire your token. Can't do that."}

@@ -5,6 +5,7 @@ from jamaica import settings
 # from jamaica import serializers
 from sqlalchemy.exc import IntegrityError
 from barbados.exceptions import ValidationException, ServiceUnavailableException, FactoryUpdateException
+from flask_cognito import CognitoAuthError
 
 
 class CustomApi(Api):
@@ -108,3 +109,21 @@ def service_error_handler(error):
     :return:
     """
     return {'message': 'A necessary internal service is unavailable. ' + str(error)}, 500
+
+
+@api.marshal_with(ErrorModel)
+@api.errorhandler(CognitoAuthError)
+def auth_error_handler(error):
+    """
+    Handle an authentication error.
+    :param error: Exception.
+    :return: Common exception model and appropriate HTTP code.
+    """
+    message, details = str(error).split(' - ')
+
+    # This is somewhat confusing.
+    code = 401  # Unauthorized, but the module says "Authorization Required"
+    if message == 'Not Authorized':
+        code = 403  # Forbidden
+
+    return {'message': message, 'details': details}, code

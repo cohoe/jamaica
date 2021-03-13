@@ -16,7 +16,7 @@ setup(
         'flask_uuid',
         'flask_caching',
         'flask',
-        'flask-security-too'
+        'flask_cognito'
     ],
     test_requires=[
         'pytest'
