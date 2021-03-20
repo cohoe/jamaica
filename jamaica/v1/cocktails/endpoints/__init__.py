@@ -69,6 +69,14 @@ class CocktailSearchEndpoint(Resource):
     # Amazingly it took finding this post to figure out how
     # this is supposed to work.
     # https://stackoverflow.com/questions/41227736/flask-something-more-strict-than-api-expect-for-input-data
+    #
+    # An empty body is not valid JSON, so if you try and curl this (or anything that does a RequestParser.parse_args())
+    # it will fail with a cryptic way of saying "BAD REQEUST" (HTTP/400) which is considered the appropriate response.
+    # This happens whether strict is True or False. You can do something like:
+    #   curl -H "Content-Type: application-json" -X GET -d '{}' localhost:8080/api/v1/cocktails/search
+    # and you'll get a good response (HTTP/200), but that seems like even more haxx. Note that if you don't do the -X GET
+    # curl will infer you meant POST and do that instead, which is not allowed (HTTP/405)
+    # https://github.com/pallets/flask/issues/1317
     @api.response(200, 'success')
     @api.expect(cocktail_list_parser, validate=True)
     @api.marshal_list_with(CocktailSearchItem)
