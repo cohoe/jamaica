@@ -155,7 +155,8 @@ class InventoryItemsEndpoint(Resource):
 
 
 @ns.route('/<uuid:id>/recipes/<string:cocktail_slug>')
-@ns.route('/<uuid:id>/recipes/<string:cocktail_slug>/<string:spec_slug>')
+@ns.route('/<uuid:id>/recipes/<string:cocktail_slug>/<string:spec_slug>',
+          doc={'description': 'Access a specific spec.'})
 @api.doc(params={'id': 'Inventory ID object.'})
 class InventoryRecipeEndpoint(Resource):
 
@@ -243,7 +244,7 @@ class InventoryRecipesEndpoint(Resource):
 
 @ns.route('/<uuid:id>/recipes/search')
 @api.doc(params={'id': 'An object ID.'})
-class InventoryRecipesEndpoint(Resource):
+class InventoryRecipesSearchEndpoint(Resource):
 
     def get(self, id):
         inventory_recipes_parser.add_argument('inventory_id', default=str(id))

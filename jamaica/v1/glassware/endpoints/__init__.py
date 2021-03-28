@@ -13,7 +13,7 @@ ns = api.namespace('v1/glassware', description='Glassware.')
 
 
 @ns.route('')
-class GlasswareEndpoint(Resource):
+class GlasswaresEndpoint(Resource):
 
     @api.response(200, 'success')
     @api.marshal_list_with(GlasswareItem)
