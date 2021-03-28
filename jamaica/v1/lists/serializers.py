@@ -1,11 +1,11 @@
 from flask_restx import fields
 from jamaica.v1.restx import api
-from jamaica.v1.serializers import SearchResultBase, NullableString
+from jamaica.v1.serializers import SearchResultBase
 
 
 ListItemObject = api.model('ListItemObject', {
     'cocktail_slug': fields.String(attribute='cocktail_slug', description='Slug of the cocktail.'),
-    'spec_slug': NullableString(attribute='spec_slug', description='Slug of the specific spec.'),
+    'spec_slug': fields.String(attribute='spec_slug', description='Optional slug of the specific spec.', required=False),
     'highlight': fields.Boolean(attribute='highlight', description='Boolean of whether this is highlighted or not.')
 })
 

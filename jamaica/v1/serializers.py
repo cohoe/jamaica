@@ -1,19 +1,6 @@
 from flask_restx import fields
 from jamaica.v1.restx import api
 
-
-# Certain things should allow for null.
-# https://github.com/noirbizarre/flask-restplus/issues/179
-class NullableString(fields.String):
-    __schema_type__ = ['string', 'null']
-    __schema_example__ = 'nullable string'
-
-
-class NullableBoolean(fields.Boolean):
-    __schema_type__ = ['boolean', 'null']
-    __schema_example__ = 'nullable boolean'
-
-
 DisplayItemBase = api.model('DisplayItemBase', {
     'slug': fields.String(attribute='slug', description='This items slug (id).', required=True, example='la-viaa'),
     'display_name': fields.String(attribute='display_name', description='This items display name.', example='La Viaa'),
@@ -25,8 +12,8 @@ SearchResultBase = api.model('SearchResultBase', {
 
 TextItem = api.model('TextItem', {
     'text': fields.String(description='String of text.', example='The quick brown cat jumped over the energetic raccoon.', required=True),
-    'author': NullableString(description='Author of this text.', example='root'),
-    'datetime': NullableString(description='UTC timestamp (datetime.datetime.isoformat())', example='2020-05-04T02:36:11.368253', required=False)
+    'author': fields.String(description='Author of this text.', example='root', required=False),
+    'datetime': fields.String(description='UTC timestamp (datetime.datetime.isoformat())', example='2020-05-04T02:36:11.368253', required=False)
 })
 
 CocktailSearchItem = api.inherit('CocktailSearchItem', SearchResultBase, {
@@ -42,13 +29,13 @@ ComponentItem = api.inherit('ComponentItem', DisplayItemBase, {
     'quantity': fields.Float(description='Quantity of the ingredient in the specified unit which is described in another field. Can be omitted in certain cases such as a rinse.', example=1.5),
     'unit': fields.String(description='Unit of measure for this component. Can be omitted in certain cases such as muddling while citrus.', example='oz'),
     'notes': fields.List(fields.Nested(TextItem), description='Notes on the component.'),
-    'optional': NullableBoolean(description='Optionality of this component'),
-    'preparation': NullableString(description='Preparation of this component if special.')
+    'optional': fields.Boolean(description='Optionality of this component', required=False),
+    'preparation': fields.String(description='Preparation of this component if special.', required=False)
 })
 
 CitationItem = api.model('CitationItem', {
     'title': fields.String(description='Title of the citation.', example='Death & Co: Modern Classic Cocktails', required=True),
-    'author': fields.List(NullableString(), description='Author of the work being cited', example=['Jillian Vose', 'Ivy Mix']),
+    'author': fields.List(fields.String, description='Author of the work being cited', example=['Jillian Vose', 'Ivy Mix'], required=False),
     'date': fields.Date(description='Date that the citation was published.', example='01-01-1970'),
     'year': fields.Integer(description='Year if a specific date is not available.', example=1812),
     'publisher': fields.String(description='Publisher of the citation.', example='Ten Speed Press'),
