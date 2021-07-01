@@ -7,6 +7,7 @@ inventory_resolve_parser.add_argument('cocktail', type=str, help='cocktail slug'
 inventory_resolve_parser.add_argument('spec', type=str, help='spec slug from the cocktail')
 # inventory_resolve_parser.add_argument('ingredient', type=str, help='cocktail slug')
 
-# This matches everything that the cocktail_list_parser can do.
+# This matches everything that the cocktail_list_parser can do. Well.... almost.
 inventory_recipes_parser = copy.deepcopy(cocktail_list_parser)
 inventory_recipes_parser.add_argument('missing', type=str, help='Count of missing')
+inventory_recipes_parser.remove_argument('instructions')
