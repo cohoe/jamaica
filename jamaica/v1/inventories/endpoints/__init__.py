@@ -239,7 +239,7 @@ class InventoryRecipesEndpoint(Resource):
             RecipeResolutionFactory.delete_obj(rs, commit=False)
         current_session.commit()
 
-        return len(results), 204
+        return len(results), 200
 
 
 @ns.route('/<uuid:id>/recipes/search')
