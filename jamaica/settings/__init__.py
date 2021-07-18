@@ -1,5 +1,8 @@
 from barbados.settings import Setting, Settings
 
+# All settings must have a default in order for Jamaica to start with an empty config database.
+# You cannot use None.
+
 # https://github.com/postrational/rest_api_demo/blob/master/rest_api_demo/settings.py
 app_settings = Settings(
     # Flask-Restplus settings
