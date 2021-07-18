@@ -194,10 +194,12 @@ class InventoryRecipeEndpoint(Resource):
         results = RecipeResolver.resolve(inventory=i, cocktail=c, spec_slug=spec_slug)
 
         # Drop
-        [RecipeResolutionFactory.delete_obj(rs) for rs in results]
-        [RecipeResolutionIndexer.index(rs) for rs in results]
+        for rs in results:
+            RecipeResolutionFactory.delete_obj(rs, commit=False)
+            RecipeResolutionIndexer.delete(rs)
+        current_session.commit()
 
-        return None, 204
+        return len(results), 204
 
 
 @ns.route('/<uuid:id>/recipes')
@@ -237,6 +239,7 @@ class InventoryRecipesEndpoint(Resource):
         results = RecipeResolutionFactory.produce_all_objs_from_inventory(inventory_id=id)
         for rs in results:
             RecipeResolutionFactory.delete_obj(rs, commit=False)
+            RecipeResolutionIndexer.delete(rs)
         current_session.commit()
 
         return len(results), 200
